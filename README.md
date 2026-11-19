@@ -2,7 +2,7 @@
 
 Klastimer voor zelfstandig werken. De leerkracht stelt per vak een afvinklijst met minuten in. Op elke iPad verschijnt de timer met de taken.
 
-**App:** https://sandromeertens.github.io/focuz/
+**App:** https://sandromeertens.github.io/Focuz/
 
 - Leerkracht: open de app en kies "Ik ben leerkracht".
 - Leerlingen: scan de QR-code of typ de klascode in.
@@ -20,7 +20,7 @@ De afvinklijst met minuten komt uit het vak met dezelfde naam in Focuz.
 - **Automatisch uit OneDrive:** eenmalig een app-registratie bij Microsoft:
   1. Ga naar https://entra.microsoft.com → Applicaties → App-registraties → **Nieuwe registratie**.
   2. Naam: `Focuz`. Accounttypen: **Accounts in elke organisatiedirectory en persoonlijke Microsoft-accounts**.
-  3. Omleidings-URI: platform **Toepassing met één pagina (SPA)**, adres `https://sandromeertens.github.io/focuz/`.
+  3. Omleidings-URI: platform **Toepassing met één pagina (SPA)**, adres `https://sandromeertens.github.io/Focuz/`.
   4. Klik **Registreren** en kopieer de **Application (client) ID**.
   5. Plak die in Focuz bij "Automatisch via OneDrive" (of bovenin `index.html` bij `FOCUZ_MS_CLIENT_ID`).
   Bij een schoolaccount kan het zijn dat de ICT-beheerder toestemming moet geven.
