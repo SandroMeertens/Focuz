@@ -33,3 +33,12 @@ Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: `Instruc
 4. **Tijdens de les:** vink op één iPad een taak af en kijk of de voortgang bij jou verschijnt. Stuur één keer een melding.
 5. **Wifi-test:** zet op één iPad even de vliegtuigmodus aan. De timer moet doorlopen; na het uitzetten verbindt hij weer.
 6. **Na de proefdag:** werkt alles, dan kan de hele klas meedoen. Zie je "Geen verbinding met de server", dan blokkeert het schoolnetwerk de verbinding: vraag de ICT-beheerder om poort 8084 (broker.emqx.io) open te zetten, of koppel een eigen Firebase-server.
+
+## Opbouw en tests
+- `index.html` – de pagina, `style.css` – opmaak, `app.js` – alle logica, `sw.js` – offline starten, `manifest.webmanifest` + `icons/` – app-icoon.
+- `tests/` – automatische tests (Playwright) met een lokale MQTT-server en twee voorbeeld-dagklappers zonder echte gegevens. Ze draaien bij elke wijziging via GitHub Actions (tabblad **Actions**).
+- Lokaal draaien: `cd tests && npm install && npx playwright install chromium && npx playwright test`
+
+## Beveiliging
+- **Openbare server:** alle berichten zijn versleuteld met de klascode (AES-GCM, sleutel via PBKDF2). Wie op de server meeluistert ziet alleen onleesbare tekst en een hash als onderwerp, geen klascodes, roosters of lesdoelen. Wie de klascode kent (dus ook leerlingen) kan in theorie nog wel berichten sturen.
+- **Eigen Firebase-server:** alleen de ingelogde leerkracht kan de timer besturen (zie `database.rules.json`). Aanbevolen voor dagelijks gebruik.
