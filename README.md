@@ -14,7 +14,7 @@ Plak je Firebase-config bovenin `index.html` (zoek naar `window.KLASTIMER_FIREBA
 ## Koppeling met Word (dagklapper)
 Focuz leest de dagtabellen uit je dagklapper (kolommen Tijd, Vak, Leerstof, Lesdoel, met een kop als "Donderdag 19 november").
 Per blok worden de tijd, het vak, de leerstof (titel) en het lesdoel (ik-doel) overgenomen. "klaar: ..." in de leerstof wordt een klaaropdracht.
-De afvinklijst met minuten komt uit het vak met dezelfde naam in Focuz.
+Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: `Instructie (10 min); Werkboek opdr. 1-4 (20 min); klaar: plusblad`. Staan er geen taken in Word, dan gebruikt Focuz de afvinklijst van het vak met dezelfde naam.
 
 - **Handmatig:** "Kies Word-bestand" → kies je dagklapper (ook uit OneDrive).
 - **Automatisch, zonder Microsoft-login:** open Focuz in Chrome of Edge op een computer waar OneDrive gesynchroniseerd is, tik op "Automatisch bijwerken" en kies je dagklapper in de OneDrive-map. Focuz kijkt elke minuut of het bestand is aangepast.

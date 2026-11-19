@@ -128,13 +128,31 @@ h2{font-size:22px;margin:0 0 12px;font-weight:900}
 @media(max-width:760px),(orientation:portrait) and (max-width:900px){#kid.haslist .kidmain{grid-template-columns:minmax(0,1fr)}#kid.haslist .ring{width:min(60vw,320px)}.lamps{grid-auto-flow:column}.lamps i{width:min(18vw,90px)}}
 
 /* ---------- leerkracht ---------- */
-#teacher{min-height:100vh;padding:24px max(4vw,16px) 40px;color:#fff}
-.tgrid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:20px;align-items:start}
-.thead{max-width:1180px;margin:0 auto 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
-.thead h1{color:#fff}
-.who{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px;color:#cfe0f5}
+#teacher{height:100vh;height:100dvh;padding:14px max(2vw,14px);color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr);gap:14px;overflow:hidden}
+.thead{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.thead h1{color:#fff;font-size:30px;margin:0}
+.ttabs{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.ttabs button{background:rgba(255,255,255,.12);color:#fff;min-height:44px;padding:8px 16px}
+.ttabs button.on{background:#fff;color:var(--ink)}
+.who .count{margin:0;color:#cfe0f5}
+.tab{display:none;min-height:0}
+.tab.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.col{display:flex;flex-direction:column;gap:14px;min-height:0}
+.col>.panel,.col>.preview{flex:none}
+.col>.grow{flex:1 1 auto;min-height:0;overflow:auto}
+.inline{display:flex;align-items:center;gap:10px;margin-top:10px}.inline label{margin:0;white-space:nowrap}.inline input{max-width:160px}
+.center-panel{text-align:center}
+button.ghostdark{background:#fff;border:2px solid var(--line)}
+#teacher .panel{padding:16px 18px}
+#teacher h2{font-size:19px;margin-bottom:8px}
+#teacher label,#teacher .lbl{margin:10px 0 4px}
+#teacher .row{margin-top:10px}
+#teacher .preview{padding:14px}
+#teacher .preview .big{font-size:clamp(44px,6vw,80px)}
+@media(max-width:860px){#teacher{height:auto;overflow:visible}.tab.on{grid-template-columns:minmax(0,1fr)}.col>.grow{overflow:visible}}
 .panel{background:var(--panel);color:var(--ink);border-radius:22px;padding:22px}
 .panel+.panel{margin-top:20px}
+#teacher .panel+.panel{margin-top:0}
 .preview{background:#152b48;border-radius:22px;padding:22px;text-align:center}
 .preview .big{font-size:clamp(52px,8vw,100px)}
 .preview.idle .big{font-size:clamp(32px,4vw,48px);margin:10px 0}
@@ -174,6 +192,21 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .dayidle h3,.dayoverbox h3,.bright h3{margin:0 0 10px;font-size:24px;font-weight:900}
 .dayover{position:fixed;inset:0;z-index:15;background:rgba(10,20,35,.7);display:grid;place-items:center;padding:20px}
 .dayoverbox{background:var(--bg);border-radius:24px;padding:22px;width:min(560px,100%);max-height:90vh;overflow:auto;color:#fff}
+.weekbox{width:min(1000px,100%);max-height:96vh;padding:16px 18px}
+.weekbox h3{margin-bottom:8px}
+#kWeekList{gap:6px}
+#kWeekList li{padding:6px 12px;gap:10px}
+#kWeekList .dt{font-size:16px}#kWeekList .dv{font-size:17px}
+#kWeekList .dv small{font-size:13px}
+#kWeekList .dv small.d{white-space:nowrap;font-size:13px}
+@media(min-width:800px){#kWeekList{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-flow:column;grid-template-rows:repeat(var(--rows,5),auto)}}
+.weekbox>button{margin-top:10px}
+.wtabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.wtabs button{background:rgba(255,255,255,.12);color:#fff;display:grid;line-height:1.1;padding:8px 0;min-height:56px}
+.wtabs button span{font-weight:900;text-transform:capitalize}.wtabs button small{font-size:14px;color:#cfe0f5}
+.wtabs button.today{box-shadow:inset 0 0 0 2px var(--go)}
+.wtabs button.sel{background:#fff;color:var(--ink)}.wtabs button.sel small{color:var(--soft)}
+.daylist .dv small.d{white-space:normal;font-size:14px;margin-top:2px}
 .dayoverbox>button{margin-top:14px;width:100%;background:#fff;color:var(--ink)}
 /* digibord */
 #board{min-height:100vh;background:#13263f;color:#fff;display:grid;grid-template-rows:1fr auto;padding:clamp(20px,3vw,48px)}
@@ -193,6 +226,14 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .bfoot b{font-size:30px;letter-spacing:.12em;color:#fff}
 .bqr svg{width:96px;height:96px;background:#fff;border-radius:10px;padding:4px;display:block}
 @media(max-width:900px){.bmain{grid-template-columns:minmax(0,1fr)}}
+.kvbox{width:min(1200px,96vw);height:min(860px,94vh);display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+.kvhead{display:flex;flex-wrap:wrap;gap:12px;align-items:center;color:#fff}.kvhead b{font-size:20px}.kvhead a{color:#fff;margin-left:auto}
+.kvhead button{min-height:40px;padding:6px 16px}
+.kvframe{position:relative;overflow:hidden;border-radius:18px;background:#000}
+.kvframe iframe{position:absolute;left:0;top:0;width:1180px;height:820px;border:0;transform-origin:0 0}
+body:has(#teacher:not(.hide)) .status,body:has(#board:not(.hide)) .status{top:auto;bottom:6px}
+.wb{padding:6px 10px}
+.viewbadge{position:fixed;left:14px;top:calc(10px + env(safe-area-inset-top));z-index:5;background:#fff;color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800}
 .msbox{background:#f3f6fa;border-radius:14px;padding:14px;margin-top:12px}
 .msbox .res{display:grid;gap:6px;margin-top:10px}
 .msbox .res button{text-align:left;font-weight:700;background:#fff;border:2px solid var(--line)}
@@ -211,7 +252,6 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .mode{font-size:13px;color:var(--soft);margin-top:10px}
 .modal{position:fixed;inset:0;background:rgba(10,20,35,.6);display:grid;place-items:center;padding:20px;z-index:10}
 .modal .card{color:var(--ink)}
-@media(max-width:860px){.tgrid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:420px){.tr{grid-template-columns:minmax(0,1fr) 84px 44px}.tr .n{display:none}.rr{grid-template-columns:100px minmax(0,1fr) 44px}}
 @media(prefers-reduced-motion:reduce){.ring .fg,#kid,.lamps i{transition:none}}
 </style>
@@ -276,8 +316,11 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
       <div class="extras hide" id="kExtras"><h4>Klaaropdrachten</h4><ul id="kExtraList"></ul></div>
     </div>
   </div>
-  <div class="kidfoot">Klas <b id="kCode"></b><button id="kCalm">Rustig scherm</button><button id="kLeave">Andere code</button></div>
+  <div class="kidfoot">Klas <b id="kCode"></b><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave">Andere code</button></div>
   <div class="offline hide" id="kOff"></div>
+  <div class="dayover hide" id="kWeekOver" role="dialog" aria-label="Weekplanning">
+    <div class="dayoverbox weekbox"><h3>Weekplanning</h3><div class="wtabs" id="kWeekTabs"></div><ul class="daylist" id="kWeekList"></ul><button id="kWeekClose">Sluiten</button></div>
+  </div>
   <div class="dayover hide" id="kDayOver" role="dialog" aria-label="Rooster van vandaag">
     <div class="dayoverbox"><h3>Vandaag</h3><ul class="daylist" id="kDayList"></ul><button id="kDayClose">Sluiten</button></div>
   </div>
@@ -289,13 +332,55 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 <!-- LEERKRACHT -->
 <section id="teacher" class="hide">
   <div class="thead">
-    <div><h1>Focuz</h1><div class="small" style="color:#cfe0f5">Bediening voor de leerkracht</div></div>
-    <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tNewCode">Nieuwe klascode</button><button class="primary" id="tBoard">Digibord</button></div>
+    <h1>Focuz</h1>
+    <nav class="ttabs" id="tTabs">
+      <button data-tab="nu" class="on">Nu</button>
+      <button data-tab="vakken">Vakken</button>
+      <button data-tab="rooster">Word &amp; rooster</button>
+      <button data-tab="klas">Klas koppelen</button>
+    </nav>
+    <div class="who"><span id="tWho"></span><span class="count" id="tCount">0 iPads verbonden</span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tKidView">Leerlingbeeld</button><button class="primary" id="tBoard">Digibord</button></div>
   </div>
-  <div class="tgrid">
-    <div>
+
+  <!-- TAB: NU -->
+  <div class="tab on" data-tab="nu">
+    <div class="col">
+      <div class="preview" id="tPrev">
+        <div class="small" style="color:#cfe0f5">Dit zien de leerlingen</div>
+        <div class="big" id="tBig">--:--</div>
+        <div class="sub" id="tSub">Nog niet gestart</div>
+      </div>
       <div class="panel">
-        <h2>Planning per vak</h2>
+        <div class="vakbar"><select id="tVak2" aria-label="Vak om te starten"></select></div>
+        <div class="chips" id="tChips" style="margin-top:10px"></div>
+        <div class="inline"><label for="tTime">of klaar om</label><input id="tTime" type="time"></div>
+        <p class="err" id="tErr"></p>
+        <div class="row"><button class="primary" id="tStart">Start dit vak</button><button id="tPause" disabled>Pauze</button></div>
+        <div class="row"><button id="tPlus" disabled>+5 min</button><button id="tMin" disabled>−5 min</button><button class="danger" id="tStop" disabled>Stop</button></div>
+        <label class="switch"><input type="checkbox" id="tSound" checked> Geluid op de iPads</label>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel grow">
+        <h2>Vandaag</h2>
+        <div class="next" id="rNext"></div>
+        <div class="wday" id="wToday"></div>
+      </div>
+      <div class="panel">
+        <h2>Melding naar alle iPads</h2>
+        <div class="chips" id="mPresets"></div>
+        <div class="linkbox"><input id="mText2" maxlength="80" placeholder="Of typ zelf een melding" aria-label="Eigen melding"><button class="primary" id="mSend">Stuur</button></div>
+        <div class="row"><button id="mClear" disabled>Melding weghalen</button></div>
+        <p class="small muted" id="mInfo">De melding komt over het hele scherm met een geluid, op elke iPad waar Focuz open staat.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: VAKKEN -->
+  <div class="tab" data-tab="vakken">
+    <div class="col">
+      <div class="panel grow">
+        <h2>Vak</h2>
         <div class="vakbar">
           <select id="tVak" aria-label="Vak"></select>
           <button id="tVakAdd">+ Vak</button>
@@ -306,69 +391,64 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
         <input id="tTask" maxlength="80" placeholder="Bijv. Les 3: breuken vergelijken">
         <label for="tDoel">Ik-doel</label>
         <input id="tDoel" maxlength="140" placeholder="Bijv. Ik kan breuken met elkaar vergelijken.">
-        <div class="lbl">Afvinklijst</div>
-        <div class="trows" id="tRows"></div>
-        <div class="sum"><button id="tAddRow">+ Taak</button><span id="tSum"></span></div>
         <label for="tExtra">Klaaropdrachten (één per regel)</label>
         <textarea id="tExtra" rows="3" placeholder="Lezen in je leesboek&#10;Plusblad"></textarea>
-
-        <hr class="hr">
-        <div class="lbl">Totale tijd</div>
-        <div class="chips" id="tChips"></div>
-        <label for="tTime">…of klaar om</label>
-        <input id="tTime" type="time" style="max-width:200px">
-        <p class="err" id="tErr"></p>
-        <div class="row"><button class="primary" id="tStart">Start dit vak</button><button id="tPause" disabled>Pauze</button></div>
-        <div class="row"><button id="tPlus" disabled>+5 minuten</button><button id="tMin" disabled>−5 minuten</button><button class="danger" id="tStop" disabled>Stop</button></div>
-        <label class="switch"><input type="checkbox" id="tSound" checked> Geluid op de iPads (seintje bij 5 minuten en als de tijd om is)</label>
-        <p class="small muted">Wijzigingen in de lijst van het lopende vak gaan meteen naar de iPads.</p>
+        <p class="small muted">Komt het vak uit je dagklapper, dan gaan de leerstof, het lesdoel en de taken uit Word voor. Deze lijst wordt gebruikt als er in Word geen taken staan.</p>
       </div>
+    </div>
+    <div class="col">
+      <div class="panel grow">
+        <h2>Afvinklijst</h2>
+        <div class="trows" id="tRows"></div>
+        <div class="sum"><button id="tAddRow">+ Taak</button><span id="tSum"></span></div>
+      </div>
+    </div>
+  </div>
 
-      <div class="panel">
+  <!-- TAB: WORD & ROOSTER -->
+  <div class="tab" data-tab="rooster">
+    <div class="col">
+      <div class="panel grow">
         <h2>Koppeling met Word</h2>
         <p class="small muted" id="wStatus">Nog geen Word-bestand ingelezen.</p>
         <div class="row"><button id="wPick">Kies Word-bestand</button><button id="wAuto" class="primary">Automatisch bijwerken</button><button id="wMsBtn" class="hide">Via Microsoft-login</button></div>
         <div id="wAutoBox" class="msbox hide"></div>
         <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
         <div id="wMsBox" class="msbox hide"></div>
-        <label class="switch"><input type="checkbox" id="wUse" checked> Rooster van vandaag uit Word gebruiken (vakken starten vanzelf)</label>
-        <div class="wday" id="wToday"></div>
-        <p class="small muted">Uit je dagklapper komen per blok de tijd, het vak, de leerstof (titel) en het lesdoel (ik-doel). Staat er "klaar:" in de leerstof, dan wordt dat een klaaropdracht. De afvinklijst met minuten komt uit het vak met dezelfde naam hierboven.</p>
+        <label class="switch"><input type="checkbox" id="wUse" checked> Rooster uit Word gebruiken (vakken starten vanzelf)</label>
+        <p class="small muted">Uit je dagklapper komen per blok de tijd, het vak, de leerstof en het lesdoel. Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: <b>Instructie (10 min); Werkboek opdr. 1-4 (20 min); klaar: plusblad</b></p>
       </div>
-
-      <div class="panel">
-        <h2>Weekrooster</h2>
+    </div>
+    <div class="col">
+      <div class="panel grow">
+        <h2>Weekrooster zonder Word</h2>
         <div class="days" id="rDays"></div>
         <div class="rrows" id="rRows"></div>
         <div class="sum"><button id="rAdd">+ Blok</button></div>
-        <label class="switch"><input type="checkbox" id="rAuto" checked> Vakken automatisch starten op de tijd in het rooster</label>
-        <div class="next" id="rNext"></div>
-        <p class="small muted">Een vak duurt zo lang als de minuten van de taken samen. Automatisch starten werkt als dit scherm open staat, bijvoorbeeld op het digibord.</p>
+        <label class="switch"><input type="checkbox" id="rAuto" checked> Vakken automatisch starten</label>
+        <p class="small muted">Wordt alleen gebruikt op dagen die niet in je Word-bestand staan. Automatisch starten werkt als dit scherm open staat.</p>
       </div>
     </div>
-    <div>
-      <div class="preview" id="tPrev">
-        <div class="small" style="color:#cfe0f5">Dit zien de leerlingen</div>
-        <div class="big" id="tBig">--:--</div>
-        <div class="sub" id="tSub">Nog niet gestart</div>
-      </div>
-      <div class="panel" style="margin-top:20px">
-        <h2>Melding naar alle iPads</h2>
-        <div class="chips" id="mPresets"></div>
-        <label for="mText2">Of typ zelf een melding</label>
-        <input id="mText2" maxlength="80" placeholder="Bijv. Iedereen naar het lokaal van groep 7">
-        <div class="row"><button class="primary" id="mSend">Stuur melding</button><button id="mClear" disabled>Melding weghalen</button></div>
-        <p class="small muted" id="mInfo">De melding komt over het hele scherm met een geluid, op elke iPad waar de Focuz open staat.</p>
-      </div>
-      <div class="panel" style="margin-top:20px">
+  </div>
+
+  <!-- TAB: KLAS -->
+  <div class="tab" data-tab="klas">
+    <div class="col">
+      <div class="panel grow center-panel">
         <h2>Leerlingen koppelen</h2>
         <div class="muted small">Klascode</div>
         <div class="code" id="tCode"></div>
         <div class="qr" id="tQr"></div>
         <p class="small muted" id="tQrNote">Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel grow">
+        <h2>Link voor leerlingen</h2>
         <div class="linkbox"><input id="tLink" readonly aria-label="Link voor leerlingen"><button id="tCopy">Kopieer</button></div>
-        <div class="count" id="tCount">0 iPads verbonden</div>
         <div class="mode" id="tMode"></div>
+        <div class="row"><button class="ghostdark" id="tNewCode">Nieuwe klascode</button></div>
+        <p class="small muted">Met een nieuwe klascode moeten alle iPads opnieuw koppelen.</p>
       </div>
     </div>
   </div>
@@ -390,6 +470,10 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
   <div class="bfoot"><span>Klascode <b id="bCode"></b></span><span class="bqr" id="bQr"></span><button class="ghost" id="bBack">Terug naar bediening</button></div>
 </section>
 
+<div class="modal hide" id="kvModal"><div class="kvbox">
+  <div class="kvhead"><b>Leerlingbeeld</b><span class="small" style="color:#cfe0f5">Zo ziet het eruit op de iPads (iPad liggend)</span><a id="kvOpen" target="_blank" rel="noopener">Open in nieuw tabblad</a><button id="kvClose">Sluiten</button></div>
+  <div class="kvframe" id="kvFrame"></div>
+</div></div>
 <div class="modal hide" id="modal"><div class="card">
   <h2 id="mTitle"></h2><p class="muted" id="mText"></p>
   <input id="mInput" class="hide" maxlength="30">
@@ -480,7 +564,7 @@ function mqttTransport(h){
     tick(){
       if(!client||!client.connected)return;
       if(role==='teacher')client.publish(base+'clock',JSON.stringify({now:Date.now()}));
-      if(role==='kid')client.publish(base+'ping',JSON.stringify({id:myId}));
+      if(role==='kid'&&!VIEW)client.publish(base+'ping',JSON.stringify({id:myId}));
     },
     count(){const n=Date.now();for(const k in peers)if(n-peers[k]>50000)delete peers[k];h.onKids(Object.keys(peers).length)},
     wake(){if(client&&!client.connected)client.reconnect()},
@@ -508,7 +592,7 @@ function fbTransport(h){
   const t={
     async start(){
       await fbInit();
-      if(role==='kid'){
+      if(role==='kid'&&!VIEW){
         if(!fb.auth.currentUser) await fb.auth.signInAnonymously();
         me=ref('kids/'+fb.auth.currentUser.uid);
         conRef=fb.db.ref('.info/connected');
@@ -535,7 +619,7 @@ function connect(){
   const h={onState:s=>{state=s&&typeof s==='object'?s:{status:'idle'};if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
            onKids:n=>{$('tCount').textContent=n===1?'1 iPad verbonden':n+' iPads verbonden'},
            onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
-           onDay:d=>{curDay=d&&typeof d==='object'?{date:d.date||'',blocks:arr(d.blocks)}:null;renderDay()}};
+           onDay:d=>{curDay=d&&typeof d==='object'?{date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{}}:null;renderDay();renderWeek()}};
   daySig='';
   T=USE_FB?fbTransport(h):mqttTransport(h);
   T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
@@ -700,7 +784,8 @@ async function keepAwake(){try{if('wakeLock' in navigator) await navigator.wakeL
 
 /* =================== schermen =================== */
 function show(id){['home','login','kid','teacher','board'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
-function startKid(c){role='kid';code=c;store.set('kt_kid_code',c);store.set('kt_role','kid');$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
+const VIEW=new URLSearchParams(location.search).has('kijk');
+function startKid(c){role='kid';code=c;if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{const b=document.createElement('div');b.className='viewbadge';b.textContent='Leerlingbeeld (voorbeeld)';document.body.append(b);$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
 
 async function startTeacher(){
   store.set('kt_role','teacher');
@@ -778,7 +863,8 @@ const sumMin = v => vakTasks(v).reduce((a,x)=>a+x.m,0);
 
 function renderVakBar(){
   $('tVak').innerHTML='';Object.keys(plan.vakken).forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v;$('tVak').append(o)});
-  $('tVak').value=curVak;$('tTask').value=V().title;$('tDoel').value=V().doel;$('tExtra').value=V().extra;
+  $('tVak').value=curVak;
+  $('tVak2').innerHTML=$('tVak').innerHTML;$('tVak2').value=curVak;$('tTask').value=V().title;$('tDoel').value=V().doel;$('tExtra').value=V().extra;
   renderRows();renderRooster();
 }
 function renderRows(){
@@ -861,6 +947,22 @@ function autoCheck(){
 
 /* =================== dagritme =================== */
 let curDay=null, daySig='';
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function weekDates(){ // ma t/m vr van deze week; in het weekend de volgende week
+  const d=new Date();let wd=d.getDay();if(wd===6)d.setDate(d.getDate()+2);else if(wd===0)d.setDate(d.getDate()+1);
+  wd=d.getDay();d.setDate(d.getDate()-(wd-1));
+  return [0,1,2,3,4].map(i=>{const x=new Date(d);x.setDate(d.getDate()+i);return x});
+}
+function blocksFor(dt){
+  const key=ymd(dt);
+  if(plan.useWord&&plan.word&&plan.word.days[key]&&plan.word.days[key].length)
+    return plan.word.days[key].map(b=>({at:b.at,end:b.end,vak:b.vak,title:b.title||'',doel:(b.doel||'').slice(0,160)}));
+  const wd=dt.getDay();if(wd<1||wd>5)return [];
+  const rows=plan.rooster[wd].filter(x=>x.vak&&x.at).slice().sort((a,b)=>a.at.localeCompare(b.at));
+  return rows.map((x,i)=>{let end=addMin(x.at,sumMin(x.vak)||30);if(rows[i+1]&&rows[i+1].at>x.at&&rows[i+1].at<end)end=rows[i+1].at;
+    const v=plan.vakken[x.vak]||{};return {at:x.at,end,vak:x.vak,title:v.title||'',doel:(v.doel||'').slice(0,160)}});
+}
+function weekBlocks(){const w={};weekDates().forEach(d=>{w[ymd(d)]=blocksFor(d)});return w}
 function todayBlocks(){
   const w=wordToday();
   if(w)return w.map(b=>({at:b.at,end:b.end,vak:b.vak,title:b.title||''}));
@@ -871,7 +973,7 @@ function todayBlocks(){
 }
 function publishDay(){
   if(role!=='teacher'||!plan||!T)return;
-  const d={date:today(),blocks:todayBlocks()};const sig=JSON.stringify(d);
+  const d={date:today(),blocks:todayBlocks(),week:weekBlocks()};const sig=JSON.stringify(d);
   if(sig===daySig)return;daySig=sig;curDay=d;T.sendDay(d);renderBoardDay();
 }
 const hmNow = () => {const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
@@ -904,6 +1006,34 @@ function renderDay(){
 }
 $('kNext').addEventListener('click',()=>{$('kDayOver').classList.remove('hide')});
 $('kDayClose').addEventListener('click',()=>$('kDayOver').classList.add('hide'));
+/* weekplanning voor de leerling */
+const DAGNAAM=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+let weekSel=null;
+function renderWeek(){
+  if(role!=='kid')return;
+  const w=curDay&&curDay.week?curDay.week:{};const keys=Object.keys(w).sort();
+  const has=keys.some(k=>arr(w[k]).length);$('kWeekBtn').classList.toggle('hide',!has);
+  if(!has){$('kWeekOver').classList.add('hide');return}
+  if(!weekSel||!keys.includes(weekSel))weekSel=keys.includes(today())?today():keys[0];
+  $('kWeekTabs').innerHTML='';
+  keys.forEach(k=>{const [y,m,d]=k.split('-').map(Number);const dt=new Date(y,m-1,d);
+    const b=document.createElement('button');b.dataset.k=k;b.className=(k===weekSel?'sel':'')+(k===today()?' today':'');
+    b.innerHTML='<span></span><small></small>';b.querySelector('span').textContent=DAGNAAM[dt.getDay()].slice(0,2);b.querySelector('small').textContent=d;
+    b.setAttribute('aria-label',DAGNAAM[dt.getDay()]+' '+d);$('kWeekTabs').append(b)});
+  const ul=$('kWeekList');ul.innerHTML='';const blocks=arr(w[weekSel]);
+  ul.style.setProperty('--rows',Math.max(1,Math.ceil(blocks.length/2)));
+  const isToday=weekSel===today(),n=hmNow();
+  if(!blocks.length){ul.innerHTML='<li><span class="dt"></span><span class="dv">Nog geen planning</span></li>';return}
+  blocks.forEach(b=>{const li=document.createElement('li');li.className=isToday?(n>=b.end?'past':n>=b.at?'now':''):(weekSel<today()?'past':'');
+    li.innerHTML='<span class="dt"></span><span class="dv"><span></span><small class="t"></small><small class="d"></small></span>';
+    li.querySelector('.dt').textContent=b.at;li.querySelector('.dv span').textContent=b.vak;
+    const t=li.querySelector('.t'),d=li.querySelector('.d');if(b.title)t.textContent=b.title;else t.remove();
+    if(b.doel)d.textContent='Ik-doel: '+b.doel;else d.remove();ul.append(li)});
+}
+$('kWeekBtn').addEventListener('click',()=>{weekSel=null;renderWeek();$('kWeekOver').classList.remove('hide')});
+$('kWeekTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;weekSel=b.dataset.k;renderWeek()});
+$('kWeekClose').addEventListener('click',()=>$('kWeekOver').classList.add('hide'));
+$('kWeekOver').addEventListener('click',e=>{if(e.target===$('kWeekOver'))$('kWeekOver').classList.add('hide')});
 $('kDayOver').addEventListener('click',e=>{if(e.target===$('kDayOver'))$('kDayOver').classList.add('hide')});
 
 /* =================== digibord =================== */
@@ -957,6 +1087,16 @@ function dateFromHeader(txt,ref){
 }
 const toHM = s => {const m=String(s).match(/(\d{1,2})[.:](\d{2})/);return m?`${pad(+m[1])}:${m[2]}`:null};
 const addMin = (hm,mins) => {const [h,m]=hm.split(':').map(Number);const t=h*60+m+mins;return `${pad(Math.floor(t/60)%24)}:${pad(t%60)}`};
+// "Instructie (10 min); Werkboek opdr. 1-4 (15 min)" -> taken met minuten
+const MIN_RE=/\(?\s*(\d{1,3})\s*(?:min(?:uten|uut)?|m)\.?\s*\)?\s*$/i;
+function splitTasks(txt){
+  const parts=txt.split(/\s*(?:;|\n|\s•\s)\s*/).map(x=>x.replace(/^[-–•*]\s*/,'').trim()).filter(Boolean);
+  if(!parts.some(x=>MIN_RE.test(x)&&x.replace(MIN_RE,'').trim()))return {title:txt,tasks:[]};
+  const tasks=[],rest=[];
+  parts.forEach(x=>{const m=x.match(MIN_RE);const t=x.replace(MIN_RE,'').replace(/[\s,:–-]+$/,'').trim();
+    if(m&&t)tasks.push({t:t.slice(0,80),m:Math.min(240,+m[1])});else if(tasks.length)tasks.push({t:x.slice(0,80),m:0});else rest.push(x)});
+  return {title:rest.join(' · '),tasks:tasks.slice(0,15)};
+}
 function shortTitle(s){
   s=s.replace(/\n/g,' ').trim();if(s.length<=90)return s;
   const dot=s.indexOf('. ');if(dot>10&&dot<=90)return s.slice(0,dot+1);
@@ -982,7 +1122,8 @@ async function parseDocx(buf){
       let leer=iL>=0?(c[iL]||''):'', klaar='';
       const km=leer.match(/^(.*?)\s*[–—-]?\s*klaar\s*:\s*(.+)$/is);if(km){leer=km[1].replace(/[\s–—-]+$/,'');klaar=km[2].trim()}
       if(blocks.length&&blocks[blocks.length-1].at===at&&blocks[blocks.length-1].vak===vak)continue; // dubbele rij
-      blocks.push({at,vak,title:shortTitle(leer),doel:(iD>=0?(c[iD]||''):'').replace(/\n/g,' ').slice(0,220),klaar:klaar.slice(0,80)});
+      const lt=splitTasks(leer);
+      blocks.push({at,vak,title:shortTitle(lt.title),doel:(iD>=0?(c[iD]||''):'').replace(/\n/g,' ').slice(0,220),klaar:klaar.slice(0,200),tasks:lt.tasks});
     }
     blocks.sort((a,b)=>a.at.localeCompare(b.at));
     blocks.forEach((b,i)=>{b.end=blocks[i+1]&&blocks[i+1].at>b.at?blocks[i+1].at:addMin(b.at,45)});
@@ -1002,15 +1143,16 @@ async function importWord(buf,fileName){
   savePlan();renderWordToday();renderNext();
   // lopend vak bijwerken als de leerstof of het doel is veranderd
   const w=wordToday();if(w&&state.status!=='idle'&&state.wordAt){const b=w.find(x=>x.at===state.wordAt&&x.vak===state.vak);
-    if(b&&(b.title!==state.task||b.doel!==state.doel))publishState({...state,task:b.title,doel:b.doel,extra:blockExtra(b)})}
+    if(b&&(b.title!==state.task||b.doel!==state.doel||JSON.stringify(blockTasks(b))!==JSON.stringify(state.tasks||[])))publishState({...state,task:b.title,doel:b.doel,tasks:blockTasks(b),extra:blockExtra(b)})}
   return n;
 }
-const blockExtra = b => [...(b.klaar?[b.klaar]:[]),...vakExtra(b.vak)].slice(0,12);
+const blockExtra = b => [...(b.klaar?b.klaar.split(/\s*;\s*/).filter(Boolean).map(x=>x.slice(0,80)):[]),...vakExtra(b.vak)].slice(0,12);
+const blockTasks = b => {const t=arr(b.tasks).filter(x=>x&&x.t);return t.length?t:vakTasks(b.vak)};
 function startBlock(b,autoKey){
   const t=srvNow();let endAt=slotTime(b.end)+offset;
   if(endAt<=t+60000)endAt=t+(sumMin(b.vak)||30)*60000;
   publishState({v:3,sid:newCode(),status:'running',endAt,total:endAt-Math.min(t,slotTime(b.at)+offset),vak:b.vak,task:b.title||'',doel:b.doel||'',
-    tasks:vakTasks(b.vak),extra:blockExtra(b),sound:$('tSound').checked,auto:autoKey||'',wordAt:b.at});
+    tasks:blockTasks(b),extra:blockExtra(b),sound:$('tSound').checked,auto:autoKey||'',wordAt:b.at});
 }
 function renderWordToday(){
   if(!plan)return;
@@ -1029,6 +1171,7 @@ function renderWordToday(){
     r.querySelector('.wt').textContent=b.at+'–'+b.end;r.querySelector('.wv span').textContent=b.vak;r.querySelector('.wv small').textContent=b.title||'';
     box.append(r);
   });
+  const nw=box.querySelector('.now'),pp=box.closest('.grow');if(nw&&pp&&!pp.dataset.scrolled){pp.dataset.scrolled='1';pp.scrollTop=Math.max(0,nw.offsetTop-pp.offsetTop-90)}
 }
 $('wToday').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const w=plan.word&&plan.word.days[today()];if(w&&w[+b.dataset.i])startBlock(w[+b.dataset.i])});
 $('wUse').addEventListener('change',()=>{plan.useWord=$('wUse').checked;savePlan();renderNext()});
@@ -1186,6 +1329,21 @@ function setupTeacher(){
 }
 
 function bindTeacher(){
+  // tabbladen
+  const setTab=t=>{document.querySelectorAll('#tTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+    document.querySelectorAll('#teacher .tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));store.set('fz_tab',t)};
+  $('tTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
+  if(store.get('fz_tab'))setTab(store.get('fz_tab'));
+  $('tVak2').addEventListener('change',()=>{curVak=$('tVak2').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
+  // leerlingbeeld
+  const fit=()=>{const f=$('kvFrame'),i=f.querySelector('iframe');if(!i)return;const sc=Math.min(f.clientWidth/1180,f.clientHeight/820);i.style.transform=`scale(${sc})`;i.style.left=((f.clientWidth-1180*sc)/2)+'px'};
+  $('tKidView').addEventListener('click',()=>{
+    const url=location.origin+location.pathname+'?klas='+code+'&kijk=1';$('kvOpen').href=url;
+    $('kvFrame').innerHTML='';const i=document.createElement('iframe');i.src=url;i.title='Leerlingbeeld';$('kvFrame').append(i);
+    $('kvModal').classList.remove('hide');requestAnimationFrame(fit);
+  });
+  window.addEventListener('resize',fit);
+  $('kvClose').addEventListener('click',()=>{$('kvModal').classList.add('hide');$('kvFrame').innerHTML=''});
   $('tVak').addEventListener('change',()=>{curVak=$('tVak').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
   $('tVakAdd').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Nieuw vak',text:'Hoe heet het vak?',input:''}));if(!n)return;if(!plan.vakken[n])plan.vakken[n]={title:'',doel:'',tasks:[{t:'',m:15}],extra:''};curVak=n;savePlan();renderVakBar();renderChips()});
   $('tVakRen').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Vak hernoemen',input:curVak}));if(!n||n===curVak||plan.vakken[n])return;
