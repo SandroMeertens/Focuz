@@ -233,6 +233,12 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .kvframe iframe{position:absolute;left:0;top:0;width:1180px;height:820px;border:0;transform-origin:0 0}
 body:has(#teacher:not(.hide)) .status,body:has(#board:not(.hide)) .status{top:auto;bottom:6px}
 .wb{padding:6px 10px}
+body.hasdemo .kidtop{padding-top:66px}
+.demobar{position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top));z-index:25;display:flex;flex-wrap:wrap;gap:6px;align-items:center;max-width:calc(100% - 180px);background:#fff;color:var(--ink);border-radius:16px;padding:6px 8px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.demobar b{font-size:13px;padding:0 6px}
+.demobar button{min-height:34px;padding:4px 12px;font-size:14px;border-radius:10px}
+.demobar button.on{background:var(--ink);color:#fff}
+.demobar .dsep{width:1px;align-self:stretch;background:var(--line)}
 .viewbadge{position:fixed;left:14px;top:calc(10px + env(safe-area-inset-top));z-index:5;background:#fff;color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800}
 .msbox{background:#f3f6fa;border-radius:14px;padding:14px;margin-top:12px}
 .msbox .res{display:grid;gap:6px;margin-top:10px}
@@ -471,7 +477,7 @@ body:has(#teacher:not(.hide)) .status,body:has(#board:not(.hide)) .status{top:au
 </section>
 
 <div class="modal hide" id="kvModal"><div class="kvbox">
-  <div class="kvhead"><b>Leerlingbeeld</b><span class="small" style="color:#cfe0f5">Zo ziet het eruit op de iPads (iPad liggend)</span><a id="kvOpen" target="_blank" rel="noopener">Open in nieuw tabblad</a><button id="kvClose">Sluiten</button></div>
+  <div class="kvhead"><b>Leerlingbeeld</b><span class="small" style="color:#cfe0f5">Klik gerust rond. Met "Oefenen" probeer je alles uit zonder dat de iPads iets merken.</span><a id="kvOpen" target="_blank" rel="noopener">Open in nieuw tabblad</a><button id="kvClose">Sluiten</button></div>
   <div class="kvframe" id="kvFrame"></div>
 </div></div>
 <div class="modal hide" id="modal"><div class="card">
@@ -522,6 +528,7 @@ function ask({title,text='',input=null,ok='OK'}){
 /* =================== verbinding =================== */
 let connected=false, everConnected=false, offSince=Date.now();
 function setConn(ok,txt){
+  if(typeof DEMO!=='undefined'&&DEMO){ok=true;txt='Oefenstand'}
   $('dot').className='dot '+(ok?'on':'off');$('conn').textContent=txt;
   if(ok){everConnected=true;offSince=0}else if(connected||!offSince)offSince=Date.now();
   connected=ok;renderOffline();
@@ -785,7 +792,44 @@ async function keepAwake(){try{if('wakeLock' in navigator) await navigator.wakeL
 /* =================== schermen =================== */
 function show(id){['home','login','kid','teacher','board'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
 const VIEW=new URLSearchParams(location.search).has('kijk');
-function startKid(c){role='kid';code=c;if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{const b=document.createElement('div');b.className='viewbadge';b.textContent='Leerlingbeeld (voorbeeld)';document.body.append(b);$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
+/* ---- oefenstand in het leerlingbeeld ---- */
+let DEMO=false, demoN=0;
+const DEMO_BLOCKS=[{at:'08:30',end:'09:00',vak:'Stillezen',title:'Lezen in je eigen boek',doel:''},{at:'09:00',end:'10:00',vak:'Rekenen',title:'Blok 3 les 9',doel:'Ik kan breuken met elkaar vergelijken.'},
+  {at:'10:00',end:'10:15',vak:'Pauze',title:'',doel:''},{at:'10:15',end:'11:00',vak:'Spelling',title:'Blok 3 les 4',doel:'Ik kan woorden met -ig en -lijk goed schrijven.'},
+  {at:'11:00',end:'11:45',vak:'Taal',title:'Les 7: verhaaltekst',doel:'Ik kan een verhaal opbouwen met begin, midden en eind.'},{at:'12:40',end:'13:00',vak:'BG lezen',title:'Tekst 4 lezen',doel:''}];
+function demoDay(){
+  if(curDay&&curDay.date===today()&&arr(curDay.blocks).length)return curDay;
+  const week={};weekDates().forEach(d=>{week[ymd(d)]=DEMO_BLOCKS});return {date:today(),blocks:DEMO_BLOCKS,week};
+}
+function demoStart(){
+  const day=demoDay();curDay=day;const n=hmNow();
+  const b=arr(day.blocks).find(x=>n>=x.at&&n<x.end)||arr(day.blocks).find(x=>x.vak&&!/pauze/i.test(x.vak))||DEMO_BLOCKS[1];
+  demoN++;
+  state={v:3,sid:'DEMO'+demoN,status:'running',endAt:srvNow()+30*60000,total:35*60000,vak:b.vak,task:b.title||'',doel:b.doel||'',
+    tasks:[{t:'Instructie aan de instructietafel',m:10},{t:'Werkboek opdracht 1 t/m 6',m:20},{t:'Nakijken en verbeteren',m:5}],extra:['Plusblad','Lezen in je leesboek'],sound:true,wordAt:b.at};
+  rang=false;render();renderWeek();
+}
+function demoAct(a){
+  if(a==='live'){DEMO=false;state={status:'idle'};curDay=null;curMsg=null;connect();buildDemoBar();render();renderMsg();return}
+  if(!DEMO){DEMO=true;if(T){T.stop();T=null}setConn(true,'Oefenstand');curDay=demoDay();renderWeek()}
+  if(a==='start')demoStart();
+  else if(a==='bijna'){if(state.status!=='running')demoStart();state={...state,endAt:srvNow()+4*60000+50000};store.del('kt_warned');rang=false}
+  else if(a==='om'){if(state.status!=='running')demoStart();state={...state,endAt:srvNow()+3000}}
+  else if(a==='pauze'){if(state.status==='running')state={...state,status:'paused',remaining:Math.max(0,state.endAt-srvNow())};else if(state.status==='paused')state={...state,status:'running',endAt:srvNow()+state.remaining}}
+  else if(a==='wacht'){state={status:'idle'}}
+  else if(a==='melding'){curMsg={id:'D'+Date.now(),text:'Kom terug naar de klas',at:srvNow()};renderMsg()}
+  buildDemoBar();render();
+}
+function buildDemoBar(){
+  document.body.classList.add('hasdemo');
+  let bar=$('demoBar');if(!bar){bar=document.createElement('div');bar.id='demoBar';bar.className='demobar';document.body.append(bar);
+    bar.addEventListener('click',e=>{const b=e.target.closest('button');if(b)demoAct(b.dataset.a)})}
+  const btn=(a,t,on)=>`<button data-a="${a}"${on?' class="on"':''}>${t}</button>`;
+  bar.innerHTML='<b>Leerlingbeeld</b>'+btn('live','Live',!DEMO)+btn('start','Oefenen',DEMO)+
+    (DEMO?'<span class="dsep"></span>'+btn('start','Nieuw vak')+btn('bijna','Laatste 5 min')+btn('om','Tijd om')+btn('pauze',state.status==='paused'?'Hervat':'Pauze')+btn('wacht','Tussen vakken')+btn('melding','Melding'):'');
+}
+
+function startKid(c){role='kid';code=c;if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{buildDemoBar();$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
 
 async function startTeacher(){
   store.set('kt_role','teacher');
