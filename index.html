@@ -385,6 +385,22 @@ details.opt summary:focus-visible{outline:3px solid #7fb2ff;border-radius:14px}
 @keyframes letter{to{opacity:1;transform:none}}
 @keyframes fade{to{opacity:1}}
 @keyframes glow{to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+/* leerlingbeeld v2 */
+.doel span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vakline{text-align:center;color:#cfe0f5;font-size:clamp(15px,1.8vmin,19px);margin-top:10px;max-width:440px;text-wrap:balance;min-height:1.4em}
+.ring.taskmode .sub{color:#fff;font-weight:800;font-size:clamp(16px,2.4vmin,22px);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ring.over .fg{stroke:var(--warn)}
+.ring.over .big{color:#ffd08a}
+.tasks li.later{opacity:.55}
+.tasks li.later:hover{opacity:.8}
+.nextwrap{text-align:center;padding:0 16px 8px}
+.nextwrap .nextbar{margin:0}
+#kid.brk{background:#2a4d6e}
+#kid.brk .ring .fg{stroke:#7fb2ff}
+#kid.brk .task{font-size:clamp(44px,7vw,80px)}
+#kid.done .ringtext .big{font-size:clamp(40px,7vmin,72px)}
+#kLeave.holding{background:rgba(255,255,255,.25);transition:background 3s linear}
 /* dagritme */
 .daylist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .daylist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 16px;color:#fff}
@@ -519,8 +535,7 @@ body.hasdemo .kidtop{padding-top:66px}
     <span class="vak hide" id="kVak"></span>
     <div class="task" id="kTask">&nbsp;</div>
     <div class="doel hide" id="kDoel"><b>Ik-doel</b><span id="kDoelTxt"></span></div>
-    <div class="endline" id="kEnd">&nbsp;</div>
-    <button class="nextbar hide" id="kNext"></button>
+    <div class="endline hide" id="kEnd"></div>
   </div>
   <div class="kidmain">
     <div class="morning hide" id="kMorning">
@@ -541,6 +556,7 @@ body.hasdemo .kidtop{padding-top:66px}
         <div class="ltext" id="kLText"></div>
         <div class="paused-badge hide kPaused">Gepauzeerd</div>
       </div>
+      <div class="vakline" id="kVakLine"></div>
     </div>
     <div class="list hide" id="kListWrap">
       <h3>Mijn taken</h3>
@@ -550,7 +566,8 @@ body.hasdemo .kidtop{padding-top:66px}
       <div class="extras hide" id="kExtras"><h4>Klaaropdrachten</h4><ul id="kExtraList"></ul></div>
     </div>
   </div>
-  <div class="kidfoot">Klas <b id="kCode"></b><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave">Andere code</button></div>
+  <div class="nextwrap"><button class="nextbar hide" id="kNext"></button></div>
+  <div class="kidfoot">Klas <b id="kCode"></b><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave" title="Houd 3 seconden ingedrukt">Andere code</button></div>
   <div class="offline hide" id="kOff"></div>
   <div class="dayover hide" id="kWeekOver" role="dialog" aria-label="Weekplanning">
     <div class="dayoverbox weekbox"><h3>Weekplanning</h3><div class="wtabs" id="kWeekTabs"></div><ul class="daylist" id="kWeekList"></ul><button id="kWeekClose">Sluiten</button></div>
@@ -925,22 +942,34 @@ function render(){
   else {big=fmt(rem);sub=state.status==='paused'?'De timer staat even stil':(warn?'Nog even! Rond je werk af':'Werk rustig door');
         if(state.status==='running') endTxt='Klaar om '+clock(state.endAt-offset)}
   if(role==='kid'){
-    const k=$('kid');k.classList.toggle('warn',warn);k.classList.toggle('done',done);k.classList.toggle('idle',state.status==='idle'||done);k.classList.toggle('calm',calm);
-    const live=state.status!=='idle';
-    $('kVak').textContent=state.vak||'';$('kVak').classList.toggle('hide',!state.vak||!live);
-    $('kTask').textContent=(live&&state.task)||' ';
-    $('kDoelTxt').textContent=state.doel||'';$('kDoel').classList.toggle('hide',!live||!state.doel);
-    $('kEnd').textContent=calm?' ':(endTxt||' ');
-    if(done) $('kBig').innerHTML='<div class="doneicon">✓</div>Klaar!'; else $('kBig').textContent=big;
-    $('kSub').textContent=done?'De tijd is om. Leg je spullen neer.':sub;
+    const k=$('kid'),live=state.status!=='idle';
+    const brk=live&&BREAK_RE.test(state.vak||''),gym=live&&GYM_RE.test(state.vak||'');
+    const special=brk||gym;
+    k.classList.toggle('warn',warn&&!special);k.classList.toggle('done',done);k.classList.toggle('idle',!live||done);k.classList.toggle('calm',calm);k.classList.toggle('brk',special&&!done);
+    $('kVak').textContent=state.vak||'';$('kVak').classList.toggle('hide',!state.vak||!live||special);
+    $('kTask').textContent=!live?'\u00a0':special?(state.vak||'Pauze'):kidTitle(state.task||'')||'\u00a0';
+    $('kDoelTxt').textContent=state.doel||'';$('kDoel').classList.toggle('hide',!live||!state.doel||special||done);
+    // wat staat er in de klok: de taak van nu, of het hele vak
+    const tm=taskTimer();let arc=1,overT=false,line='';
+    const nb=nextBlockKid();
+    if(!live){big='Even wachten';sub='De timer is nog niet gestart'}
+    else if(done){big='';sub=nb?'Straks: '+nb.vak:'Leg je spullen neer';line=nb?'Om '+nb.at+' begint '+nb.vak+'. Pak je spullen alvast.':'Leg je spullen neer en kijk naar voren.';arc=0}
+    else if(special){big=fmt(rem);sub=state.status==='paused'?'Staat even stil':brk?'Pauze tot '+clock(state.endAt-offset):'Omkleden en naar de gymzaal';arc=rem/total;line=nb?'Daarna: '+nb.at+' '+nb.vak:''}
+    else if(tm){const r=tm.endAt-Date.now();overT=r<=0;big=overT?'+'+fmt(-r):fmt(r);sub=tm.t;arc=overT?0:r/(tm.m*60000);
+      line=(overT?'Over je tijd, rond af en ga door. ':'')+'Hele vak: nog '+minTxt(Math.max(1,Math.ceil(rem/60000)))+' · klaar om '+clock(state.endAt-offset)}
+    else {arc=rem/total;line=state.status==='running'?'Klaar om '+clock(state.endAt-offset):''}
+    if(calm&&live&&!done){const r=tm?tm.endAt-Date.now():rem;big=r>0?'nog '+Math.max(1,Math.ceil(r/60000))+' min':'tijd om';}
+    if(done)$('kBig').innerHTML='<div class="doneicon">✓</div>Tijd is om!';else $('kBig').textContent=big;
+    $('kSub').textContent=sub;$('kVakLine').textContent=line;
+    $('kRing').classList.toggle('over',overT);$('kRing').classList.toggle('taskmode',!!tm&&!done&&!special);
     document.querySelectorAll('.kPaused').forEach(e=>e.classList.toggle('hide',state.status!=='paused'));
-    $('kArc').style.strokeDashoffset = String(CIRC*(1-(state.status==='idle'?1:done?0:Math.max(0,Math.min(1,rem/total)))));
+    $('kArc').style.strokeDashoffset=String(CIRC*(1-(!live?1:done?0:Math.max(0,Math.min(1,arc)))));
     // stoplicht
     $('kRing').classList.toggle('hide',calm);$('kLight').classList.toggle('hide',!calm);
-    $('lR').classList.toggle('on',done);$('lO').classList.toggle('on',warn);$('lG').classList.toggle('on',live&&!done&&!warn);
-    $('kLText').textContent=!live?'Even wachten':done?'Tijd is om':state.status==='paused'?'Even pauze':warn?'Bijna klaar, rond af':'Werk rustig door';
+    $('lR').classList.toggle('on',done||overT);$('lO').classList.toggle('on',warn&&!overT);$('lG').classList.toggle('on',live&&!done&&!warn&&!overT);
+    {const r=tm?tm.endAt-Date.now():rem;
+     $('kLText').textContent=!live?'Even wachten':done?'Tijd is om':state.status==='paused'?'Even pauze':overT?'Rond af, volgende taak':(warn?'Bijna klaar · nog ongeveer ':'Nog ongeveer ')+minTxt(Math.max(1,Math.ceil(r/60000)));}
     $('kCalm').textContent=calm?'Klok tonen':'Rustig scherm';
-    // seintje bij 5 minuten
     if(state.status==='running'&&warn&&total>6*60000&&store.get('kt_warned')!==state.sid){store.set('kt_warned',state.sid);if(state.sound!==false)chime(true)}
     renderKidList();renderOffline();renderDay();
     if(done && !rang){rang=true;if(state.sound!==false)chime()}
@@ -948,6 +977,14 @@ function render(){
     renderNow();
   }
 }
+
+const BREAK_RE=/^(pauze|eten|lunch|eten en drinken|fruit|buitenspelen)$/i, GYM_RE=/^(gym|bewegingsonderwijs|gymles)$/i;
+function kidTitle(t){t=String(t||'').trim();const i=t.indexOf(':');if(i>=3&&i<=40)return t.slice(0,i).trim();return t}
+function taskTimer(){ // lopende taaktimer van een taak die nog niet af is
+  if(!mini||state.status!=='running')return null;const x=(state.tasks||[])[mini.i];if(!x||!x.m||getTicks().includes(mini.i))return null;
+  return {endAt:mini.endAt,m:x.m,t:x.t,i:mini.i};
+}
+function nextBlockKid(){const bl=dayBlocks();const from=(typeof DEMO!=='undefined'&&DEMO&&state.wordAt)?state.wordAt:hmNow();return bl.find(b=>b.at>from&&!(state.wordAt&&b.at===state.wordAt))||null}
 
 /* =================== afvinklijst op de iPad =================== */
 let listSig='', listSid='', selTask=null, mini=null; // mini = {i,endAt,rung}
@@ -959,11 +996,12 @@ function startMini(i){const x=(state.tasks||[])[i];mini=x&&x.m?{i,endAt:Date.now
 function renderKidList(){
   const tasks = Array.isArray(state.tasks)?state.tasks.filter(x=>x&&x.t):[];
   const extras = Array.isArray(state.extra)?state.extra.filter(Boolean):[];
-  const show = state.status!=='idle' && (tasks.length||extras.length);
+  const sp=BREAK_RE.test(state.vak||'')||GYM_RE.test(state.vak||'');const dn=state.status==='running'&&state.endAt<=srvNow();
+  const show = state.status!=='idle' && !sp && !dn && (tasks.length||extras.length);
   $('kid').classList.toggle('haslist',!!show);
   $('kListWrap').classList.toggle('hide',!show);
   if(!show){listSig='';return}
-  if(listSid!==state.sid){listSid=state.sid;selTask=null;try{mini=JSON.parse(store.get('kt_mini_'+state.sid))}catch(e){mini=null}if(mini)selTask=mini.i}
+  if(listSid!==state.sid){listSid=state.sid;selTask=null;try{mini=JSON.parse(store.get('kt_mini_'+state.sid))}catch(e){mini=null}if(mini)selTask=mini.i;else{const t0=getTicks();const f=tasks.findIndex((x,j)=>!t0.includes(j));selTask=f>=0?f:null}}
   const sig=state.sid+JSON.stringify(tasks)+extras.join('|');
   if(sig!==listSig){
     listSig=sig;
@@ -982,17 +1020,13 @@ function renderKidList(){
   [...$('kTasks').children].forEach((li,i)=>{
     const x=tasks[i], ok=ticks.includes(i);if(ok)doneCount++;
     const running=mini&&mini.i===i, r=running?mini.endAt-Date.now():0;
-    li.classList.toggle('ok',ok);li.classList.toggle('sel',selTask===i);li.classList.toggle('over',running&&r<=0&&!ok);
+    li.classList.toggle('ok',ok);li.classList.toggle('sel',selTask===i);li.classList.toggle('over',running&&r<=0&&!ok);li.classList.toggle('later',!ok&&selTask!==i);
     li.querySelector('.box').textContent=ok?'✓':'';
     li.querySelector('.tdetail').classList.toggle('hide',selTask!==i);
     if(selTask!==i)return;
     const say=li.querySelector('.say'), b=li.querySelector('.mbtn');
-    if(running){
-      say.innerHTML='';const m=document.createElement('div');m.className='mini'+(r<=0?' over':'');
-      if(r>0) m.textContent=calm?'Nog ongeveer '+minTxt(Math.ceil(r/60000)):fmt(r);
-      else m.textContent=calm?'Je tijd voor deze taak is om':'+'+fmt(-r)+' over je tijd';
-      say.append(m);
-      if(r<=0){const o=document.createElement('div');o.className='overmsg';o.textContent='Rond af en ga door naar de volgende taak.';say.append(o)}
+    if(running&&!ok){
+      say.textContent=r>0?'Je taaktimer loopt. Kijk op de klok.':'Je tijd voor deze taak is om. Rond af en vink hem af.';
       b.textContent='Stop taaktimer';b.classList.remove('hide');
     } else {
       say.innerHTML=x.m?'Hier krijg je <b>'+minTxt(x.m)+'</b> voor.':'Voor deze taak is geen tijd ingesteld.';
@@ -1002,7 +1036,7 @@ function renderKidList(){
   $('kProg').textContent=tasks.length?`${doneCount} van ${tasks.length} af`:'';
   const all=tasks.length>0&&doneCount===tasks.length;
   $('kAllDone').classList.toggle('hide',!(all&&extras.length));
-  $('kExtras').classList.toggle('hide',!extras.length);
+  $('kExtras').classList.toggle('hide',!extras.length||(tasks.length>0&&!all));
 }
 $('kTasks').addEventListener('click',e=>{
   const li=e.target.closest('li');if(!li)return;const i=+li.dataset.i;
@@ -1067,7 +1101,7 @@ function show(id){['home','login','kid','teacher','board'].forEach(s=>$(s).class
 const VIEW=new URLSearchParams(location.search).has('kijk');
 /* ---- oefenstand in het leerlingbeeld ---- */
 let DEMO=false, demoN=0;
-const DEMO_BLOCKS=[{at:'08:30',end:'09:00',vak:'Stillezen',title:'Lezen in je eigen boek',doel:''},{at:'09:00',end:'10:00',vak:'Rekenen',title:'Blok 3 les 9',doel:'Ik kan breuken met elkaar vergelijken.'},
+const DEMO_BLOCKS=[{at:'08:30',end:'09:00',vak:'Stillezen',title:'Lezen in je eigen boek',doel:''},{at:'09:00',end:'10:00',vak:'Rekenen',title:'Blok 3 les 9',doel:'Ik kan breuken met elkaar vergelijken.',tasks:[{t:'Instructie',m:10},{t:'Werkboek opdracht 1 t/m 6',m:25},{t:'Nakijken',m:5}],extra:['Plusblad']},
   {at:'10:00',end:'10:15',vak:'Pauze',title:'',doel:''},{at:'10:15',end:'11:00',vak:'Spelling',title:'Blok 3 les 4',doel:'Ik kan woorden met -ig en -lijk goed schrijven.'},
   {at:'11:00',end:'11:45',vak:'Taal',title:'Les 7: verhaaltekst',doel:'Ik kan een verhaal opbouwen met begin, midden en eind.'},{at:'12:40',end:'13:00',vak:'BG lezen',title:'Tekst 4 lezen',doel:''}];
 function demoDay(){
@@ -1075,12 +1109,20 @@ function demoDay(){
   const week={};weekDates().forEach(d=>{week[ymd(d)]=DEMO_BLOCKS});return {date:today(),blocks:DEMO_BLOCKS,week};
 }
 function demoStart(){
-  const day=demoDay();curDay=day;const n=hmNow();
-  const b=arr(day.blocks).find(x=>n>=x.at&&n<x.end)||arr(day.blocks).find(x=>x.vak&&!/pauze/i.test(x.vak))||DEMO_BLOCKS[1];
+  // kies een echte dag uit de weekplanning: vandaag als er nog blokken komen, anders de volgende lesdag
+  const d=demoDay(),week=d.week||{},n=hmNow();
+  const keys=Object.keys(week).sort().filter(k=>k>=today()&&arr(week[k]).length);
+  let key=keys.find(k=>k>today()||arr(week[k]).some(b=>b.end>n))||keys[0];
+  const list=key?arr(week[key]):DEMO_BLOCKS;
+  const isLater=key&&key!==today();
+  const real=list.filter(b=>b.vak&&!BREAK_RE.test(b.vak)&&!GYM_RE.test(b.vak));
+  const b=(!isLater&&list.find(x=>n>=x.at&&n<x.end&&!BREAK_RE.test(x.vak)))||real.find(x=>arr(x.tasks).length)||real[0]||DEMO_BLOCKS[1];
+  curDay={...d,date:today(),blocks:list,week};
   demoN++;
-  state={v:3,sid:'DEMO'+demoN,status:'running',endAt:srvNow()+30*60000,total:35*60000,vak:b.vak,task:b.title||'',doel:b.doel||'',
-    tasks:[{t:'Instructie aan de instructietafel',m:10},{t:'Werkboek opdracht 1 t/m 6',m:20},{t:'Nakijken en verbeteren',m:5}],extra:['Plusblad','Lezen in je leesboek'],sound:true,wordAt:b.at};
-  rang=false;render();renderWeek();
+  const dur=Math.max(5,(localTime(b.end)-localTime(b.at))/60000||35);
+  state={v:3,sid:'DEMO'+demoN,status:'running',endAt:srvNow()+dur*60000*0.85,total:dur*60000,vak:b.vak,task:b.title||'',doel:b.doel||'',
+    tasks:arr(b.tasks).filter(x=>x&&x.t),extra:arr(b.extra).filter(Boolean),sound:true,wordAt:b.at};
+  rang=false;mini=null;listSid='';render();renderWeek();
 }
 function demoAct(a){
   if(a==='live'){DEMO=false;state={status:'idle'};curDay=null;curMsg=null;connect();buildDemoBar();render();renderMsg();return}
@@ -1090,6 +1132,7 @@ function demoAct(a){
   else if(a==='om'){if(state.status!=='running')demoStart();state={...state,endAt:srvNow()+3000}}
   else if(a==='pauze'){if(state.status==='running')state={...state,status:'paused',remaining:Math.max(0,state.endAt-srvNow())};else if(state.status==='paused')state={...state,status:'running',endAt:srvNow()+state.remaining}}
   else if(a==='wacht'){state={status:'idle'}}
+  else if(a==='pauzeblok'){demoN++;state={v:3,sid:'DEMO'+demoN,status:'running',endAt:srvNow()+12*60000,total:15*60000,vak:'Pauze',task:'',doel:'',tasks:[],extra:[],sound:true,wordAt:''}}
   else if(a==='melding'){curMsg={id:'D'+Date.now(),text:'Kom terug naar de klas',at:srvNow()};renderMsg()}
   buildDemoBar();render();
 }
@@ -1099,7 +1142,7 @@ function buildDemoBar(){
     bar.addEventListener('click',e=>{const b=e.target.closest('button');if(b)demoAct(b.dataset.a)})}
   const btn=(a,t,on)=>`<button data-a="${a}"${on?' class="on"':''}>${t}</button>`;
   bar.innerHTML='<b>Leerlingbeeld</b>'+btn('live','Live',!DEMO)+btn('start','Oefenen',DEMO)+
-    (DEMO?'<span class="dsep"></span>'+btn('start','Nieuw vak')+btn('bijna','Laatste 5 min')+btn('om','Tijd om')+btn('pauze',state.status==='paused'?'Hervat':'Pauze')+btn('wacht','Tussen vakken')+btn('melding','Melding'):'');
+    (DEMO?'<span class="dsep"></span>'+btn('start','Nieuw vak')+btn('bijna','Laatste 5 min')+btn('om','Tijd om')+btn('pauze',state.status==='paused'?'Hervat':'Pauze')+btn('wacht','Tussen vakken')+btn('pauzeblok','Pauzescherm')+btn('melding','Melding'):'');
 }
 
 function startKid(c){role='kid';code=c;if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{if(!new URLSearchParams(location.search).has('mini'))buildDemoBar();else document.body.classList.add('minimode');$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
@@ -1326,7 +1369,8 @@ function renderDay(){
   // "Straks"-balk tijdens een vak
   const n=hmNow();const next=blocks.find(b=>b.at>n&&!(state.wordAt&&b.at===state.wordAt));
   const nb=$('kNext');
-  if(live&&blocks.length){nb.classList.remove('hide');nb.innerHTML='';
+  const spc=BREAK_RE.test(state.vak||'')||GYM_RE.test(state.vak||'')||(state.status==='running'&&state.endAt<=srvNow());
+  if(live&&blocks.length&&!spc){nb.classList.remove('hide');nb.innerHTML='';
     if(next){nb.append('Straks: ');const b=document.createElement('b');b.textContent=next.at+' '+next.vak;nb.append(b)}else nb.textContent='Dit is het laatste blok van vandaag';
   } else nb.classList.add('hide');
   if(!blocks.length)$('kDayOver').classList.add('hide');
@@ -1921,7 +1965,11 @@ $('btnTeacher').addEventListener('click',startTeacher);
 const join=()=>{const c=$('codeIn').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(!validCode(c)){$('codeErr').textContent='Die code klopt niet. Een klascode heeft 6 tekens.';return}unlockAudio();startKid(c)};
 $('btnJoin').addEventListener('click',join);
 $('codeIn').addEventListener('keydown',e=>{if(e.key==='Enter')join()});
-$('kLeave').addEventListener('click',async()=>{if(!await ask({title:'Andere klascode invoeren?',ok:'Ja'}))return;store.del('kt_kid_code');store.del('kt_role');T&&T.stop();T=null;role=null;state={status:'idle'};show('home');$('homeChoose').classList.add('hide');$('homeKid').classList.remove('hide');setConn(false,'Niet verbonden')});
+let leaveT=null;
+const leaveCancel=()=>{clearTimeout(leaveT);leaveT=null;$('kLeave').classList.remove('holding')};
+$('kLeave').addEventListener('pointerdown',()=>{$('kLeave').classList.add('holding');leaveT=setTimeout(()=>{leaveCancel();doLeave()},3000)});
+['pointerup','pointerleave','pointercancel'].forEach(ev=>$('kLeave').addEventListener(ev,()=>{if(leaveT){leaveCancel();$('kLeave').textContent='Houd 3 sec ingedrukt';setTimeout(()=>$('kLeave').textContent='Andere code',2000)}}));
+const doLeave=async()=>{if(!await ask({title:'Andere klascode invoeren?',text:'Deze iPad ontvangt dan geen timer meer van deze klas.',ok:'Ja'}))return;store.del('kt_kid_code');store.del('kt_role');T&&T.stop();T=null;role=null;state={status:'idle'};show('home');$('homeChoose').classList.add('hide');$('homeKid').classList.remove('hide');setConn(false,'Niet verbonden')};
 document.addEventListener('pointerdown',unlockAudio,{passive:true});
 bindTeacher();
 
