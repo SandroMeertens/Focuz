@@ -25,3 +25,11 @@ Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: `Instruc
   4. Klik **Registreren** en kopieer de **Application (client) ID**.
   5. Plak die in Focuz bij "Automatisch via OneDrive" (of bovenin `index.html` bij `FOCUZ_MS_CLIENT_ID`).
   Bij een schoolaccount kan het zijn dat de ICT-beheerder toestemming moet geven.
+
+## Proefdag (stappenplan)
+1. **Voor schooltijd:** open Focuz op je laptop of het digibord (Chrome of Edge), koppel je dagklapper via Rooster → Automatisch bijwerken.
+2. **Drie iPads:** scan de QR-code bij Klas, zet Focuz op het beginscherm (Delen → Zet op beginscherm). Controleer dat bovenin "3 iPads" staat.
+3. **Ochtend:** de iPads tonen het ochtendscherm. Om het eerste blok moet de timer vanzelf starten.
+4. **Tijdens de les:** vink op één iPad een taak af en kijk of de voortgang bij jou verschijnt. Stuur één keer een melding.
+5. **Wifi-test:** zet op één iPad even de vliegtuigmodus aan. De timer moet doorlopen; na het uitzetten verbindt hij weer.
+6. **Na de proefdag:** werkt alles, dan kan de hele klas meedoen. Zie je "Geen verbinding met de server", dan blokkeert het schoolnetwerk de verbinding: vraag de ICT-beheerder om poort 8084 (broker.emqx.io) open te zetten, of koppel een eigen Firebase-server.
