@@ -306,6 +306,43 @@ body:has(#teacher:not(.hide)) .status{display:none}
 .who button{min-height:40px;padding:6px 14px;font-size:15px;white-space:nowrap}
 .ntime span{font-size:clamp(56px,min(8.5vw,13vh),130px)}
 #nActive{display:flex;flex-direction:column;gap:6px}
+
+.tab[data-tab=klas].on{display:grid;grid-template-columns:minmax(0,1fr);place-items:center}
+.klascard{background:#fff;color:var(--ink);border-radius:24px;padding:clamp(24px,3vw,44px);width:min(1080px,100%);display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.kqr{display:grid;justify-items:center;gap:14px}
+.qrframe{border:2px solid var(--line);border-radius:22px;padding:14px;background:#fff}
+.klascard .qr{margin:0;padding:0;border-radius:0}
+.klascard .qr svg{width:min(34vh,300px);height:min(34vh,300px)}
+.kcode{display:grid;justify-items:center;line-height:1.1}
+.kcode span{font-size:14px;color:var(--soft);font-weight:700}
+.kcode b{font-size:clamp(36px,4vw,52px);font-weight:900;letter-spacing:.16em;padding-left:.16em}
+.ksteps h2{font-size:28px!important;margin:0 0 14px!important}
+.ksteps ol{margin:0;padding:0;list-style:none;counter-reset:st;display:grid;gap:14px}
+.ksteps li{counter-increment:st;display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start;font-size:17px;line-height:1.45}
+.ksteps li::before{content:counter(st);width:36px;height:36px;border-radius:50%;background:var(--go);color:#fff;font-weight:900;display:grid;place-items:center}
+.kalt{margin:18px 0 10px;color:var(--soft);font-size:15px}
+.klink{display:flex;gap:8px}
+.klink input{font-size:14px;color:var(--soft)}
+.klink button{white-space:nowrap}
+.kfoot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.kfoot .mode{margin:0;font-size:13px;color:var(--soft);flex:1 1 260px}
+.kfoot .link{color:var(--soft);font-size:14px;text-decoration:underline;min-height:36px;padding:2px 0}
+@media(max-width:860px){.klascard{grid-template-columns:minmax(0,1fr)}}
+
+.rmain{display:flex;flex-direction:column;gap:4px}
+.wstat{margin:0 0 4px;font-weight:700;color:var(--ink)}
+.toggles{display:grid;gap:4px;margin-top:8px}
+.howto{margin-top:auto;background:#f3f6fa;border-radius:14px;padding:14px 16px;font-size:15px}
+.howto p{margin:6px 0;color:var(--soft)}
+.howto code{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;color:var(--ink);overflow-wrap:anywhere}
+details.opt{border:2px solid var(--line);border-radius:16px;margin-top:10px;background:#fff}
+details.opt summary{list-style:none;cursor:pointer;padding:12px 44px 12px 16px;position:relative;display:grid;gap:2px}
+details.opt summary::-webkit-details-marker{display:none}
+details.opt summary::after{content:"";position:absolute;right:18px;top:50%;width:9px;height:9px;border-right:3px solid var(--soft);border-bottom:3px solid var(--soft);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+details.opt[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+details.opt summary span{font-size:14px;color:var(--soft)}
+details.opt summary:focus-visible{outline:3px solid #7fb2ff;border-radius:14px}
+.optbody{padding:0 16px 16px}
 /* dagritme */
 .daylist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .daylist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 16px;color:#fff}
@@ -471,13 +508,12 @@ body.hasdemo .kidtop{padding-top:66px}
     <div class="tclock"><b id="tClock">--:--</b><span id="tDate"></span></div>
     <nav class="ttabs" id="tTabs">
       <button data-tab="nu" class="on">Nu</button>
-      <button data-tab="vakken">Vakken</button>
       <button data-tab="rooster">Rooster</button>
       <button data-tab="klas">Klas</button>
     </nav>
     <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button>
       <button class="spill" id="sPill" aria-expanded="false"><i></i><span id="sPillTxt">Status</span></button>
-      <button class="ghost" id="mBtn">Melding</button><button class="ghost" id="tKidView">Leerlingbeeld</button><button class="primary" id="tBoard">Digibord</button></div>
+      <button class="ghost" id="mBtn">Melding</button><button class="primary" id="tBoard">Digibord</button></div>
     <div class="pop hide" id="sPop">
       <ul class="slist" id="sList"></ul>
       <div class="swarn" id="sWarn"></div>
@@ -529,81 +565,84 @@ body.hasdemo .kidtop{padding-top:66px}
     </div>
   </div>
 
-  <!-- TAB: VAKKEN -->
-  <div class="tab" data-tab="vakken">
-    <div class="col">
-      <div class="panel grow">
-        <h2>Vak</h2>
-        <div class="vakbar">
-          <select id="tVak" aria-label="Vak"></select>
-          <button id="tVakAdd">+ Vak</button>
-          <button id="tVakRen" class="link">Hernoem</button>
-          <button id="tVakDel" class="link">Verwijder</button>
-        </div>
-        <label for="tTask">Titel op de iPads (optioneel)</label>
-        <input id="tTask" maxlength="80" placeholder="Bijv. Les 3: breuken vergelijken">
-        <label for="tDoel">Ik-doel</label>
-        <input id="tDoel" maxlength="140" placeholder="Bijv. Ik kan breuken met elkaar vergelijken.">
-        <label for="tExtra">Klaaropdrachten (één per regel)</label>
-        <textarea id="tExtra" rows="3" placeholder="Lezen in je leesboek&#10;Plusblad"></textarea>
-        <p class="small muted">Komt het vak uit je dagklapper, dan gaan de leerstof, het lesdoel en de taken uit Word voor. Deze lijst wordt gebruikt als er in Word geen taken staan.</p>
-      </div>
-    </div>
-    <div class="col">
-      <div class="panel grow">
-        <h2>Afvinklijst</h2>
-        <div class="trows" id="tRows"></div>
-        <div class="sum"><button id="tAddRow">+ Taak</button><span id="tSum"></span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: WORD & ROOSTER -->
+  <!-- TAB: ROOSTER -->
   <div class="tab" data-tab="rooster">
     <div class="col">
-      <div class="panel grow">
-        <h2>Koppeling met Word</h2>
-        <p class="small muted" id="wStatus">Nog geen Word-bestand ingelezen.</p>
-        <div class="row"><button id="wPick">Kies Word-bestand</button><button id="wAuto" class="primary">Automatisch bijwerken</button><button id="wMsBtn" class="hide">Via Microsoft-login</button></div>
+      <div class="panel grow rmain">
+        <h2>Dagklapper</h2>
+        <p class="wstat" id="wStatus">Nog geen Word-bestand ingelezen.</p>
+        <div class="row"><button id="wAuto" class="primary">Automatisch bijwerken</button><button id="wPick">Eenmalig inlezen</button><button id="wMsBtn" class="hide">Via Microsoft-login</button></div>
         <div id="wAutoBox" class="msbox hide"></div>
         <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
         <div id="wMsBox" class="msbox hide"></div>
-        <label class="switch"><input type="checkbox" id="wUse" checked> Rooster uit Word gebruiken (vakken starten vanzelf)</label>
-        <div class="next" id="rNext"></div>
-        <div class="wday" id="wToday"></div>
-        <p class="small muted">Uit je dagklapper komen per blok de tijd, het vak, de leerstof en het lesdoel. Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: <b>Instructie (10 min); Werkboek opdr. 1-4 (20 min); klaar: plusblad</b></p>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="wUse" checked><span></span> Rooster uit de dagklapper gebruiken</label>
+          <label class="toggle"><input type="checkbox" id="rAuto" checked><span></span> Vakken automatisch laten starten</label>
+        </div>
+        <div class="howto">
+          <b>Zo schrijf je taken in je dagklapper</b>
+          <p>Zet ze in de kolom Leerstof, gescheiden door een puntkomma:</p>
+          <code>Blok 3 les 9; Instructie (10 min); Werkboek 1-4 (20 min); klaar: plusblad</code>
+          <p>De tekst zonder minuten wordt de titel. "klaar:" wordt een klaaropdracht. Het lesdoel wordt het ik-doel.</p>
+        </div>
+        <div class="next hide" id="rNext"></div>
+        <div class="wday hide" id="wToday"></div>
       </div>
     </div>
     <div class="col">
       <div class="panel grow">
-        <h2>Weekrooster zonder Word</h2>
-        <div class="days" id="rDays"></div>
-        <div class="rrows" id="rRows"></div>
-        <div class="sum"><button id="rAdd">+ Blok</button></div>
-        <label class="switch"><input type="checkbox" id="rAuto" checked> Vakken automatisch starten</label>
-        <p class="small muted">Wordt alleen gebruikt op dagen die niet in je Word-bestand staan. Automatisch starten werkt als dit scherm open staat.</p>
+        <h2>Extra opties</h2>
+        <p class="small muted" style="margin-top:-4px">Alleen nodig als je iets wilt toevoegen aan je dagklapper.</p>
+        <details class="opt" name="opt">
+          <summary><b>Standaard per vak</b><span>Klaaropdrachten en een afvinklijst die bij elk blok van een vak horen</span></summary>
+          <div class="optbody">
+            <div class="vakbar">
+              <select id="tVak" aria-label="Vak"></select>
+              <button id="tVakAdd">+ Vak</button>
+              <button id="tVakRen" class="link">Hernoem</button>
+              <button id="tVakDel" class="link">Verwijder</button>
+            </div>
+            <input id="tTask" class="hide" maxlength="80"><input id="tDoel" class="hide" maxlength="140">
+            <label for="tExtra">Klaaropdrachten (één per regel)</label>
+            <textarea id="tExtra" rows="2" placeholder="Lezen in je leesboek&#10;Plusblad"></textarea>
+            <div class="lbl">Afvinklijst als er in de dagklapper geen taken staan</div>
+            <div class="trows" id="tRows"></div>
+            <div class="sum"><button id="tAddRow">+ Taak</button><span id="tSum"></span></div>
+          </div>
+        </details>
+        <details class="opt" name="opt">
+          <summary><b>Weekrooster zonder Word</b><span>Voor dagen die niet in je dagklapper staan</span></summary>
+          <div class="optbody">
+            <div class="days" id="rDays"></div>
+            <div class="rrows" id="rRows"></div>
+            <div class="sum"><button id="rAdd">+ Blok</button></div>
+          </div>
+        </details>
       </div>
     </div>
   </div>
 
   <!-- TAB: KLAS -->
   <div class="tab" data-tab="klas">
-    <div class="col">
-      <div class="panel grow center-panel">
-        <h2>Leerlingen koppelen</h2>
-        <div class="muted small">Klascode</div>
-        <div class="code" id="tCode"></div>
-        <div class="qr" id="tQr"></div>
-        <p class="small muted" id="tQrNote">Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.</p>
+    <div class="klascard">
+      <div class="kqr">
+        <div class="qrframe"><div class="qr" id="tQr"></div></div>
+        <div class="kcode"><span>Klascode</span><b id="tCode"></b></div>
       </div>
-    </div>
-    <div class="col">
-      <div class="panel grow">
-        <h2>Link voor leerlingen</h2>
-        <div class="linkbox"><input id="tLink" readonly aria-label="Link voor leerlingen"><button id="tCopy">Kopieer</button></div>
-        <div class="mode" id="tMode"></div>
-        <div class="row"><button class="ghostdark" id="tNewCode">Nieuwe klascode</button></div>
-        <p class="small muted">Met een nieuwe klascode moeten alle iPads opnieuw koppelen.</p>
+      <div class="ksteps">
+        <h2>iPads koppelen</h2>
+        <ol>
+          <li><span><b>Open de camera</b> op de iPad en richt hem op de QR-code.</span></li>
+          <li><span><b>Tik op de link</b> die verschijnt. Focuz opent meteen in de klas.</span></li>
+          <li><span><b>Zet Focuz op het beginscherm:</b> Delen → Zet op beginscherm. De volgende keer opent hij vanzelf.</span></li>
+        </ol>
+        <p class="kalt" id="tQrNote">Geen camera? Ga naar <b>sandromeertens.github.io/Focuz</b>, kies "Ik ben leerling" en typ de klascode.</p>
+        <div class="klink"><input id="tLink" readonly aria-label="Link voor leerlingen"><button id="tCopy">Kopieer link</button></div>
+        <div class="kfoot">
+          <span class="mode" id="tMode"></span>
+          <button class="link" id="tKidView">Bekijk als leerling</button>
+          <button class="link" id="tNewCode">Nieuwe klascode maken</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1680,12 +1719,12 @@ function setupTeacher(){
   $('tCode').textContent=code;
   const url=location.origin+location.pathname+'?klas='+code;$('tLink').value=url;
   try{const q=qrcode(0,'M');q.addData(url);q.make();$('tQr').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true});$('tQr').classList.remove('hide')}catch(e){$('tQr').classList.add('hide')}
-  $('tQrNote').textContent=/^https?:$/.test(location.protocol)?'Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.':'Let op: de QR-code werkt pas als deze app online staat. De klascode intypen werkt wel.';
+  if(!/^https?:$/.test(location.protocol))$('tQrNote').textContent='Let op: de QR-code werkt pas als Focuz online staat. De klascode intypen werkt wel.';
   $('tSound').checked=store.get('kt_sound')!=='0';
   renderWordToday();initAuto();
   if(plan.msFile){$('wMsBox').classList.remove('hide');renderMs();msRefresh(false)}
   else if(msClientId()&&/code=|state=/.test(location.hash)){$('wMsBox').classList.remove('hide');renderMs()}
-  $('tMode').textContent=USE_FB?'Eigen server: alleen jij kunt de timer besturen. Planning staat in je account.':'Openbare server. Planning staat alleen op dit apparaat. Koppel een eigen server voor meer veiligheid (zie handleiding).';
+  $('tMode').textContent=USE_FB?'Eigen server · alleen jij kunt de timer besturen':'Openbare server · planning staat op dit apparaat';
 }
 
 function bindTeacher(){
@@ -1693,7 +1732,7 @@ function bindTeacher(){
   const setTab=t=>{document.querySelectorAll('#tTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
     document.querySelectorAll('#teacher .tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));store.set('fz_tab',t)};
   $('tTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
-  if(store.get('fz_tab'))setTab(store.get('fz_tab'));
+  if(['nu','rooster','klas'].includes(store.get('fz_tab')))setTab(store.get('fz_tab'));
   $('tVak2').addEventListener('change',()=>{curVak=$('tVak2').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
   // leerlingbeeld
   const fit=()=>{const f=$('kvFrame'),i=f.querySelector('iframe');if(!i)return;const sc=Math.min(f.clientWidth/1180,f.clientHeight/820);i.style.transform=`scale(${sc})`;i.style.left=((f.clientWidth-1180*sc)/2)+'px'};
