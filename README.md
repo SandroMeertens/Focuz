@@ -17,7 +17,8 @@ Per blok worden de tijd, het vak, de leerstof (titel) en het lesdoel (ik-doel) o
 De afvinklijst met minuten komt uit het vak met dezelfde naam in Focuz.
 
 - **Handmatig:** "Kies Word-bestand" → kies je dagklapper (ook uit OneDrive).
-- **Automatisch uit OneDrive:** eenmalig een app-registratie bij Microsoft:
+- **Automatisch, zonder Microsoft-login:** open Focuz in Chrome of Edge op een computer waar OneDrive gesynchroniseerd is, tik op "Automatisch bijwerken" en kies je dagklapper in de OneDrive-map. Focuz kijkt elke minuut of het bestand is aangepast.
+- **Automatisch via Microsoft-login (optioneel):** eenmalig een app-registratie bij Microsoft:
   1. Ga naar https://entra.microsoft.com → Applicaties → App-registraties → **Nieuwe registratie**.
   2. Naam: `Focuz`. Accounttypen: **Accounts in elke organisatiedirectory en persoonlijke Microsoft-accounts**.
   3. Omleidings-URI: platform **Toepassing met één pagina (SPA)**, adres `https://sandromeertens.github.io/Focuz/`.

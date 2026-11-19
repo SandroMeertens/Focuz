@@ -288,7 +288,8 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
       <div class="panel">
         <h2>Koppeling met Word</h2>
         <p class="small muted" id="wStatus">Nog geen Word-bestand ingelezen.</p>
-        <div class="row"><button id="wPick">Kies Word-bestand</button><button id="wMsBtn">Automatisch via OneDrive</button></div>
+        <div class="row"><button id="wPick">Kies Word-bestand</button><button id="wAuto" class="primary">Automatisch bijwerken</button><button id="wMsBtn" class="hide">Via Microsoft-login</button></div>
+        <div id="wAutoBox" class="msbox hide"></div>
         <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
         <div id="wMsBox" class="msbox hide"></div>
         <label class="switch"><input type="checkbox" id="wUse" checked> Rooster van vandaag uit Word gebruiken (vakken starten vanzelf)</label>
@@ -875,7 +876,7 @@ function startBlock(b,autoKey){
 function renderWordToday(){
   if(!plan)return;
   $('wUse').checked=plan.useWord;
-  const st=plan.word?`Ingelezen om ${clock(plan.word.at)} uit "${plan.word.file}"`+(plan.msFile?' · werkt elke 10 minuten bij':''):'Nog geen Word-bestand ingelezen.';
+  const st=plan.word?`Ingelezen om ${clock(plan.word.at)} uit "${plan.word.file}"`+(plan.msFile?' · werkt elke 10 minuten bij':(fileHandle&&filePerm==='granted'?' · werkt automatisch bij':'')):'Nog geen Word-bestand ingelezen.';
   $('wStatus').textContent=st;
   const box=$('wToday');box.innerHTML='';
   if(!plan.word)return;
@@ -974,6 +975,56 @@ async function renderMs(){
 }
 $('wMsBtn').addEventListener('click',()=>{const h=$('wMsBox').classList.toggle('hide');if(!h)renderMs()});
 setInterval(()=>{if(role==='teacher'&&plan&&plan.msFile)msRefresh(false)},10*60000);
+if(window.FOCUZ_MS_CLIENT_ID||store.get('fz_ms_client'))$('wMsBtn').classList.remove('hide');
+
+/* ---- automatisch via de OneDrive-map op deze computer (zonder Microsoft-login) ---- */
+const CAN_WATCH = 'showOpenFilePicker' in window;
+let fileHandle=null, fileLastMod=0, filePerm='';
+const idb = (mode,fn) => new Promise((ok,no)=>{try{const r=indexedDB.open('focuz',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');
+  r.onsuccess=()=>{const tx=r.result.transaction('kv',mode);const q=fn(tx.objectStore('kv'));tx.oncomplete=()=>ok(q&&q.result);tx.onerror=()=>no(tx.error)};r.onerror=()=>no(r.error)}catch(e){no(e)}});
+const saveHandle = h => idb('readwrite',s=>h?s.put(h,'wordfile'):s.delete('wordfile'));
+const loadHandle = () => idb('readonly',s=>s.get('wordfile')).catch(()=>null);
+async function readHandle(force){
+  if(!fileHandle)return;
+  try{
+    filePerm=await fileHandle.queryPermission({mode:'read'});
+    if(filePerm!=='granted'){renderAuto();return}
+    const f=await fileHandle.getFile();
+    if(!force&&f.lastModified===fileLastMod&&plan.word)return;
+    await importWord(await f.arrayBuffer(),f.name);fileLastMod=f.lastModified;renderAuto();
+  }catch(e){$('wStatus').textContent='Bijwerken mislukt: '+e.message+'. Staat het bestand nog op dezelfde plek?'}
+}
+function renderAuto(){
+  const box=$('wAutoBox');box.innerHTML='';
+  const el=(tag,txt,cls)=>{const e=document.createElement(tag);if(txt)e.textContent=txt;if(cls)e.className=cls;box.append(e);return e};
+  if(!CAN_WATCH){
+    el('div','Automatisch bijwerken werkt in Chrome of Edge op een computer (bijvoorbeeld je laptop of het digibord), niet op een iPad of in Safari. Open Focuz daar en kies je dagklapper uit je OneDrive-map.','small');return;
+  }
+  if(!fileHandle){
+    el('div','Kies je dagklapper in de OneDrive-map op deze computer. Focuz kijkt daarna elke minuut of je het bestand hebt aangepast en neemt de wijzigingen vanzelf over.','small');
+    const b=el('button','Kies je dagklapper','primary');b.style.marginTop='10px';
+    b.onclick=async()=>{try{const [h]=await showOpenFilePicker({types:[{description:'Word',accept:{'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx']}}],multiple:false});
+      fileHandle=h;await saveHandle(h);fileLastMod=0;$('wStatus').textContent='Inlezen…';await readHandle(true);renderAuto()}catch(e){if(e.name!=='AbortError')el('div','Kiezen mislukt: '+e.message,'err')}};
+    return;
+  }
+  if(filePerm!=='granted'){
+    el('div',`Focuz mag "${fileHandle.name}" weer lezen na één klik (de browser vraagt dit na het opnieuw opstarten).`,'small');
+    const b=el('button','Toegang geven','primary');b.style.marginTop='10px';
+    b.onclick=async()=>{try{filePerm=await fileHandle.requestPermission({mode:'read'})}catch(e){}if(filePerm==='granted')await readHandle(true);renderAuto()};
+  } else el('div',`Gekoppeld: "${fileHandle.name}". Wijzigingen in Word komen binnen een minuut in Focuz (nadat OneDrive het bestand heeft opgeslagen).`,'small');
+  const row=el('div','','row');
+  const b2=document.createElement('button');b2.textContent='Ander bestand';b2.onclick=async()=>{fileHandle=null;await saveHandle(null);renderAuto()};
+  row.append(b2);
+}
+$('wAuto').addEventListener('click',()=>{const h=$('wAutoBox').classList.toggle('hide');if(!h)renderAuto()});
+async function initAuto(){
+  if(!CAN_WATCH)return;
+  fileHandle=await loadHandle();if(!fileHandle)return;
+  $('wAutoBox').classList.remove('hide');
+  try{filePerm=await fileHandle.queryPermission({mode:'read'})}catch(e){filePerm=''}
+  renderAuto();if(filePerm==='granted')readHandle(false);
+}
+setInterval(()=>{if(role==='teacher'&&fileHandle&&filePerm==='granted')readHandle(false)},60000);
 function startVak(v,endAt,autoKey){
   const t=srvNow();
   if(!endAt){const m=sumMin(v)||30;endAt=t+m*60000}
@@ -989,7 +1040,7 @@ function setupTeacher(){
   try{const q=qrcode(0,'M');q.addData(url);q.make();$('tQr').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true});$('tQr').classList.remove('hide')}catch(e){$('tQr').classList.add('hide')}
   $('tQrNote').textContent=/^https?:$/.test(location.protocol)?'Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.':'Let op: de QR-code werkt pas als deze app online staat. De klascode intypen werkt wel.';
   $('tSound').checked=store.get('kt_sound')!=='0';
-  renderWordToday();
+  renderWordToday();initAuto();
   if(plan.msFile){$('wMsBox').classList.remove('hide');renderMs();msRefresh(false)}
   else if(msClientId()&&/code=|state=/.test(location.hash)){$('wMsBox').classList.remove('hide');renderMs()}
   $('tMode').textContent=USE_FB?'Eigen server: alleen jij kunt de timer besturen. Planning staat in je account.':'Openbare server. Planning staat alleen op dit apparaat. Koppel een eigen server voor meer veiligheid (zie handleiding).';
