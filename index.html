@@ -177,6 +177,108 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .rr{display:grid;grid-template-columns:140px minmax(0,1fr) 44px;gap:8px;align-items:center}
 .rr .past{opacity:.5}
 .next{background:#eef7f2;border-radius:12px;padding:10px 14px;font-weight:800;margin-top:12px}
+/* ---------- dashboard Nu ---------- */
+#teacher{padding-top:calc(16px + env(safe-area-inset-top))}
+.tclock{display:flex;flex-direction:column;line-height:1.1;margin-right:6px}
+.tclock b{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}
+.tclock span{font-size:13px;color:#cfe0f5;white-space:nowrap}
+.nowcard{background:#152b48;border-radius:22px;padding:20px 22px;display:flex;flex-direction:column;gap:6px;color:#fff;transition:background .6s}
+.nowcard.warn{background:#6b4210}.nowcard.done{background:#17543a}.nowcard.paused{background:#2b3b52}
+.nhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nlabel{background:#fff;color:var(--ink);border-radius:999px;padding:2px 12px;font-weight:900;font-size:14px}
+.nowcard.warn .nlabel{background:var(--warn);color:#fff}
+.nsrc{font-size:14px;color:#cfe0f5}
+.nvak{font-size:clamp(26px,2.6vw,38px);font-weight:900;line-height:1.05;margin-top:4px}
+.ntitle{font-size:18px;font-weight:700;color:#dfe9f6;line-height:1.3}
+.ndoel{display:flex;gap:8px;align-items:baseline;font-size:16px;font-weight:700;color:#fff}
+.ndoel b{flex:none;background:var(--go);border-radius:6px;padding:0 7px;font-size:13px}
+.ntime{display:flex;align-items:baseline;gap:14px;margin-top:4px}
+.ntime span{font-size:clamp(56px,6.4vw,96px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.ntime small{font-size:18px;color:#cfe0f5}
+.nbar{height:12px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden}
+.nbar i{display:block;height:100%;background:var(--go);transition:width .9s linear}
+.nowcard.warn .nbar i{background:var(--warn)}
+.nprog{display:grid;gap:5px;margin-top:6px}
+.nph{font-size:13px;color:#cfe0f5}
+.npr{display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:10px;align-items:center;font-size:14px;font-weight:700}
+.npr .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.npr .b{height:8px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}.npr .b i{display:block;height:100%;background:#7fe0b0}
+.npr .c{text-align:right;font-variant-numeric:tabular-nums;color:#cfe0f5}
+.nctl{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.nctl button{flex:1 1 90px;min-height:46px;background:rgba(255,255,255,.14);color:#fff}
+.nctl button.danger{background:transparent;border:2px solid rgba(255,255,255,.35)}
+.nctl button:disabled{opacity:.35}
+.nidle{font-size:clamp(28px,3vw,40px);font-weight:900;margin-top:6px}
+.nnext{color:#cfe0f5;font-size:16px}
+.nafter{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.15);font-size:17px;color:#fff}
+.nafter b{font-weight:900}.nafter .muted{color:#9fb6d3}
+#nIdle+.nafter{margin-top:8px}
+.quick{margin-top:4px}
+.quick>button.link{color:#cfe0f5;padding:4px 0;min-height:36px;text-decoration:underline}
+.qbox{background:#fff;color:var(--ink);border-radius:16px;padding:12px;display:grid;gap:8px;margin-top:4px}
+.qrow{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:8px}
+.qbox .chips button{min-width:0;padding:8px 12px;min-height:40px}
+.qbox .err{margin:0;min-height:0}
+.mrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.mlabel{font-weight:900;margin-right:4px}
+.mrow .chips{gap:6px}.mrow .chips button,#mPlus{min-height:40px;padding:6px 12px;font-size:15px}
+#mPlus{width:40px;padding:0;font-size:22px}
+.mrow .linkbox{flex:1 1 100%;margin:0}
+.mactive{flex:1;display:flex;align-items:center;gap:10px;background:#fdecec;color:#8a1f22;border-radius:12px;padding:6px 6px 6px 12px;font-weight:800}
+.mactive span{flex:1}
+.mactive button{min-height:38px;background:#fff}
+.statgrid{display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:14px;align-items:start}
+.slist{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-weight:700;font-size:15px}
+.slist li{display:flex;gap:9px;align-items:center}
+.slist li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--go)}
+.slist li.off::before{background:#b9c3d1}.slist li.warn::before{background:var(--warn)}.slist li.bad::before{background:var(--stop)}
+.swarn{display:grid;gap:6px;margin-top:10px}
+.swarn div{background:#fff4e2;color:#7a4a12;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700}
+.swarn:empty{display:none}
+.mini{position:relative;padding:0;min-height:0;width:168px;height:117px;border-radius:12px;overflow:hidden;background:#1f3a5f}
+.mini span{position:absolute;left:6px;bottom:6px;z-index:2;background:#fff;color:var(--ink);font-size:11px;border-radius:6px;padding:1px 6px}
+.mini iframe{position:absolute;left:0;top:0;width:1180px;height:820px;border:0;transform:scale(.1424);transform-origin:0 0;pointer-events:none}
+.toggle{display:flex;align-items:center;gap:10px;margin:12px 0 0;font-weight:800;cursor:pointer}
+.toggle input{position:absolute;opacity:0;width:1px;height:1px}
+.toggle span{width:46px;height:28px;border-radius:99px;background:#c9d2de;position:relative;transition:background .2s;flex:none}
+.toggle span::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.toggle input:checked+span{background:var(--go)}.toggle input:checked+span::after{left:21px}
+.toggle input:focus-visible+span{outline:3px solid #7fb2ff;outline-offset:2px}
+.dlist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.dlist li{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 10px;border-radius:12px}
+.dlist .dt{font-weight:900;font-variant-numeric:tabular-nums}
+.dlist .dv{display:flex;flex-direction:column;min-width:0}
+.dlist .dv b{font-weight:900;line-height:1.2}
+.dlist .dv small{color:#3d4b60;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dlist li.past{opacity:.42}
+.dlist li.now{background:#e3f6ec;box-shadow:inset 0 0 0 2px var(--go)}
+.dlist li.next{background:#f1f5fa}
+.dlist li.empty{display:block;color:var(--soft)}
+.dlist .tag{background:var(--go);color:#fff;border-radius:6px;padding:2px 8px;font-size:13px;font-weight:900}
+.dlist .tag.soft{background:#e9eef5;color:var(--soft)}
+.dlist button{min-height:36px;padding:4px 12px;font-size:14px}
+body.minimode .status,body.minimode .kidfoot{display:none}
+.ndoel span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ntitle{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.nowcard{gap:5px;padding:18px 20px}
+.dlist li{padding:5px 10px;gap:10px}
+.dlist .dv{flex-direction:row;align-items:baseline;gap:8px}
+.dlist .dv b{flex:none}
+.dlist .dv small{flex:1;min-width:0;font-size:14px}
+.dlist li.now,.dlist li.next{padding:8px 10px}
+body:has(#teacher:not(.hide)) .status{display:none}
+.nowcard{position:relative}
+.qbtn{margin-left:auto;min-height:36px;padding:4px 14px;font-size:14px;background:rgba(255,255,255,.14);color:#fff}
+.qbox{position:absolute;left:14px;right:14px;top:58px;z-index:3;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+
+.nafter{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow{flex-wrap:wrap}
+.mrow .chips{flex:1 1 auto;flex-wrap:nowrap;min-width:0}
+.mrow .chips button{white-space:nowrap;padding:6px 10px;font-size:14px}
+@media(max-width:1500px){.mlabel{display:none}}
+
+@media(max-height:800px){.ntime span{font-size:clamp(48px,5.4vw,80px)}.nvak{font-size:28px}.npr{font-size:13px}.nctl button{min-height:42px}.statgrid{grid-template-columns:minmax(0,1fr) 140px}.mini{width:140px;height:97px}.mini iframe{transform:scale(.1186)}}
+
 /* dagritme */
 .daylist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .daylist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 16px;color:#fff}
@@ -339,45 +441,66 @@ body.hasdemo .kidtop{padding-top:66px}
 <section id="teacher" class="hide">
   <div class="thead">
     <h1>Focuz</h1>
+    <div class="tclock"><b id="tClock">--:--</b><span id="tDate"></span></div>
     <nav class="ttabs" id="tTabs">
       <button data-tab="nu" class="on">Nu</button>
       <button data-tab="vakken">Vakken</button>
       <button data-tab="rooster">Word &amp; rooster</button>
       <button data-tab="klas">Klas koppelen</button>
     </nav>
-    <div class="who"><span id="tWho"></span><span class="count" id="tCount">0 iPads verbonden</span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tKidView">Leerlingbeeld</button><button class="primary" id="tBoard">Digibord</button></div>
+    <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tKidView">Leerlingbeeld</button><button class="primary" id="tBoard">Digibord</button></div>
   </div>
 
   <!-- TAB: NU -->
   <div class="tab on" data-tab="nu">
     <div class="col">
-      <div class="preview" id="tPrev">
-        <div class="small" style="color:#cfe0f5">Dit zien de leerlingen</div>
-        <div class="big" id="tBig">--:--</div>
-        <div class="sub" id="tSub">Nog niet gestart</div>
+      <div class="nowcard grow" id="nCard">
+        <div class="nhead"><span class="nlabel" id="nLabel">Nu</span><span class="nsrc" id="nSrc"></span><button class="qbtn" id="qToggle" aria-expanded="false">Zelf een timer starten</button></div>
+        <div id="nActive">
+          <div class="nvak" id="nVak"></div>
+          <div class="ntitle" id="nTitle"></div>
+          <div class="ndoel hide" id="nDoel"><b>Ik-doel</b><span id="nDoelTxt"></span></div>
+          <div class="ntime"><span id="nBig">--:--</span><small id="nEnd"></small></div>
+          <div class="nbar"><i id="nBar"></i></div>
+          <div class="nprog" id="nProg"></div>
+          <div class="nctl" id="nCtl">
+            <button id="tPause">Pauze</button><button id="tPlus">+5 min</button><button id="tMin">−5 min</button><button class="danger" id="tStop">Stop</button>
+          </div>
+        </div>
+        <div id="nIdle" class="hide">
+          <div class="nidle" id="nIdleTxt">Geen vak actief</div>
+          <div class="nnext" id="nNext"></div>
+        </div>
+        <div class="nafter" id="nAfter"></div>
+        <div class="quick">
+          <div class="qbox hide" id="qBox">
+            <div class="qrow"><select id="tVak2" aria-label="Vak om te starten"></select><input id="tTime" type="time" aria-label="Klaar om"></div>
+            <div class="chips" id="tChips"></div>
+            <p class="err" id="tErr"></p>
+            <button class="primary" id="tStart">Start</button>
+          </div>
+        </div>
       </div>
-      <div class="panel">
-        <div class="vakbar"><select id="tVak2" aria-label="Vak om te starten"></select></div>
-        <div class="chips" id="tChips" style="margin-top:10px"></div>
-        <div class="inline"><label for="tTime">of klaar om</label><input id="tTime" type="time"></div>
-        <p class="err" id="tErr"></p>
-        <div class="row"><button class="primary" id="tStart">Start dit vak</button><button id="tPause" disabled>Pauze</button></div>
-        <div class="row"><button id="tPlus" disabled>+5 min</button><button id="tMin" disabled>−5 min</button><button class="danger" id="tStop" disabled>Stop</button></div>
-        <label class="switch"><input type="checkbox" id="tSound" checked> Geluid op de iPads</label>
+      <div class="panel mrow">
+        <span class="mlabel">Melding</span>
+        <div class="chips" id="mPresets"></div>
+        <button id="mPlus" aria-label="Eigen melding typen">+</button>
+        <div class="linkbox hide" id="mOwn"><input id="mText2" maxlength="80" placeholder="Typ een eigen melding" aria-label="Eigen melding"><button class="primary" id="mSend">Stuur</button></div>
+        <div class="mactive hide" id="mActive"><span id="mInfo"></span><button id="mClear">Weghalen</button></div>
       </div>
     </div>
     <div class="col">
-      <div class="panel grow">
-        <h2>Vandaag</h2>
-        <div class="next" id="rNext"></div>
-        <div class="wday" id="wToday"></div>
+      <div class="panel stat">
+        <div class="statgrid">
+          <ul class="slist" id="sList"></ul>
+          <button class="mini" id="sMini" aria-label="Leerlingbeeld openen"><span>Leerlingbeeld</span><div id="sMiniFrame"></div></button>
+        </div>
+        <div class="swarn" id="sWarn"></div>
+        <label class="toggle"><input type="checkbox" id="tSound" checked><span></span> Belletjes op de iPads</label>
       </div>
-      <div class="panel">
-        <h2>Melding naar alle iPads</h2>
-        <div class="chips" id="mPresets"></div>
-        <div class="linkbox"><input id="mText2" maxlength="80" placeholder="Of typ zelf een melding" aria-label="Eigen melding"><button class="primary" id="mSend">Stuur</button></div>
-        <div class="row"><button id="mClear" disabled>Melding weghalen</button></div>
-        <p class="small muted" id="mInfo">De melding komt over het hele scherm met een geluid, op elke iPad waar Focuz open staat.</p>
+      <div class="panel grow">
+        <h2 id="dHead">Vandaag</h2>
+        <ul class="dlist" id="dList"></ul>
       </div>
     </div>
   </div>
@@ -422,6 +545,8 @@ body.hasdemo .kidtop{padding-top:66px}
         <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
         <div id="wMsBox" class="msbox hide"></div>
         <label class="switch"><input type="checkbox" id="wUse" checked> Rooster uit Word gebruiken (vakken starten vanzelf)</label>
+        <div class="next" id="rNext"></div>
+        <div class="wday" id="wToday"></div>
         <p class="small muted">Uit je dagklapper komen per blok de tijd, het vak, de leerstof en het lesdoel. Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: <b>Instructie (10 min); Werkboek opdr. 1-4 (20 min); klaar: plusblad</b></p>
       </div>
     </div>
@@ -561,7 +686,7 @@ function mqttTransport(h){
         if(k==='day'){h.onDay(msg);return}
         if(k==='state')h.onState(msg);
         else if(k==='clock'&&role==='kid'&&typeof msg.now==='number')offset=msg.now-Date.now();
-        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]=Date.now();t.count()}
+        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number)};t.count()}
       });
     },
     publish(s){client&&client.publish(base+'state',JSON.stringify(s),{qos:1,retain:true})},
@@ -571,9 +696,9 @@ function mqttTransport(h){
     tick(){
       if(!client||!client.connected)return;
       if(role==='teacher')client.publish(base+'clock',JSON.stringify({now:Date.now()}));
-      if(role==='kid'&&!VIEW)client.publish(base+'ping',JSON.stringify({id:myId}));
+      if(role==='kid'&&!VIEW)client.publish(base+'ping',JSON.stringify({id:myId,sid:state.sid||'',ticks:getTicks()}));
     },
-    count(){const n=Date.now();for(const k in peers)if(n-peers[k]>50000)delete peers[k];h.onKids(Object.keys(peers).length)},
+    count(){const n=Date.now();for(const k in peers)if(n-peers[k].at>50000)delete peers[k];h.onKids(Object.values(peers))},
     wake(){if(client&&!client.connected)client.reconnect()},
     stop(){try{client&&client.end(true)}catch(e){}}
   };
@@ -603,9 +728,9 @@ function fbTransport(h){
         if(!fb.auth.currentUser) await fb.auth.signInAnonymously();
         me=ref('kids/'+fb.auth.currentUser.uid);
         conRef=fb.db.ref('.info/connected');
-        conRef.on('value',s=>{if(s.val()){me.onDisconnect().remove();me.set({at:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}});
+        conRef.on('value',s=>{if(s.val()){me.onDisconnect().remove();t.tick()}});
       } else {
-        ref('kids').on('value',s=>h.onKids(s.numChildren()),()=>{});
+        ref('kids').on('value',s=>{const v=s.val()||{};h.onKids(Object.values(v).map(x=>({sid:String(x.sid||''),ticks:arr(x.ticks).map(Number)})))},()=>{});
       }
       ref('state').on('value',s=>h.onState(s.val()||{status:'idle'}),e=>setConn(false,'Geen toegang'));
       ref('msg').on('value',s=>h.onMsg(s.val()),()=>{});
@@ -615,7 +740,7 @@ function fbTransport(h){
     sendMsg(m){(m?ref('msg').set(m):ref('msg').remove()).catch(e=>{$('mInfo').textContent='Versturen mislukt: '+(e.code||e.message)})},
     publish(s){ref('state').set(JSON.parse(JSON.stringify(s))).catch(e=>{$('tErr').textContent='Opslaan mislukt: '+(e.code||e.message)})},
     clear(){ref('state').remove().catch(()=>{})},
-    tick(){}, count(){}, wake(){},
+    tick(){if(me)me.set({at:firebase.database.ServerValue.TIMESTAMP,sid:state.sid||'',ticks:getTicks()}).catch(()=>{})}, count(){}, wake(){},
     stop(){try{ref('state').off();ref('kids').off();ref('msg').off();ref('day').off();conRef&&conRef.off();me&&me.remove()}catch(e){}}
   };
   return t;
@@ -643,7 +768,7 @@ function effState(){
 function connect(){
   if(T)T.stop();
   const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
-           onKids:n=>{$('tCount').textContent=n===1?'1 iPad verbonden':n+' iPads verbonden'},
+           onKids:list=>{kidsInfo=list;renderNow()},
            onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
            onDay:d=>{curDay=d&&typeof d==='object'?{date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{}}:null;renderDay();renderWeek()}};
   daySig='';
@@ -685,13 +810,7 @@ function render(){
     renderKidList();renderOffline();renderDay();
     if(done && !rang){rang=true;if(state.sound!==false)chime()}
   } else if(role==='teacher'){
-    const p=$('tPrev');p.classList.toggle('warn',warn);p.classList.toggle('done',done);p.classList.toggle('idle',state.status==='idle'||done);
-    $('tBig').textContent=big;$('tSub').textContent=[state.status!=='idle'&&state.vak,sub,endTxt].filter(Boolean).join(' · ');
-    const active = state.status==='running'&&!done || state.status==='paused';
-    $('tPause').disabled=!active;$('tPause').textContent=state.status==='paused'?'Hervat':'Pauze';
-    $('tPlus').disabled=!(active||done);$('tMin').disabled=!active;$('tStop').disabled=state.status==='idle';
-    $('tStart').textContent=active?'Opnieuw starten':'Start dit vak';
-    renderBoard(rem,total,done,warn,big,sub,endTxt);
+    renderNow();
   }
 }
 
@@ -761,7 +880,7 @@ $('kTasks').addEventListener('click',e=>{
       selTask=next>=0?next:null;
       if(next>=0&&(!mini||mini.i!==next))startMini(next);   // volgende taak start vanzelf
     }
-    setTicks(t);
+    setTicks(t);if(T&&!VIEW&&!DEMO)T.tick();
   } else if(e.target.closest('.mbtn')){
     if(mini&&mini.i===i){mini=null;saveMini()}else{startMini(i);unlockAudio()}
   } else if(e.target.closest('.trow')){
@@ -773,7 +892,7 @@ $('kCalm').addEventListener('click',()=>{calm=!calm;store.set('kt_calm',calm?'1'
 
 /* =================== melding naar alle iPads =================== */
 let curMsg=null, msgRingAt=0;
-const PRESETS=['Kom terug naar de klas','Kijk naar het bord','Ruim je spullen op','Tijd voor de pauze'];
+const PRESETS=['Kom terug naar de klas','Kijk naar het bord','Ruim je spullen op','Pauze'];
 function msgActive(){return curMsg&&srvNow()-(curMsg.at||0)<15*60000}
 function renderMsg(){
   if(role==='kid'){
@@ -784,14 +903,15 @@ function renderMsg(){
       if(Date.now()-msgRingAt>20000){msgRingAt=Date.now();chime();keepAwake()}   // herhaalt tot op Oké is getikt
     } else msgRingAt=0;
   } else if(role==='teacher'){
-    const a=msgActive();$('mClear').disabled=!a;
-    $('mInfo').textContent=a?`Verstuurd om ${clock(curMsg.at-offset)}: "${curMsg.text}"`:'De melding komt over het hele scherm met een geluid, op elke iPad waar de Focuz open staat.';
+    const a=msgActive();$('mActive').classList.toggle('hide',!a);$('mPresets').classList.toggle('hide',a);$('mPlus').classList.toggle('hide',a);if(a)$('mOwn').classList.add('hide');
+    if(a)$('mInfo').textContent=`Op alle iPads sinds ${clock(curMsg.at-offset)}: "${curMsg.text}"`;
   }
 }
 $('mPresets').innerHTML=PRESETS.map(p=>`<button data-p="${p}">${p}</button>`).join('');
 $('mPresets').addEventListener('click',e=>{const b=e.target.closest('button');if(b)sendMsg(b.dataset.p)});
-$('mSend').addEventListener('click',()=>{const t=$('mText2').value.trim();if(t){sendMsg(t);$('mText2').value=''}});
+$('mSend').addEventListener('click',()=>{const t=$('mText2').value.trim();if(t){sendMsg(t);$('mText2').value='';$('mOwn').classList.add('hide')}});
 $('mText2').addEventListener('keydown',e=>{if(e.key==='Enter')$('mSend').click()});
+$('mPlus').addEventListener('click',()=>{$('mOwn').classList.toggle('hide');if(!$('mOwn').classList.contains('hide'))$('mText2').focus()});
 $('mClear').addEventListener('click',()=>{curMsg=null;T&&T.sendMsg(null);renderMsg()});
 function sendMsg(text){curMsg={id:newCode(),text:text.slice(0,80),at:srvNow()};T&&T.sendMsg(curMsg);renderMsg()}
 $('kAlertOk').addEventListener('click',()=>{if(curMsg)store.set('kt_msgseen',curMsg.id);renderMsg()});
@@ -848,7 +968,7 @@ function buildDemoBar(){
     (DEMO?'<span class="dsep"></span>'+btn('start','Nieuw vak')+btn('bijna','Laatste 5 min')+btn('om','Tijd om')+btn('pauze',state.status==='paused'?'Hervat':'Pauze')+btn('wacht','Tussen vakken')+btn('melding','Melding'):'');
 }
 
-function startKid(c){role='kid';code=c;if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{buildDemoBar();$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
+function startKid(c){role='kid';code=c;if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{if(!new URLSearchParams(location.search).has('mini'))buildDemoBar();else document.body.classList.add('minimode');$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
 
 async function startTeacher(){
   store.set('kt_role','teacher');
@@ -1099,6 +1219,135 @@ $('kWeekClose').addEventListener('click',()=>$('kWeekOver').classList.add('hide'
 $('kWeekOver').addEventListener('click',e=>{if(e.target===$('kWeekOver'))$('kWeekOver').classList.add('hide')});
 $('kDayOver').addEventListener('click',e=>{if(e.target===$('kDayOver'))$('kDayOver').classList.add('hide')});
 
+/* =================== dashboard: tabblad Nu =================== */
+let kidsInfo=[];
+const MAAND=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+const DAG=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y)/864e5+1)/7)}
+function nextSchoolDay(from){const d=new Date(from||Date.now());do{d.setDate(d.getDate()+1)}while(d.getDay()===0||d.getDay()===6);return d}
+const dayName = d => {const t=new Date();const tm=new Date();tm.setDate(t.getDate()+1);
+  if(ymd(d)===ymd(t))return 'Vandaag';if(ymd(d)===ymd(tm))return 'Morgen, '+DAG[d.getDay()]+' '+d.getDate()+' '+MAAND[d.getMonth()];return DAG[d.getDay()][0].toUpperCase()+DAG[d.getDay()].slice(1)+' '+d.getDate()+' '+MAAND[d.getMonth()]};
+// welk vak loopt er nu (door de leerkracht gestart, of vanzelf volgens het rooster)?
+function currentView(){
+  const t=state,n=srvNow();
+  if((t.status==='running'&&t.endAt>n)||t.status==='paused')return {src:'teacher',s:t};
+  if(plan&&plan.auto){
+    const b=todayBlocks().find(x=>Date.now()>=localTime(x.at)&&Date.now()<localTime(x.end));
+    if(b&&!(t.stoppedAt&&t.stoppedAt-offset>=localTime(b.at))){
+      const w=wordToday(),wb=w&&w.find(x=>x.at===b.at&&x.vak===b.vak);
+      const sid='A'+today().replace(/-/g,'')+b.at.replace(':','');
+      return {src:'auto',s:{v:3,sid,status:'running',endAt:localTime(b.end)+offset,total:localTime(b.end)-localTime(b.at),vak:b.vak,task:b.title||'',
+        doel:wb?wb.doel:((plan.vakken[b.vak]||{}).doel||''),tasks:wb?blockTasks(wb):vakTasks(b.vak),extra:wb?blockExtra(wb):vakExtra(b.vak),sound:$('tSound').checked,wordAt:b.at}};
+    }
+  }
+  if(t.status==='running'&&t.endAt<=n&&n-t.endAt<10*60000)return {src:'done',s:t};
+  return {src:'none',s:t};
+}
+function takeOver(){const v=currentView();if(v.src==='auto')publishState(v.s)}
+function nextBlock(){
+  const n=hmNow();const tb=todayBlocks();const nx=tb.find(b=>b.at>n);
+  if(nx)return {b:nx,label:'Straks'};
+  const d=nextSchoolDay();const bl=blocksFor(d);
+  return bl.length?{b:bl[0],label:dayName(d).split(',')[0]}:null;
+}
+function renderNow(){
+  if(role!=='teacher'||!plan)return;
+  const now=new Date();
+  $('tClock').textContent=hmNow();
+  $('tDate').textContent=DAG[now.getDay()]+' '+now.getDate()+' '+MAAND[now.getMonth()]+' · week '+isoWeek(now);
+  const v=currentView(),s=v.s,n=srvNow();
+  const active=v.src==='teacher'||v.src==='auto';
+  const rem=s.status==='paused'?s.remaining:(s.endAt||0)-n,total=s.total||1;
+  const warn=active&&rem<=5*60000&&rem<total;
+  const card=$('nCard');card.classList.toggle('warn',warn);card.classList.toggle('done',v.src==='done');card.classList.toggle('paused',s.status==='paused'&&active);
+  $('nActive').classList.toggle('hide',!(active||v.src==='done'));$('nIdle').classList.toggle('hide',active||v.src==='done');
+  $('nLabel').textContent=v.src==='done'?'Tijd is om':s.status==='paused'&&active?'Gepauzeerd':'Nu';$('nLabel').classList.toggle('hide',!(active||v.src==='done'));
+  $('nSrc').textContent=v.src==='auto'?'Gestart volgens rooster':v.src==='teacher'?(s.auto||s.wordAt?'Gestart volgens rooster':'Zelf gestart'):'';
+  const nb=nextBlock();
+  if(active||v.src==='done'){
+    $('nVak').textContent=s.vak||'';$('nTitle').textContent=s.task||'';$('nTitle').classList.toggle('hide',!s.task);
+    $('nDoelTxt').textContent=s.doel||'';$('nDoel').classList.toggle('hide',!s.doel);
+    $('nBig').textContent=v.src==='done'?'00:00':fmt(rem);
+    $('nEnd').textContent=s.status==='paused'?'staat stil':v.src==='done'?'':'tot '+clock(s.endAt-offset);
+    $('nBar').style.width=(v.src==='done'?0:Math.max(0,Math.min(1,rem/total))*100)+'%';
+    $('nCtl').classList.toggle('hide',v.src==='done');$('tPause').textContent=s.status==='paused'?'Hervat':'Pauze';$('tMin').disabled=s.status==='running'&&rem<6*60000;
+    // voortgang van de klas
+    const tasks=arr(s.tasks).filter(x=>x&&x.t);const here=kidsInfo.filter(k=>k.sid===s.sid);
+    const pr=$('nProg');pr.innerHTML='';
+    if(tasks.length){
+      const h=document.createElement('div');h.className='nph';h.textContent=here.length?`Voortgang van ${here.length} iPad${here.length===1?'':'s'}`:'Voortgang verschijnt zodra iPads afvinken';pr.append(h);
+      tasks.slice(0,6).forEach((x,i)=>{const c=here.filter(k=>k.ticks.includes(i)).length;const pct=here.length?c/here.length*100:0;
+        const r=document.createElement('div');r.className='npr';r.innerHTML='<span class="t"></span><span class="b"><i></i></span><span class="c"></span>';
+        r.querySelector('.t').textContent=(i+1)+'. '+x.t;r.querySelector('i').style.width=pct+'%';r.querySelector('.c').textContent=here.length?c+'/'+here.length:'';pr.append(r)});
+    }
+  } else {
+    const tb=todayBlocks(),hm=hmNow();
+    $('nIdleTxt').textContent=!tb.length?'Geen lessen vandaag':hm<tb[0].at?'Goedemorgen':hm>=tb[tb.length-1].end?'Klaar voor vandaag':'Geen vak actief';
+  }
+  // na dit vak / straks
+  if(nb){$('nAfter').innerHTML='';const sp=document.createElement('span');sp.textContent=nb.label+': ';const b=document.createElement('b');b.textContent=nb.b.at+' '+nb.b.vak;
+    $('nAfter').append(sp,b);if(nb.b.title){const t=document.createElement('span');t.className='muted';t.textContent=' · '+nb.b.title;$('nAfter').append(t)}
+    $('nNext').textContent=plan.auto?'Het volgende blok start vanzelf op de iPads.':'Automatisch starten staat uit. Start het volgende blok zelf.';}
+  else {$('nAfter').textContent='Geen rooster gevonden voor de komende dagen.';$('nNext').textContent='Koppel je dagklapper bij Word & rooster.'}
+  renderStatus();renderDayCard();
+  renderBoardFrom(v);
+}
+function ago(ms){const m=Math.round(ms/60000);if(m<1)return 'net';if(m<60)return m+' min geleden';const h=Math.round(m/60);if(h<24)return h+' uur geleden';const d=Math.round(h/24);return d===1?'gisteren':d+' dagen geleden'}
+let statKey='';
+function renderStatus(){
+  const items=[],warns=[];
+  const nk=kidsInfo.length;
+  items.push([nk?'ok':'off',nk===1?'1 iPad verbonden':nk+' iPads verbonden']);
+  if(!connected)items.push(['bad','Geen verbinding met de server']);
+  if(plan.word){const age=Date.now()-plan.word.at;const auto=(fileHandle&&filePerm==='granted')||plan.msFile;
+    items.push([age>2*864e5?'warn':'ok',`Dagklapper ${ago(age)} ingelezen`+(auto?' · automatisch':'')]);
+    if(age>2*864e5)warns.push('Je dagklapper is al '+ago(age).replace(' geleden','')+' niet ingelezen. Klopt de planning nog?');
+    if(fileHandle&&filePerm!=='granted')warns.push('Klik bij Word & rooster op "Toegang geven" om automatisch bijwerken weer aan te zetten.');
+    const nd=nextSchoolDay();if(!plan.word.days[ymd(nd)]&&!(plan.rooster[nd.getDay()]||[]).length)warns.push(dayName(nd).split(',')[0]+' ('+DAG[nd.getDay()]+' '+nd.getDate()+' '+MAAND[nd.getMonth()]+') staat niet in je dagklapper.');
+  } else {items.push(['warn','Geen dagklapper gekoppeld']);warns.push('Koppel je dagklapper bij Word & rooster, dan starten de vakken vanzelf.')}
+  const wd=weekDates();const has=wd.filter(d=>blocksFor(d).length);
+  if(daySig&&has.length)items.push(['ok','Weekplanning op de iPads t/m '+DAG[has[has.length-1].getDay()].slice(0,2)+' '+has[has.length-1].getDate()+' '+MAAND[has[has.length-1].getMonth()]]);
+  if(!plan.auto)items.push(['warn','Automatisch starten staat uit']);
+  const key=JSON.stringify([items,warns]);if(key===statKey)return;statKey=key;
+  $('sList').innerHTML='';items.forEach(([c,t])=>{const li=document.createElement('li');li.className=c;li.textContent=t;$('sList').append(li)});
+  $('sWarn').innerHTML='';warns.forEach(t=>{const d=document.createElement('div');d.textContent=t;$('sWarn').append(d)});
+}
+let dayKey='';
+function renderDayCard(){
+  let d=new Date();let bl=todayBlocks();const n=hmNow();
+  if(!bl.length||n>=bl[bl.length-1].end){d=nextSchoolDay();bl=blocksFor(d)}
+  const isToday=ymd(d)===today();const v=currentView();
+  const key=ymd(d)+n+JSON.stringify(bl)+v.src+(v.s.wordAt||'')+v.s.vak;if(key===dayKey)return;dayKey=key;
+  $('dHead').textContent=dayName(d);
+  const ul=$('dList');ul.innerHTML='';
+  if(!bl.length){ul.innerHTML='<li class="empty">Geen rooster. Koppel je dagklapper of vul het weekrooster in.</li>';return}
+  const nextI=isToday?bl.findIndex(b=>b.at>n):0;
+  bl.forEach((b,i)=>{
+    const li=document.createElement('li');
+    const isNow=isToday&&n>=b.at&&n<b.end, past=isToday&&n>=b.end, isNext=i===nextI&&!isNow;
+    li.className=isNow?'now':past?'past':isNext?'next':'';
+    li.innerHTML='<span class="dt"></span><span class="dv"><b></b><small></small></span><span class="dx"></span>';
+    li.querySelector('.dt').textContent=b.at;li.querySelector('b').textContent=b.vak;
+    const sm=li.querySelector('small');if(b.title)sm.textContent=b.title;else sm.remove();
+    const x=li.querySelector('.dx');
+    if(isNow){x.innerHTML='<span class="tag">nu</span>'}
+    else if(isNext&&isToday){const bt=document.createElement('button');bt.textContent='Nu starten';bt.onclick=()=>{const w=wordToday(),wb=w&&w.find(y=>y.at===b.at&&y.vak===b.vak);
+      if(wb)startBlock(wb);else{curVak=plan.vakken[b.vak]?b.vak:curVak;startVak(b.vak,null)}};x.append(bt)}
+    else if(isNext){x.innerHTML='<span class="tag soft">eerste</span>'}
+    ul.append(li);
+  });
+  const nw=ul.querySelector('.now')||ul.querySelector('.next'),pp=ul.closest('.grow');if(nw&&pp)pp.scrollTop=Math.max(0,nw.offsetTop-pp.offsetTop-110);
+}
+// mini leerlingbeeld
+let miniOn=false;
+function startMiniView(){
+  if(miniOn||!code)return;miniOn=true;
+  const f=document.createElement('iframe');f.src=location.origin+location.pathname+'?klas='+code+'&kijk=1&mini=1';f.title='Klein leerlingbeeld';f.tabIndex=-1;
+  $('sMiniFrame').append(f);
+}
+$('sMini').addEventListener('click',()=>$('tKidView').click());
+$('qToggle').addEventListener('click',()=>{const h=$('qBox').classList.toggle('hide');$('qToggle').setAttribute('aria-expanded',String(!h));$('qToggle').textContent=h?'Zelf een timer starten':'Sluiten'});
+
 /* =================== digibord =================== */
 let boardDayKey='';
 function renderBoardDay(){
@@ -1107,6 +1356,16 @@ function renderBoardDay(){
   const key=hmNow()+JSON.stringify(blocks);if(key===boardDayKey)return;boardDayKey=key;
   fillDay($('bDay'),blocks);
   if(!blocks.length)$('bDay').innerHTML='<li><span class="dt"></span><span class="dv">Geen rooster voor vandaag</span></li>';
+}
+function renderBoardFrom(v){
+  const s=v.s,n=srvNow(),active=v.src==='teacher'||v.src==='auto';
+  const rem=s.status==='paused'?s.remaining:(s.endAt||0)-n,total=s.total||1,done=v.src==='done';
+  const warn=active&&rem<=5*60000&&rem<total;
+  const big=done?'Tijd is om!':active?fmt(rem):'Even wachten';
+  const sub=done?'Leg je spullen neer en kijk naar voren':s.status==='paused'?'De timer staat even stil':warn?'Nog even! Rond je werk af':active?'Werk rustig door':'';
+  const save=state;state=active||done?s:{status:'idle'};
+  renderBoard(rem,total,done,warn,big,sub,active&&s.status==='running'?'Klaar om '+clock(s.endAt-offset):'');
+  state=save;
 }
 function renderBoard(rem,total,done,warn,big,sub,endTxt){
   if($('board').classList.contains('hide'))return;
@@ -1385,7 +1644,7 @@ function setupTeacher(){
   try{const q=qrcode(0,'M');q.addData(url);q.make();$('tQr').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true});$('tQr').classList.remove('hide')}catch(e){$('tQr').classList.add('hide')}
   $('tQrNote').textContent=/^https?:$/.test(location.protocol)?'Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.':'Let op: de QR-code werkt pas als deze app online staat. De klascode intypen werkt wel.';
   $('tSound').checked=store.get('kt_sound')!=='0';
-  renderWordToday();initAuto();
+  renderWordToday();initAuto();setTimeout(startMiniView,1500);
   if(plan.msFile){$('wMsBox').classList.remove('hide');renderMs();msRefresh(false)}
   else if(msClientId()&&/code=|state=/.test(location.hash)){$('wMsBox').classList.remove('hide');renderMs()}
   $('tMode').textContent=USE_FB?'Eigen server: alleen jij kunt de timer besturen. Planning staat in je account.':'Openbare server. Planning staat alleen op dit apparaat. Koppel een eigen server voor meer veiligheid (zie handleiding).';
@@ -1432,7 +1691,7 @@ function bindTeacher(){
     else{const m=chosenMin!==null?chosenMin:sumMin(curVak);if(!m){$('tErr').textContent='Vul minuten in bij de taken, of kies een totale tijd.';return}endAt=srvNow()+m*60000}
     $('tErr').textContent='';startVak(curVak,endAt);
   });
-  $('tPause').addEventListener('click',()=>{
+  $('tPause').addEventListener('click',()=>{takeOver();
     if(state.status==='running')publishState({...state,status:'paused',remaining:Math.max(0,state.endAt-srvNow())});
     else if(state.status==='paused')publishState({...state,status:'running',endAt:srvNow()+state.remaining});
   });
@@ -1440,16 +1699,16 @@ function bindTeacher(){
     if(state.status==='running'){const e=Math.max(n+1000,Math.max(state.endAt,n)+ms);publishState({...state,endAt:e,total:Math.max(state.total,e-n)})}
     else if(state.status==='paused'){const r=Math.max(1000,state.remaining+ms);publishState({...state,remaining:r,total:Math.max(state.total,r)})}
   };
-  $('tPlus').addEventListener('click',()=>shift(5*60000));
-  $('tMin').addEventListener('click',()=>shift(-5*60000));
-  $('tStop').addEventListener('click',()=>publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||'',stoppedAt:srvNow()}));
+  $('tPlus').addEventListener('click',()=>{takeOver();shift(5*60000)});
+  $('tMin').addEventListener('click',()=>{takeOver();shift(-5*60000)});
+  $('tStop').addEventListener('click',async()=>{if(!await ask({title:'Vak stoppen?',text:'De timer stopt op alle iPads. Het volgende blok start weer gewoon op tijd.',ok:'Stop'}))return;publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||'',stoppedAt:srvNow()})});
   $('tCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('tLink').value);$('tCopy').textContent='Gekopieerd'}catch(e){$('tLink').select()}setTimeout(()=>$('tCopy').textContent='Kopieer',1500)});
   $('tNewCode').addEventListener('click',async()=>{
     if(!await ask({title:'Nieuwe klascode?',text:'Alle iPads moeten dan opnieuw koppelen.',ok:'Nieuwe code'}))return;
     T&&T.clear();T&&T.stop();T=null;state={status:'idle'};
     if(USE_FB){try{code=await claimCode()}catch(e){$('tErr').textContent='Nieuwe code maken mislukt.';return}}
     else{code=newCode();store.set('kt_teacher_code',code)}
-    $('tCount').textContent='0 iPads verbonden';setupTeacher();connect();render();
+    kidsInfo=[];setupTeacher();connect();render();
   });
   // rooster
   $('rDays').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;rDay=+b.dataset.d;renderRooster()});
