@@ -621,9 +621,28 @@ function fbTransport(h){
   return t;
 }
 
+/* iPads volgen zelf de weekplanning: loopt er geen vak van de leerkracht, dan start het blok van nu vanzelf */
+let tState={status:'idle'};
+function localTime(hm){const [h,m]=hm.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()}
+function effState(){
+  if(typeof DEMO!=='undefined'&&DEMO)return state;
+  const t=tState||{status:'idle'};
+  const tActive=(t.status==='running'&&t.endAt>srvNow())||t.status==='paused';
+  if(tActive||!curDay||curDay.auto===false)return t;
+  const w=curDay.week&&arr(curDay.week[today()]).length?arr(curDay.week[today()]):(curDay.date===today()?arr(curDay.blocks):[]);
+  const n=Date.now();const b=w.find(x=>x&&x.at&&x.end&&n>=localTime(x.at)&&n<localTime(x.end));
+  if(!b)return t;
+  const start=localTime(b.at);
+  if(t.stoppedAt&&t.stoppedAt-offset>=start)return t;               // juf/meester heeft dit blok gestopt
+  if(t.status==='running'&&t.wordAt===b.at&&t.vak===b.vak)return t;  // al door de leerkracht gestart
+  const sid='A'+today().replace(/-/g,'')+b.at.replace(':','');
+  if(state&&state.sid===sid)return state;
+  return {v:3,sid,status:'running',endAt:localTime(b.end)+offset,total:localTime(b.end)-start,vak:b.vak,task:b.title||'',doel:b.doel||'',
+    tasks:arr(b.tasks).filter(x=>x&&x.t),extra:arr(b.extra).filter(Boolean),sound:curDay.sound!==false,wordAt:b.at,autoKid:true};
+}
 function connect(){
   if(T)T.stop();
-  const h={onState:s=>{state=s&&typeof s==='object'?s:{status:'idle'};if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
+  const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
            onKids:n=>{$('tCount').textContent=n===1?'1 iPad verbonden':n+' iPads verbonden'},
            onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
            onDay:d=>{curDay=d&&typeof d==='object'?{date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{}}:null;renderDay();renderWeek()}};
@@ -1000,11 +1019,11 @@ function weekDates(){ // ma t/m vr van deze week; in het weekend de volgende wee
 function blocksFor(dt){
   const key=ymd(dt);
   if(plan.useWord&&plan.word&&plan.word.days[key]&&plan.word.days[key].length)
-    return plan.word.days[key].map(b=>({at:b.at,end:b.end,vak:b.vak,title:b.title||'',doel:(b.doel||'').slice(0,160)}));
+    return plan.word.days[key].map(b=>({at:b.at,end:b.end,vak:b.vak,title:b.title||'',doel:(b.doel||'').slice(0,220),tasks:blockTasks(b),extra:blockExtra(b)}));
   const wd=dt.getDay();if(wd<1||wd>5)return [];
   const rows=plan.rooster[wd].filter(x=>x.vak&&x.at).slice().sort((a,b)=>a.at.localeCompare(b.at));
   return rows.map((x,i)=>{let end=addMin(x.at,sumMin(x.vak)||30);if(rows[i+1]&&rows[i+1].at>x.at&&rows[i+1].at<end)end=rows[i+1].at;
-    const v=plan.vakken[x.vak]||{};return {at:x.at,end,vak:x.vak,title:v.title||'',doel:(v.doel||'').slice(0,160)}});
+    const v=plan.vakken[x.vak]||{};return {at:x.at,end,vak:x.vak,title:v.title||'',doel:(v.doel||'').slice(0,220),tasks:vakTasks(x.vak),extra:vakExtra(x.vak)}});
 }
 function weekBlocks(){const w={};weekDates().forEach(d=>{w[ymd(d)]=blocksFor(d)});return w}
 function todayBlocks(){
@@ -1017,7 +1036,7 @@ function todayBlocks(){
 }
 function publishDay(){
   if(role!=='teacher'||!plan||!T)return;
-  const d={date:today(),blocks:todayBlocks(),week:weekBlocks()};const sig=JSON.stringify(d);
+  const d={date:today(),blocks:todayBlocks(),week:weekBlocks(),auto:!!plan.auto,sound:$('tSound').checked};const sig=JSON.stringify(d);
   if(sig===daySig)return;daySig=sig;curDay=d;T.sendDay(d);renderBoardDay();
 }
 const hmNow = () => {const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
@@ -1423,7 +1442,7 @@ function bindTeacher(){
   };
   $('tPlus').addEventListener('click',()=>shift(5*60000));
   $('tMin').addEventListener('click',()=>shift(-5*60000));
-  $('tStop').addEventListener('click',()=>publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||''}));
+  $('tStop').addEventListener('click',()=>publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||'',stoppedAt:srvNow()}));
   $('tCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('tLink').value);$('tCopy').textContent='Gekopieerd'}catch(e){$('tLink').select()}setTimeout(()=>$('tCopy').textContent='Kopieer',1500)});
   $('tNewCode').addEventListener('click',async()=>{
     if(!await ask({title:'Nieuwe klascode?',text:'Alle iPads moeten dan opnieuw koppelen.',ok:'Nieuwe code'}))return;
@@ -1444,7 +1463,7 @@ function bindTeacher(){
 
 /* =================== tikken =================== */
 setInterval(()=>{
-  if(!role)return;render();renderMsg();
+  if(!role)return;if(role==='kid'){const e=effState();if(e!==state){if(e.sid!==state.sid)rang=false;state=e}}render();renderMsg();
   if(role==='kid'&&mini&&!mini.rung&&mini.endAt<=Date.now()&&!getTicks().includes(mini.i)){mini.rung=true;saveMini();if(state.sound!==false)chime(true)}
 },500);
 setInterval(()=>{T&&T.tick();T&&T.count()},10000);
