@@ -26,6 +26,8 @@
    };
    ===================================================================== */
 window.KLASTIMER_FIREBASE = null;
+/* Automatisch uit OneDrive: plak hier de "Application (client) ID" van je app-registratie (zie README). */
+window.FOCUZ_MS_CLIENT_ID = null;
 </script>
 <style>
 :root{--bg:#1f3a5f;--panel:#fff;--ink:#14233a;--soft:#5b6b82;--line:#dde4ee;--go:#2fb67c;--warn:#f2a33a;--stop:#e5484d;--track:rgba(255,255,255,.16)}
@@ -157,6 +159,15 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .rr{display:grid;grid-template-columns:140px minmax(0,1fr) 44px;gap:8px;align-items:center}
 .rr .past{opacity:.5}
 .next{background:#eef7f2;border-radius:12px;padding:10px 14px;font-weight:800;margin-top:12px}
+.msbox{background:#f3f6fa;border-radius:14px;padding:14px;margin-top:12px}
+.msbox .res{display:grid;gap:6px;margin-top:10px}
+.msbox .res button{text-align:left;font-weight:700;background:#fff;border:2px solid var(--line)}
+.wday{display:grid;gap:6px;margin-top:12px}
+.wb{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 10px;border-radius:12px;background:#f6f8fb}
+.wb.now{background:#e3f6ec;box-shadow:inset 0 0 0 2px var(--go)}.wb.past{opacity:.5}
+.wb .wt{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wb .wv{font-weight:800;line-height:1.25}.wb .wv small{display:block;font-weight:600;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb button{min-height:40px;padding:6px 12px}
 .code{font-size:44px;font-weight:900;letter-spacing:.14em;line-height:1}
 .qr{background:#fff;border-radius:16px;padding:10px;display:inline-block;margin-top:12px}
 .qr svg{display:block;width:190px;height:190px}
@@ -272,6 +283,17 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
         <div class="row"><button id="tPlus" disabled>+5 minuten</button><button id="tMin" disabled>−5 minuten</button><button class="danger" id="tStop" disabled>Stop</button></div>
         <label class="switch"><input type="checkbox" id="tSound" checked> Geluid op de iPads (seintje bij 5 minuten en als de tijd om is)</label>
         <p class="small muted">Wijzigingen in de lijst van het lopende vak gaan meteen naar de iPads.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Koppeling met Word</h2>
+        <p class="small muted" id="wStatus">Nog geen Word-bestand ingelezen.</p>
+        <div class="row"><button id="wPick">Kies Word-bestand</button><button id="wMsBtn">Automatisch via OneDrive</button></div>
+        <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
+        <div id="wMsBox" class="msbox hide"></div>
+        <label class="switch"><input type="checkbox" id="wUse" checked> Rooster van vandaag uit Word gebruiken (vakken starten vanzelf)</label>
+        <div class="wday" id="wToday"></div>
+        <p class="small muted">Uit je dagklapper komen per blok de tijd, het vak, de leerstof (titel) en het lesdoel (ik-doel). Staat er "klaar:" in de leerstof, dan wordt dat een klaaropdracht. De afvinklijst met minuten komt uit het vak met dezelfde naam hierboven.</p>
       </div>
 
       <div class="panel">
@@ -676,6 +698,9 @@ function normPlan(p){
   for(const k in p.vakken){const v=p.vakken[k]||{};p.vakken[k]={title:v.title||'',doel:v.doel||'',extra:v.extra||'',tasks:arr(v.tasks).map(x=>({t:(x&&x.t)||'',m:+(x&&x.m)||0}))}}
   const r=p.rooster||{};p.rooster={};for(let d=1;d<=5;d++)p.rooster[d]=arr(r[d]).filter(x=>x&&x.at).map(x=>({at:x.at,vak:x.vak||''}));
   p.auto=p.auto!==false;
+  p.useWord=p.useWord!==false;
+  if(p.word&&typeof p.word==='object'){const days={};const src=p.word.days||{};for(const k in src)days[k]=arr(src[k]).filter(b=>b&&b.at);p.word={file:p.word.file||'',at:+p.word.at||0,days}}else p.word=null;
+  if(!(p.msFile&&p.msFile.id))p.msFile=null;
   return p;
 }
 let plan, curVak, rDay=Math.min(5,Math.max(1,new Date().getDay()||1)), cloudTimer=null;
@@ -735,27 +760,220 @@ function renderRooster(){
   $('rAuto').checked=plan.auto;renderNext();
 }
 function slotTime(at){const [h,m]=at.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()}
+const wordToday = () => plan&&plan.useWord&&plan.word&&plan.word.days[today()]&&plan.word.days[today()].length?plan.word.days[today()]:null;
 function renderNext(){
   const d=new Date().getDay();const n=Date.now();
   let txt='';
-  if(d>=1&&d<=5){const nx=plan.rooster[d].filter(x=>plan.vakken[x.vak]&&slotTime(x.at)>n).sort((a,b)=>a.at.localeCompare(b.at))[0];
+  const w=wordToday();
+  if(w){const nx=w.find(b=>slotTime(b.at)>n);txt=nx?`Vandaag volgende (uit Word): ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':''):'Vandaag geen blokken meer (uit Word).'}
+  else if(d>=1&&d<=5){const nx=plan.rooster[d].filter(x=>plan.vakken[x.vak]&&slotTime(x.at)>n).sort((a,b)=>a.at.localeCompare(b.at))[0];
     if(nx)txt=`Vandaag volgende: ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':'');else txt='Vandaag geen blokken meer.'}
   else txt='Het is weekend.';
   $('rNext').textContent=txt;
 }
 function autoCheck(){
-  if(role!=='teacher'||!plan||!plan.auto)return;
-  const d=new Date().getDay();if(d<1||d>5)return;
+  if(role!=='teacher'||!plan)return;
+  renderWordToday();
+  if(!plan.auto){renderNext();return}
   const n=Date.now();
-  for(const x of plan.rooster[d]){
-    const t=slotTime(x.at);if(n<t||n-t>3*60000||!plan.vakken[x.vak])continue;
-    const key=today()+'_'+x.at+'_'+x.vak;
-    if(state.auto===key||store.get('kt_auto_'+key))continue;
-    store.set('kt_auto_'+key,'1');
-    startVak(x.vak,null,key);
+  const w=wordToday();
+  if(w){
+    for(const b of w){
+      const t=slotTime(b.at);if(n<t||n-t>3*60000)continue;
+      const key=today()+'_w_'+b.at+'_'+b.vak;
+      if(state.auto===key||store.get('kt_auto_'+key))continue;
+      store.set('kt_auto_'+key,'1');startBlock(b,key);
+    }
+  } else {
+    const d=new Date().getDay();
+    if(d>=1&&d<=5) for(const x of plan.rooster[d]){
+      const t=slotTime(x.at);if(n<t||n-t>3*60000||!plan.vakken[x.vak])continue;
+      const key=today()+'_'+x.at+'_'+x.vak;
+      if(state.auto===key||store.get('kt_auto_'+key))continue;
+      store.set('kt_auto_'+key,'1');startVak(x.vak,null,key);
+    }
   }
   renderNext();
 }
+
+/* =================== Word (dagklapper) =================== */
+const MAANDEN=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+const W_NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+function wText(el){ // tekst van een cel, zonder geneste tabellen
+  let out='';
+  (function walk(n){for(const c of n.childNodes){if(c.nodeType!==1)continue;const ln=c.localName;
+    if(ln==='tbl')continue;
+    if(ln==='t')out+=c.textContent;else if(ln==='tab')out+=' ';else if(ln==='br'||ln==='cr')out+='\n';
+    else{walk(c);if(ln==='p')out+='\n'}}})(el);
+  return out.replace(/ /g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').replace(/\n+/g,'\n').trim();
+}
+const kids = (el,name) => [...el.childNodes].filter(c=>c.nodeType===1&&c.localName===name);
+function dateFromHeader(txt,ref){
+  const m=txt.toLowerCase().match(new RegExp('(\\d{1,2})\\s+('+MAANDEN.join('|')+')'));if(!m)return null;
+  const day=+m[1], mon=MAANDEN.indexOf(m[2]);
+  const r=ref||new Date(); const start=r.getMonth()>=7?r.getFullYear():r.getFullYear()-1; // schooljaar start in augustus
+  const y=mon>=7?start:start+1;
+  return `${y}-${pad(mon+1)}-${pad(day)}`;
+}
+const toHM = s => {const m=String(s).match(/(\d{1,2})[.:](\d{2})/);return m?`${pad(+m[1])}:${m[2]}`:null};
+const addMin = (hm,mins) => {const [h,m]=hm.split(':').map(Number);const t=h*60+m+mins;return `${pad(Math.floor(t/60)%24)}:${pad(t%60)}`};
+function shortTitle(s){
+  s=s.replace(/\n/g,' ').trim();if(s.length<=90)return s;
+  const dot=s.indexOf('. ');if(dot>10&&dot<=90)return s.slice(0,dot+1);
+  return s.slice(0,87).replace(/\s+\S*$/,'')+'…';
+}
+async function parseDocx(buf){
+  if(typeof JSZip==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const zip=await JSZip.loadAsync(buf);
+  const f=zip.file('word/document.xml');if(!f)throw new Error('Dit lijkt geen Word-bestand (.docx).');
+  const xml=new DOMParser().parseFromString(await f.async('string'),'application/xml');
+  const days={};
+  for(const tbl of xml.getElementsByTagNameNS(W_NS,'tbl')){
+    const rows=kids(tbl,'tr');if(rows.length<3)continue;
+    const cellsOf=tr=>kids(tr,'tc').map(wText);
+    const head=cellsOf(rows[0]).join(' '), hdr=cellsOf(rows[1]).map(s=>s.toLowerCase());
+    if(!/tijd/.test(hdr[0]||'')||!hdr.some(h=>/vak/.test(h)))continue;
+    const date=dateFromHeader(head);if(!date)continue;
+    const iV=hdr.findIndex(h=>/vak/.test(h)), iL=hdr.findIndex(h=>/leerstof/.test(h)), iD=hdr.findIndex(h=>/lesdoel|doel/.test(h));
+    const blocks=[];
+    for(const tr of rows.slice(2)){
+      const c=cellsOf(tr);const at=toHM(c[0]||'');const vak=cleanName((c[iV]||'').split('\n')[0]);
+      if(!at||!vak)continue;
+      let leer=iL>=0?(c[iL]||''):'', klaar='';
+      const km=leer.match(/^(.*?)\s*[–—-]?\s*klaar\s*:\s*(.+)$/is);if(km){leer=km[1].replace(/[\s–—-]+$/,'');klaar=km[2].trim()}
+      if(blocks.length&&blocks[blocks.length-1].at===at&&blocks[blocks.length-1].vak===vak)continue; // dubbele rij
+      blocks.push({at,vak,title:shortTitle(leer),doel:(iD>=0?(c[iD]||''):'').replace(/\n/g,' ').slice(0,220),klaar:klaar.slice(0,80)});
+    }
+    blocks.sort((a,b)=>a.at.localeCompare(b.at));
+    blocks.forEach((b,i)=>{b.end=blocks[i+1]&&blocks[i+1].at>b.at?blocks[i+1].at:addMin(b.at,45)});
+    if(blocks.length)days[date]=blocks;
+  }
+  return days;
+}
+function keepDays(days){ // bewaar gisteren t/m 3 weken vooruit
+  const lo=new Date();lo.setDate(lo.getDate()-1);const hi=new Date();hi.setDate(hi.getDate()+21);
+  const f=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;const a=f(lo),b=f(hi);
+  const out={};for(const k in days)if(k>=a&&k<=b)out[k]=days[k];return out;
+}
+async function importWord(buf,fileName){
+  const all=await parseDocx(buf);
+  const n=Object.keys(all).length;if(!n)throw new Error('Geen dagtabellen gevonden (kolommen Tijd, Vak, Leerstof, Lesdoel).');
+  plan.word={file:fileName||'Word-bestand',at:Date.now(),days:keepDays(all)};
+  savePlan();renderWordToday();renderNext();
+  // lopend vak bijwerken als de leerstof of het doel is veranderd
+  const w=wordToday();if(w&&state.status!=='idle'&&state.wordAt){const b=w.find(x=>x.at===state.wordAt&&x.vak===state.vak);
+    if(b&&(b.title!==state.task||b.doel!==state.doel))publishState({...state,task:b.title,doel:b.doel,extra:blockExtra(b)})}
+  return n;
+}
+const blockExtra = b => [...(b.klaar?[b.klaar]:[]),...vakExtra(b.vak)].slice(0,12);
+function startBlock(b,autoKey){
+  const t=srvNow();let endAt=slotTime(b.end)+offset;
+  if(endAt<=t+60000)endAt=t+(sumMin(b.vak)||30)*60000;
+  publishState({v:3,sid:newCode(),status:'running',endAt,total:endAt-Math.min(t,slotTime(b.at)+offset),vak:b.vak,task:b.title||'',doel:b.doel||'',
+    tasks:vakTasks(b.vak),extra:blockExtra(b),sound:$('tSound').checked,auto:autoKey||'',wordAt:b.at});
+}
+function renderWordToday(){
+  if(!plan)return;
+  $('wUse').checked=plan.useWord;
+  const st=plan.word?`Ingelezen om ${clock(plan.word.at)} uit "${plan.word.file}"`+(plan.msFile?' · werkt elke 10 minuten bij':''):'Nog geen Word-bestand ingelezen.';
+  $('wStatus').textContent=st;
+  const box=$('wToday');box.innerHTML='';
+  if(!plan.word)return;
+  const w=plan.word.days[today()];
+  if(!w||!w.length){const p=document.createElement('div');p.className='muted small';p.textContent='Voor vandaag staat er geen dag in je Word-bestand.';box.append(p);return}
+  const n=Date.now();
+  w.forEach((b,i)=>{
+    const r=document.createElement('div');const s=slotTime(b.at),e=slotTime(b.end);
+    r.className='wb'+(n>=s&&n<e?' now':n>=e?' past':'');
+    r.innerHTML='<span class="wt"></span><span class="wv"><span></span><small></small></span><button data-i="'+i+'">Start</button>';
+    r.querySelector('.wt').textContent=b.at+'–'+b.end;r.querySelector('.wv span').textContent=b.vak;r.querySelector('.wv small').textContent=b.title||'';
+    box.append(r);
+  });
+}
+$('wToday').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const w=plan.word&&plan.word.days[today()];if(w&&w[+b.dataset.i])startBlock(w[+b.dataset.i])});
+$('wUse').addEventListener('change',()=>{plan.useWord=$('wUse').checked;savePlan();renderNext()});
+$('wPick').addEventListener('click',()=>$('wFile').click());
+$('wFile').addEventListener('change',async()=>{
+  const f=$('wFile').files[0];if(!f)return;$('wStatus').textContent='Inlezen…';
+  try{const n=await importWord(await f.arrayBuffer(),f.name);$('wStatus').textContent+=` · ${n} dagen gevonden`}
+  catch(e){$('wStatus').textContent='Inlezen mislukt: '+e.message}
+  $('wFile').value='';
+});
+
+/* ---- automatisch via OneDrive (Microsoft Graph) ---- */
+const MS_SCOPES=['Files.Read','User.Read'];
+let msal=null, msAccount=null, msLastMod='';
+const msClientId = () => window.FOCUZ_MS_CLIENT_ID || store.get('fz_ms_client') || '';
+async function msInit(){
+  if(msal)return msal;
+  if(!msClientId())return null;
+  if(typeof window.msal==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.39.0/lib/msal-browser.min.js');
+  msal=new window.msal.PublicClientApplication({auth:{clientId:msClientId(),authority:'https://login.microsoftonline.com/common',redirectUri:location.origin+location.pathname},cache:{cacheLocation:'localStorage'}});
+  try{const r=await msal.handleRedirectPromise();if(r&&r.account)msAccount=r.account}catch(e){}
+  msAccount=msAccount||msal.getAllAccounts()[0]||null;
+  return msal;
+}
+async function msToken(){
+  await msInit();if(!msal||!msAccount)throw new Error('Niet ingelogd bij Microsoft');
+  try{return (await msal.acquireTokenSilent({scopes:MS_SCOPES,account:msAccount})).accessToken}
+  catch(e){return (await msal.acquireTokenPopup({scopes:MS_SCOPES,account:msAccount})).accessToken}
+}
+async function graph(path){
+  const r=await fetch('https://graph.microsoft.com/v1.0'+path,{headers:{Authorization:'Bearer '+await msToken()}});
+  if(!r.ok)throw new Error('Microsoft gaf fout '+r.status);return r.json();
+}
+async function msRefresh(force){
+  if(!plan||!plan.msFile)return;
+  try{
+    await msInit();if(!msAccount){renderMs();return}
+    const f=plan.msFile;const p=f.driveId?`/drives/${f.driveId}/items/${f.id}`:`/me/drive/items/${f.id}`;
+    const it=await graph(p);
+    if(!force&&it.lastModifiedDateTime===msLastMod&&plan.word)return;
+    const url=it['@microsoft.graph.downloadUrl'];if(!url)throw new Error('Geen downloadlink');
+    const buf=await (await fetch(url)).arrayBuffer();
+    await importWord(buf,it.name);msLastMod=it.lastModifiedDateTime;
+  }catch(e){$('wStatus').textContent='Bijwerken uit OneDrive mislukt: '+e.message}
+}
+async function renderMs(){
+  const box=$('wMsBox');box.innerHTML='';
+  const el=(tag,txt,cls)=>{const e=document.createElement(tag);if(txt)e.textContent=txt;if(cls)e.className=cls;box.append(e);return e};
+  if(!msClientId()){
+    el('div','Om je Word-bestand automatisch uit OneDrive te halen, heeft Focuz eenmalig een app-registratie bij Microsoft nodig. Volg de stappen in de README en plak hier de Client-ID.','small');
+    const i=el('input');i.placeholder='Application (client) ID';i.style.marginTop='10px';
+    const b=el('button','Opslaan','primary');b.style.marginTop='10px';
+    b.onclick=()=>{const v=i.value.trim();if(!/^[0-9a-f-]{36}$/i.test(v)){i.style.borderColor='var(--stop)';return}store.set('fz_ms_client',v);renderMs()};
+    return;
+  }
+  try{await msInit()}catch(e){el('div','Microsoft-login kon niet laden.','err');return}
+  if(!msAccount){
+    el('div','Log in met het Microsoft-account waar je dagklapper in OneDrive staat.','small');
+    const b=el('button','Inloggen met Microsoft','primary');b.style.marginTop='10px';
+    b.onclick=async()=>{try{const r=await msal.loginPopup({scopes:MS_SCOPES});msAccount=r.account;renderMs();msRefresh(true)}
+      catch(e){if(/popup/i.test(e.errorCode||e.message||''))msal.loginRedirect({scopes:MS_SCOPES});else el('div','Inloggen mislukt: '+(e.errorMessage||e.message),'err')}};
+    return;
+  }
+  el('div','Ingelogd als '+(msAccount.username||msAccount.name),'small');
+  if(plan.msFile){
+    el('div','Bestand: '+plan.msFile.name+'. Focuz haalt het elke 10 minuten op zolang dit scherm open staat.','small');
+    const row=el('div','','row');
+    const b1=document.createElement('button');b1.textContent='Nu bijwerken';b1.onclick=()=>{$('wStatus').textContent='Bijwerken…';msRefresh(true)};
+    const b2=document.createElement('button');b2.textContent='Ander bestand';b2.onclick=()=>{plan.msFile=null;savePlan();renderMs()};
+    const b3=document.createElement('button');b3.textContent='Uitloggen';b3.className='link';b3.onclick=async()=>{const a=msAccount;msAccount=null;plan.msFile=null;savePlan();try{await msal.logoutPopup({account:a})}catch(e){}renderMs();renderWordToday()};
+    row.append(b1,b2,b3);return;
+  }
+  const i=el('input');i.value='Planning dagklapper';i.style.marginTop='10px';i.setAttribute('aria-label','Zoek je bestand');
+  const b=el('button','Zoek in OneDrive','primary');b.style.marginTop='10px';
+  const res=el('div','','res');
+  b.onclick=async()=>{res.textContent='Zoeken…';
+    try{const q=i.value.trim().replace(/'/g,"''");const d=await graph(`/me/drive/root/search(q='${encodeURIComponent(q)}')?$top=25`);
+      const items=(d.value||[]).filter(x=>/\.docx$/i.test(x.name||''));res.innerHTML='';
+      if(!items.length){res.textContent='Niets gevonden. Probeer een ander deel van de bestandsnaam.';return}
+      items.forEach(x=>{const btn=document.createElement('button');btn.textContent=x.name+(x.parentReference&&x.parentReference.path?'  ·  '+decodeURIComponent(x.parentReference.path.split('root:')[1]||'/'):'');
+        btn.onclick=()=>{plan.msFile={id:x.id,driveId:(x.parentReference&&x.parentReference.driveId)||'',name:x.name};savePlan();renderMs();$('wStatus').textContent='Inlezen…';msRefresh(true)};res.append(btn)});
+    }catch(e){res.textContent='Zoeken mislukt: '+e.message}};
+}
+$('wMsBtn').addEventListener('click',()=>{const h=$('wMsBox').classList.toggle('hide');if(!h)renderMs()});
+setInterval(()=>{if(role==='teacher'&&plan&&plan.msFile)msRefresh(false)},10*60000);
 function startVak(v,endAt,autoKey){
   const t=srvNow();
   if(!endAt){const m=sumMin(v)||30;endAt=t+m*60000}
@@ -771,6 +989,9 @@ function setupTeacher(){
   try{const q=qrcode(0,'M');q.addData(url);q.make();$('tQr').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true});$('tQr').classList.remove('hide')}catch(e){$('tQr').classList.add('hide')}
   $('tQrNote').textContent=/^https?:$/.test(location.protocol)?'Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.':'Let op: de QR-code werkt pas als deze app online staat. De klascode intypen werkt wel.';
   $('tSound').checked=store.get('kt_sound')!=='0';
+  renderWordToday();
+  if(plan.msFile){$('wMsBox').classList.remove('hide');renderMs();msRefresh(false)}
+  else if(msClientId()&&/code=|state=/.test(location.hash)){$('wMsBox').classList.remove('hide');renderMs()}
   $('tMode').textContent=USE_FB?'Eigen server: alleen jij kunt de timer besturen. Planning staat in je account.':'Openbare server. Planning staat alleen op dit apparaat. Koppel een eigen server voor meer veiligheid (zie handleiding).';
 }
 
