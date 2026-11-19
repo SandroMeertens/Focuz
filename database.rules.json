@@ -1,0 +1,33 @@
+{
+  "rules": {
+    "klassen": {
+      "$code": {
+        "owner": {
+          ".read": true,
+          ".write": "auth != null && (!data.exists() || data.val() === auth.uid)",
+          ".validate": "newData.val() === auth.uid"
+        },
+        "state": {
+          ".read": true,
+          ".write": "auth != null && root.child('klassen').child($code).child('owner').val() === auth.uid"
+        },
+        "msg": {
+          ".read": true,
+          ".write": "auth != null && root.child('klassen').child($code).child('owner').val() === auth.uid"
+        },
+        "kids": {
+          ".read": "auth != null && root.child('klassen').child($code).child('owner').val() === auth.uid",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
+      }
+    },
+    "teachers": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}

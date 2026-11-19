@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Focuz">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1f3a5f">
+<title>Focuz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+/* =====================================================================
+   EIGEN SERVER (Firebase) — zie de handleiding.
+   Laat op null staan om de gratis openbare server te gebruiken.
+   Plak anders hier de config uit Firebase, bijvoorbeeld:
+   window.KLASTIMER_FIREBASE = {
+     apiKey: "AIza...",
+     authDomain: "mijn-klastimer.firebaseapp.com",
+     databaseURL: "https://mijn-klastimer-default-rtdb.europe-west1.firebasedatabase.app",
+     projectId: "mijn-klastimer",
+     appId: "1:123:web:abc"
+   };
+   ===================================================================== */
+window.KLASTIMER_FIREBASE = null;
+</script>
+<style>
+:root{--bg:#1f3a5f;--panel:#fff;--ink:#14233a;--soft:#5b6b82;--line:#dde4ee;--go:#2fb67c;--warn:#f2a33a;--stop:#e5484d;--track:rgba(255,255,255,.16)}
+*{box-sizing:border-box;min-width:0}
+html,body{min-height:100%}
+body{margin:0;font:17px/1.5 Nunito,system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+.hide{display:none!important}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:14px;min-height:48px;padding:10px 18px;font-weight:800;background:#e9eef5;color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #7fb2ff;outline-offset:2px}
+button.primary{background:var(--go);color:#fff}button.danger{background:var(--stop);color:#fff}
+button.ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.35)}
+button.link{background:none;min-height:40px;padding:4px 8px;color:var(--soft);font-weight:700}
+button:disabled{opacity:.45;cursor:default}
+input,select,textarea{border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:17px;width:100%;background:#fff;color:var(--ink)}
+textarea{resize:vertical}
+.status{position:fixed;top:calc(10px + env(safe-area-inset-top));right:14px;font-size:13px;color:#cfe0f5;display:flex;align-items:center;gap:6px;z-index:5}
+.dot{width:9px;height:9px;border-radius:50%;background:#999}.dot.on{background:var(--go)}.dot.off{background:var(--stop)}
+.center{min-height:100vh;display:grid;place-items:center;padding:24px}
+.card{background:var(--panel);border-radius:24px;padding:28px;width:min(520px,100%);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+h1{font-size:40px;line-height:1.05;margin:0 0 8px;font-weight:900}
+h2{font-size:22px;margin:0 0 12px;font-weight:900}
+.muted{color:var(--soft)}.small{font-size:14px}
+.stackbtn{display:grid;gap:12px;margin-top:20px}
+.codeinput{font-size:34px;text-align:center;letter-spacing:.2em;text-transform:uppercase;font-weight:900}
+.err{color:var(--stop);font-weight:800;min-height:1.5em;margin:8px 0 0}
+
+/* ---------- leerling ---------- */
+#kid{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;color:#fff;transition:background .8s}
+#kid.warn{background:#7a4a12}#kid.done{background:#1e6b4a}
+#kid.calm.warn{background:var(--bg)}
+.kidtop{padding:22px 24px 0;text-align:center}
+.vak{display:inline-block;background:rgba(255,255,255,.15);border-radius:999px;padding:2px 14px;font-weight:900;font-size:16px}
+.task{font-size:clamp(24px,4vw,42px);font-weight:900;line-height:1.1;margin:8px 0 0;text-wrap:balance}
+.doel{display:inline-flex;gap:10px;align-items:baseline;background:#fff;color:var(--ink);border-radius:16px;padding:8px 16px;margin-top:10px;font-weight:800;font-size:clamp(17px,2.2vw,21px);max-width:900px;text-align:left}
+.doel b{flex:none;background:var(--go);color:#fff;border-radius:8px;padding:0 8px;font-size:15px}
+.endline{font-size:19px;color:#cfe0f5;margin-top:6px}
+.kidmain{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:center;padding:12px 20px;max-width:1200px;width:100%;margin:0 auto}
+#kid.haslist .kidmain{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+.ringwrap{display:grid;place-items:center}
+.ring{position:relative;width:min(70vmin,540px);aspect-ratio:1}
+#kid.haslist .ring{width:min(42vw,60vh,440px)}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bgc{stroke:var(--track)}
+.ring .fg{stroke:var(--go);transition:stroke-dashoffset .9s linear,stroke .6s}
+#kid.warn .ring .fg{stroke:var(--warn)}
+.ringtext{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12%}
+.big{font-size:clamp(56px,13vmin,140px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+#kid.haslist .big{font-size:clamp(48px,9vmin,104px)}
+#kid.idle .big{font-size:clamp(34px,7vmin,64px)}
+.sub{font-size:clamp(16px,2.6vmin,24px);color:#cfe0f5;margin-top:6px}
+.paused-badge{display:inline-block;background:#fff;color:var(--ink);border-radius:999px;padding:4px 14px;font-weight:900;margin-top:10px}
+.doneicon{font-size:clamp(70px,14vmin,140px);line-height:1}
+/* stoplicht */
+.light{display:grid;justify-items:center;gap:16px;text-align:center}
+.lamps{background:#0f1f35;border-radius:40px;padding:18px;display:grid;gap:14px;box-shadow:0 18px 40px rgba(0,0,0,.3),inset 0 2px 0 rgba(255,255,255,.08)}
+.lamps i{display:block;width:min(15vh,110px);aspect-ratio:1;border-radius:50%;opacity:.16;transition:opacity .6s}
+.lamps .r{background:var(--stop)}.lamps .o{background:var(--warn)}.lamps .g{background:var(--go)}
+.lamps i.on{opacity:1;box-shadow:0 0 34px currentColor}
+.lamps .r.on{color:var(--stop)}.lamps .o.on{color:var(--warn)}.lamps .g.on{color:var(--go)}
+.ltext{font-size:clamp(24px,3.4vw,34px);font-weight:900}
+/* takenlijst */
+.list h3{margin:0 0 4px;font-size:24px;font-weight:900}
+.progress{font-size:16px;color:#cfe0f5;margin-bottom:10px}
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.tasks li{background:rgba(255,255,255,.12);border-radius:18px;overflow:hidden}
+.tasks li.sel{background:rgba(255,255,255,.22);box-shadow:inset 0 0 0 3px #fff}
+.tasks li.over{box-shadow:inset 0 0 0 3px var(--warn)}
+.trow{display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:62px}
+.box{flex:none;width:40px;height:40px;min-height:40px;padding:0;border-radius:11px;border:3px solid #fff;background:transparent;color:#fff;font-size:22px;display:grid;place-items:center}
+.tasks li.ok .box{background:var(--go);border-color:var(--go)}
+.tname{flex:1;font-size:20px;font-weight:800;line-height:1.2;text-align:left;background:none;color:#fff;padding:6px 0;min-height:44px}
+.tasks li.ok .tname{text-decoration:line-through;opacity:.65}
+.tmin{flex:none;font-weight:900;font-size:17px;background:#fff;color:var(--ink);border-radius:999px;padding:3px 12px;white-space:nowrap}
+.tdetail{padding:0 14px 14px 66px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.tdetail .say{font-size:19px;font-weight:800;flex:1 1 200px}
+.tdetail .say b{font-size:26px}
+.tdetail button{background:#fff;color:var(--ink);min-height:48px}
+.mini{font-size:32px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
+.mini.over{color:#ffd08a}
+.overmsg{font-size:17px;font-weight:800;color:#ffd08a}
+.extras{margin-top:16px}
+.extras h4{margin:0 0 8px;font-size:19px;font-weight:900}
+.extras ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.extras li{background:rgba(255,255,255,.12);border-radius:14px;padding:10px 14px;font-weight:800;font-size:18px}
+.alldone{background:var(--go);border-radius:16px;padding:12px 16px;font-weight:900;font-size:19px;margin-top:12px}
+.kidfoot{text-align:center;padding:0 16px 18px;font-size:14px;color:#9fb6d3;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.kidfoot button{min-height:36px;padding:4px 12px;font-size:14px;background:transparent;color:#9fb6d3;border:1px solid rgba(255,255,255,.25)}
+.alert{position:fixed;inset:0;z-index:20;background:#e5484d;display:grid;place-items:center;padding:24px;animation:pulse 1.6s ease-in-out infinite alternate}
+@keyframes pulse{from{background:#e5484d}to{background:#c7363b}}
+.alertbox{text-align:center;max-width:900px}
+.alerttxt{font-size:clamp(44px,8vw,96px);font-weight:900;line-height:1.05;color:#fff;text-wrap:balance}
+.alertbox button{margin-top:32px;font-size:26px;min-height:72px;padding:12px 40px;background:#fff;color:var(--ink);border-radius:20px}
+@media(prefers-reduced-motion:reduce){.alert{animation:none}}
+.offline{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#fff;color:var(--ink);border-radius:999px;padding:10px 20px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:6;text-align:center;width:max-content;max-width:calc(100% - 32px)}
+.offline::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--warn);margin-right:10px}
+@media(max-width:760px),(orientation:portrait) and (max-width:900px){#kid.haslist .kidmain{grid-template-columns:minmax(0,1fr)}#kid.haslist .ring{width:min(60vw,320px)}.lamps{grid-auto-flow:column}.lamps i{width:min(18vw,90px)}}
+
+/* ---------- leerkracht ---------- */
+#teacher{min-height:100vh;padding:24px max(4vw,16px) 40px;color:#fff}
+.tgrid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:20px;align-items:start}
+.thead{max-width:1180px;margin:0 auto 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+.thead h1{color:#fff}
+.who{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px;color:#cfe0f5}
+.panel{background:var(--panel);color:var(--ink);border-radius:22px;padding:22px}
+.panel+.panel{margin-top:20px}
+.preview{background:#152b48;border-radius:22px;padding:22px;text-align:center}
+.preview .big{font-size:clamp(52px,8vw,100px)}
+.preview.idle .big{font-size:clamp(32px,4vw,48px);margin:10px 0}
+.preview.warn{background:#7a4a12}.preview.done{background:#1e6b4a}
+label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
+.vakbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.vakbar select{flex:1 1 180px;font-weight:800}.vakbar button{flex:none}
+.trows{display:grid;gap:8px}
+.tr{display:grid;grid-template-columns:28px minmax(0,1fr) 92px 44px;gap:8px;align-items:center}
+.tr .n{font-weight:900;color:var(--soft);text-align:center}
+.mwrap{position:relative}.mwrap input{padding-right:34px;text-align:right}
+.mwrap span{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--soft);font-size:14px;pointer-events:none}
+.tr button,.rr button{min-height:44px;padding:0;background:#f3f5f9;color:var(--soft);font-size:20px}
+.sum{margin-top:10px;font-weight:800;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips button{min-width:68px}
+.chips button.sel,.days button.sel{background:var(--ink);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.row>*{flex:1 1 140px}
+.hr{border:0;border-top:2px solid var(--line);margin:22px 0 4px}
+.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.days button{padding:8px 0}
+.rrows{display:grid;gap:8px;margin-top:12px}
+.rr{display:grid;grid-template-columns:140px minmax(0,1fr) 44px;gap:8px;align-items:center}
+.rr .past{opacity:.5}
+.next{background:#eef7f2;border-radius:12px;padding:10px 14px;font-weight:800;margin-top:12px}
+.code{font-size:44px;font-weight:900;letter-spacing:.14em;line-height:1}
+.qr{background:#fff;border-radius:16px;padding:10px;display:inline-block;margin-top:12px}
+.qr svg{display:block;width:190px;height:190px}
+.switch{display:flex;align-items:center;gap:10px;margin-top:14px;font-weight:700}.switch input{width:24px;height:24px;flex:none}
+.linkbox{display:flex;gap:8px;margin-top:10px}.linkbox input{font-size:14px}
+.count{font-size:15px;color:var(--soft);margin-top:10px}
+.mode{font-size:13px;color:var(--soft);margin-top:10px}
+.modal{position:fixed;inset:0;background:rgba(10,20,35,.6);display:grid;place-items:center;padding:20px;z-index:10}
+.modal .card{color:var(--ink)}
+@media(max-width:860px){.tgrid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:420px){.tr{grid-template-columns:minmax(0,1fr) 84px 44px}.tr .n{display:none}.rr{grid-template-columns:100px minmax(0,1fr) 44px}}
+@media(prefers-reduced-motion:reduce){.ring .fg,#kid,.lamps i{transition:none}}
+</style>
+</head>
+<body>
+<div class="status"><span class="dot" id="dot"></span><span id="conn">Verbinden…</span></div>
+
+<section id="home" class="center hide">
+  <div class="card">
+    <h1>Focuz</h1>
+    <p class="muted">De leerkracht plant per vak de taken en de tijd. Op elke iPad verschijnt de afvinklijst met de timer.</p>
+    <div id="homeChoose" class="stackbtn">
+      <button class="primary" id="btnKid">Ik ben leerling</button>
+      <button id="btnTeacher">Ik ben leerkracht</button>
+    </div>
+    <div id="homeKid" class="hide">
+      <label for="codeIn">Typ de klascode van het bord</label>
+      <input id="codeIn" class="codeinput" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <p class="err" id="codeErr"></p>
+      <div class="stackbtn"><button class="primary" id="btnJoin">Verbinden</button><button id="btnBack">Terug</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="login" class="center hide">
+  <div class="card">
+    <h1>Inloggen</h1>
+    <p class="muted">Log in als leerkracht. Je planning en klascode worden dan bewaard in je account, op elk apparaat.</p>
+    <div class="stackbtn"><button class="primary" id="btnGoogle">Inloggen met Google</button><button id="btnLoginBack">Terug</button></div>
+    <p class="err" id="loginErr"></p>
+  </div>
+</section>
+
+<!-- LEERLING -->
+<section id="kid" class="hide">
+  <div class="kidtop">
+    <span class="vak hide" id="kVak"></span>
+    <div class="task" id="kTask">&nbsp;</div>
+    <div class="doel hide" id="kDoel"><b>Ik-doel</b><span id="kDoelTxt"></span></div>
+    <div class="endline" id="kEnd">&nbsp;</div>
+  </div>
+  <div class="kidmain">
+    <div class="ringwrap">
+      <div class="ring" id="kRing">
+        <svg viewBox="0 0 200 200"><circle class="bgc" cx="100" cy="100" r="88" fill="none" stroke-width="16"/>
+          <circle class="fg" id="kArc" cx="100" cy="100" r="88" fill="none" stroke-width="16" stroke-linecap="round" stroke-dasharray="552.92" stroke-dashoffset="0"/></svg>
+        <div class="ringtext"><div><div class="big" id="kBig">--:--</div><div class="sub" id="kSub">Wachten op de juf of meester…</div><div class="paused-badge hide kPaused">Gepauzeerd</div></div></div>
+      </div>
+      <div class="light hide" id="kLight">
+        <div class="lamps"><i class="r" id="lR"></i><i class="o" id="lO"></i><i class="g" id="lG"></i></div>
+        <div class="ltext" id="kLText"></div>
+        <div class="paused-badge hide kPaused">Gepauzeerd</div>
+      </div>
+    </div>
+    <div class="list hide" id="kListWrap">
+      <h3>Mijn taken</h3>
+      <div class="progress" id="kProg"></div>
+      <ul class="tasks" id="kTasks"></ul>
+      <div class="alldone hide" id="kAllDone">Alles af! Kies een klaaropdracht.</div>
+      <div class="extras hide" id="kExtras"><h4>Klaaropdrachten</h4><ul id="kExtraList"></ul></div>
+    </div>
+  </div>
+  <div class="kidfoot">Klas <b id="kCode"></b><button id="kCalm">Rustig scherm</button><button id="kLeave">Andere code</button></div>
+  <div class="offline hide" id="kOff"></div>
+  <div class="alert hide" id="kAlert" role="alertdialog" aria-live="assertive">
+    <div class="alertbox"><div class="alerttxt" id="kAlertTxt"></div><button id="kAlertOk">Oké, ik kom!</button></div>
+  </div>
+</section>
+
+<!-- LEERKRACHT -->
+<section id="teacher" class="hide">
+  <div class="thead">
+    <div><h1>Focuz</h1><div class="small" style="color:#cfe0f5">Bediening voor de leerkracht</div></div>
+    <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tNewCode">Nieuwe klascode</button></div>
+  </div>
+  <div class="tgrid">
+    <div>
+      <div class="panel">
+        <h2>Planning per vak</h2>
+        <div class="vakbar">
+          <select id="tVak" aria-label="Vak"></select>
+          <button id="tVakAdd">+ Vak</button>
+          <button id="tVakRen" class="link">Hernoem</button>
+          <button id="tVakDel" class="link">Verwijder</button>
+        </div>
+        <label for="tTask">Titel op de iPads (optioneel)</label>
+        <input id="tTask" maxlength="80" placeholder="Bijv. Les 3: breuken vergelijken">
+        <label for="tDoel">Ik-doel</label>
+        <input id="tDoel" maxlength="140" placeholder="Bijv. Ik kan breuken met elkaar vergelijken.">
+        <div class="lbl">Afvinklijst</div>
+        <div class="trows" id="tRows"></div>
+        <div class="sum"><button id="tAddRow">+ Taak</button><span id="tSum"></span></div>
+        <label for="tExtra">Klaaropdrachten (één per regel)</label>
+        <textarea id="tExtra" rows="3" placeholder="Lezen in je leesboek&#10;Plusblad"></textarea>
+
+        <hr class="hr">
+        <div class="lbl">Totale tijd</div>
+        <div class="chips" id="tChips"></div>
+        <label for="tTime">…of klaar om</label>
+        <input id="tTime" type="time" style="max-width:200px">
+        <p class="err" id="tErr"></p>
+        <div class="row"><button class="primary" id="tStart">Start dit vak</button><button id="tPause" disabled>Pauze</button></div>
+        <div class="row"><button id="tPlus" disabled>+5 minuten</button><button id="tMin" disabled>−5 minuten</button><button class="danger" id="tStop" disabled>Stop</button></div>
+        <label class="switch"><input type="checkbox" id="tSound" checked> Geluid op de iPads (seintje bij 5 minuten en als de tijd om is)</label>
+        <p class="small muted">Wijzigingen in de lijst van het lopende vak gaan meteen naar de iPads.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Weekrooster</h2>
+        <div class="days" id="rDays"></div>
+        <div class="rrows" id="rRows"></div>
+        <div class="sum"><button id="rAdd">+ Blok</button></div>
+        <label class="switch"><input type="checkbox" id="rAuto" checked> Vakken automatisch starten op de tijd in het rooster</label>
+        <div class="next" id="rNext"></div>
+        <p class="small muted">Een vak duurt zo lang als de minuten van de taken samen. Automatisch starten werkt als dit scherm open staat, bijvoorbeeld op het digibord.</p>
+      </div>
+    </div>
+    <div>
+      <div class="preview" id="tPrev">
+        <div class="small" style="color:#cfe0f5">Dit zien de leerlingen</div>
+        <div class="big" id="tBig">--:--</div>
+        <div class="sub" id="tSub">Nog niet gestart</div>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <h2>Melding naar alle iPads</h2>
+        <div class="chips" id="mPresets"></div>
+        <label for="mText2">Of typ zelf een melding</label>
+        <input id="mText2" maxlength="80" placeholder="Bijv. Iedereen naar het lokaal van groep 7">
+        <div class="row"><button class="primary" id="mSend">Stuur melding</button><button id="mClear" disabled>Melding weghalen</button></div>
+        <p class="small muted" id="mInfo">De melding komt over het hele scherm met een geluid, op elke iPad waar de Focuz open staat.</p>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <h2>Leerlingen koppelen</h2>
+        <div class="muted small">Klascode</div>
+        <div class="code" id="tCode"></div>
+        <div class="qr" id="tQr"></div>
+        <p class="small muted" id="tQrNote">Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.</p>
+        <div class="linkbox"><input id="tLink" readonly aria-label="Link voor leerlingen"><button id="tCopy">Kopieer</button></div>
+        <div class="count" id="tCount">0 iPads verbonden</div>
+        <div class="mode" id="tMode"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal hide" id="modal"><div class="card">
+  <h2 id="mTitle"></h2><p class="muted" id="mText"></p>
+  <input id="mInput" class="hide" maxlength="30">
+  <div class="row"><button id="mCancel">Annuleer</button><button class="primary" id="mOk">OK</button></div>
+</div></div>
+
+<script>
+{
+/* =================== basis =================== */
+const FBCFG = window.KLASTIMER_FIREBASE;
+const USE_FB = !!(FBCFG && FBCFG.apiKey && FBCFG.databaseURL);
+const BROKER = new URLSearchParams(location.search).get('broker') || 'wss://broker.emqx.io:8084/mqtt';
+const PREFIX = 'klastimer-nl/v1/';
+const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const DAGEN = ['','Ma','Di','Wo','Do','Vr'];
+const $ = id => document.getElementById(id);
+const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>ALPH[b%ALPH.length]).join('');
+const validCode = c => /^[A-HJ-NP-Z2-9]{6}$/.test(c);
+const myId = store.get('kt_id') || (()=>{const i=newCode()+newCode();store.set('kt_id',i);return i})();
+const pad = n => String(n).padStart(2,'0');
+const fmt = ms => {const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return h?`${h}:${pad(m)}:${pad(r)}`:`${pad(m)}:${pad(r)}`};
+const clock = t => {const d=new Date(t);return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const minTxt = m => m===1?'1 minuut':m+' minuten';
+const today = () => {const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const CIRC = 552.92;
+const loadScript = src => new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.append(s)});
+
+let code=null, role=null, state={status:'idle'}, audioCtx=null, rang=false;
+let T=null;               // verbinding (MQTT of Firebase)
+let offset=0;             // klokverschil (ms) met de leerkracht/server
+const srvNow = () => Date.now()+offset;
+
+function ask({title,text='',input=null,ok='OK'}){
+  return new Promise(res=>{
+    $('mTitle').textContent=title;$('mText').textContent=text;$('mOk').textContent=ok;
+    $('mInput').classList.toggle('hide',input===null);$('mInput').value=input||'';
+    $('modal').classList.remove('hide');if(input!==null)setTimeout(()=>$('mInput').focus(),50);
+    const done=v=>{$('modal').classList.add('hide');$('mOk').onclick=$('mCancel').onclick=$('mInput').onkeydown=null;res(v)};
+    $('mOk').onclick=()=>done(input===null?true:$('mInput').value.trim());
+    $('mCancel').onclick=()=>done(input===null?false:null);
+    $('mInput').onkeydown=e=>{if(e.key==='Enter')$('mOk').onclick()};
+  });
+}
+
+/* =================== verbinding =================== */
+let connected=false, everConnected=false, offSince=Date.now();
+function setConn(ok,txt){
+  $('dot').className='dot '+(ok?'on':'off');$('conn').textContent=txt;
+  if(ok){everConnected=true;offSince=0}else if(connected||!offSince)offSince=Date.now();
+  connected=ok;renderOffline();
+}
+function renderOffline(){
+  const showIt = role==='kid' && !connected && offSince && Date.now()-offSince>3000;
+  $('kOff').classList.toggle('hide',!showIt);
+  if(showIt) $('kOff').textContent = everConnected&&state.status==='running'
+    ? 'Verbinding even weg. De timer loopt gewoon door.'
+    : everConnected?'Verbinding even weg. Even geduld…':'Nog geen verbinding. Staat de wifi aan?';
+}
+
+/* ---- MQTT (gratis openbare server) ---- */
+function mqttTransport(h){
+  let client=null; const base=PREFIX+code+'/'; const peers={};
+  const t={
+    async start(){
+      if(typeof mqtt==='undefined'){try{await loadScript('https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js')}catch(e){setConn(false,'Geen internet');return}}
+      client=mqtt.connect(BROKER,{clientId:'kt_'+myId+'_'+Math.random().toString(16).slice(2,6),clean:true,reconnectPeriod:2000,connectTimeout:10000,keepalive:30});
+      client.on('connect',()=>{setConn(true,'Verbonden');client.subscribe([base+'state',base+'clock',base+'ping',base+'msg'])});
+      client.on('reconnect',()=>setConn(false,'Opnieuw verbinden…'));
+      client.on('offline',()=>setConn(false,'Geen verbinding'));
+      client.on('close',()=>setConn(false,'Geen verbinding'));
+      client.on('message',(topic,buf)=>{
+        const k=topic.slice(base.length);
+        if(k==='msg'&&!buf.length){h.onMsg(null);return}
+        let msg;try{msg=JSON.parse(buf.toString())}catch(e){return}
+        if(!msg||typeof msg!=='object')return;
+        if(k==='msg'){h.onMsg(msg);return}
+        if(k==='state')h.onState(msg);
+        else if(k==='clock'&&role==='kid'&&typeof msg.now==='number')offset=msg.now-Date.now();
+        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]=Date.now();t.count()}
+      });
+    },
+    publish(s){client&&client.publish(base+'state',JSON.stringify(s),{qos:1,retain:true})},
+    clear(){client&&client.publish(base+'state','',{retain:true})},
+    sendMsg(m){client&&client.publish(base+'msg',m?JSON.stringify(m):'',{qos:1,retain:true})},
+    tick(){
+      if(!client||!client.connected)return;
+      if(role==='teacher')client.publish(base+'clock',JSON.stringify({now:Date.now()}));
+      if(role==='kid')client.publish(base+'ping',JSON.stringify({id:myId}));
+    },
+    count(){const n=Date.now();for(const k in peers)if(n-peers[k]>50000)delete peers[k];h.onKids(Object.keys(peers).length)},
+    wake(){if(client&&!client.connected)client.reconnect()},
+    stop(){try{client&&client.end(true)}catch(e){}}
+  };
+  return t;
+}
+
+/* ---- Firebase (eigen server) ---- */
+let fb=null, fbUser=null;
+async function fbInit(){
+  if(fb)return fb;
+  const v='10.12.2', g=`https://www.gstatic.com/firebasejs/${v}/`;
+  await loadScript(g+'firebase-app-compat.js');
+  await Promise.all([loadScript(g+'firebase-auth-compat.js'),loadScript(g+'firebase-database-compat.js')]);
+  firebase.initializeApp(FBCFG);
+  fb={auth:firebase.auth(),db:firebase.database()};
+  fb.db.ref('.info/serverTimeOffset').on('value',s=>{offset=s.val()||0});
+  fb.db.ref('.info/connected').on('value',s=>{if(s.val())setConn(true,'Verbonden');else setConn(false,'Geen verbinding')});
+  return fb;
+}
+function fbTransport(h){
+  const ref=p=>fb.db.ref('klassen/'+code+(p?'/'+p:''));
+  let me=null, conRef=null;
+  const t={
+    async start(){
+      await fbInit();
+      if(role==='kid'){
+        if(!fb.auth.currentUser) await fb.auth.signInAnonymously();
+        me=ref('kids/'+fb.auth.currentUser.uid);
+        conRef=fb.db.ref('.info/connected');
+        conRef.on('value',s=>{if(s.val()){me.onDisconnect().remove();me.set({at:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}});
+      } else {
+        ref('kids').on('value',s=>h.onKids(s.numChildren()),()=>{});
+      }
+      ref('state').on('value',s=>h.onState(s.val()||{status:'idle'}),e=>setConn(false,'Geen toegang'));
+      ref('msg').on('value',s=>h.onMsg(s.val()),()=>{});
+    },
+    sendMsg(m){(m?ref('msg').set(m):ref('msg').remove()).catch(e=>{$('mInfo').textContent='Versturen mislukt: '+(e.code||e.message)})},
+    publish(s){ref('state').set(JSON.parse(JSON.stringify(s))).catch(e=>{$('tErr').textContent='Opslaan mislukt: '+(e.code||e.message)})},
+    clear(){ref('state').remove().catch(()=>{})},
+    tick(){}, count(){}, wake(){},
+    stop(){try{ref('state').off();ref('kids').off();ref('msg').off();conRef&&conRef.off();me&&me.remove()}catch(e){}}
+  };
+  return t;
+}
+
+function connect(){
+  if(T)T.stop();
+  const h={onState:s=>{state=s&&typeof s==='object'?s:{status:'idle'};if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
+           onKids:n=>{$('tCount').textContent=n===1?'1 iPad verbonden':n+' iPads verbonden'},
+           onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()}};
+  T=USE_FB?fbTransport(h):mqttTransport(h);
+  T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
+}
+function publishState(s){state=s;rang=false;render();T&&T.publish(s)}
+
+/* =================== weergave timer =================== */
+const remaining = () => state.status==='running'?state.endAt-srvNow():state.status==='paused'?state.remaining:null;
+let calm = store.get('kt_calm')==='1';
+function render(){
+  const rem = remaining(), total = state.total||1;
+  const done = state.status==='running' && rem<=0;
+  const warn = !done && rem!==null && rem<=5*60000 && rem<total;
+  let big='--:--', sub='', endTxt='';
+  if(state.status==='idle'){big='Even wachten';sub='De timer is nog niet gestart'}
+  else if(done){big='Tijd is om!';sub='Leg je spullen neer en kijk naar voren'}
+  else {big=fmt(rem);sub=state.status==='paused'?'De timer staat even stil':(warn?'Nog even! Rond je werk af':'Werk rustig door');
+        if(state.status==='running') endTxt='Klaar om '+clock(state.endAt-offset)}
+  if(role==='kid'){
+    const k=$('kid');k.classList.toggle('warn',warn);k.classList.toggle('done',done);k.classList.toggle('idle',state.status==='idle'||done);k.classList.toggle('calm',calm);
+    const live=state.status!=='idle';
+    $('kVak').textContent=state.vak||'';$('kVak').classList.toggle('hide',!state.vak||!live);
+    $('kTask').textContent=(live&&state.task)||' ';
+    $('kDoelTxt').textContent=state.doel||'';$('kDoel').classList.toggle('hide',!live||!state.doel);
+    $('kEnd').textContent=calm?' ':(endTxt||' ');
+    if(done) $('kBig').innerHTML='<div class="doneicon">✓</div>Klaar!'; else $('kBig').textContent=big;
+    $('kSub').textContent=done?'De tijd is om. Leg je spullen neer.':sub;
+    document.querySelectorAll('.kPaused').forEach(e=>e.classList.toggle('hide',state.status!=='paused'));
+    $('kArc').style.strokeDashoffset = String(CIRC*(1-(state.status==='idle'?1:done?0:Math.max(0,Math.min(1,rem/total)))));
+    // stoplicht
+    $('kRing').classList.toggle('hide',calm);$('kLight').classList.toggle('hide',!calm);
+    $('lR').classList.toggle('on',done);$('lO').classList.toggle('on',warn);$('lG').classList.toggle('on',live&&!done&&!warn);
+    $('kLText').textContent=!live?'Even wachten':done?'Tijd is om':state.status==='paused'?'Even pauze':warn?'Bijna klaar, rond af':'Werk rustig door';
+    $('kCalm').textContent=calm?'Klok tonen':'Rustig scherm';
+    // seintje bij 5 minuten
+    if(state.status==='running'&&warn&&total>6*60000&&store.get('kt_warned')!==state.sid){store.set('kt_warned',state.sid);if(state.sound!==false)chime(true)}
+    renderKidList();renderOffline();
+    if(done && !rang){rang=true;if(state.sound!==false)chime()}
+  } else if(role==='teacher'){
+    const p=$('tPrev');p.classList.toggle('warn',warn);p.classList.toggle('done',done);p.classList.toggle('idle',state.status==='idle'||done);
+    $('tBig').textContent=big;$('tSub').textContent=[state.status!=='idle'&&state.vak,sub,endTxt].filter(Boolean).join(' · ');
+    const active = state.status==='running'&&!done || state.status==='paused';
+    $('tPause').disabled=!active;$('tPause').textContent=state.status==='paused'?'Hervat':'Pauze';
+    $('tPlus').disabled=!(active||done);$('tMin').disabled=!active;$('tStop').disabled=state.status==='idle';
+    $('tStart').textContent=active?'Opnieuw starten':'Start dit vak';
+  }
+}
+
+/* =================== afvinklijst op de iPad =================== */
+let listSig='', listSid='', selTask=null, mini=null; // mini = {i,endAt,rung}
+const ticksKey = () => 'kt_ticks_'+(state.sid||'');
+const getTicks = () => {try{return JSON.parse(store.get(ticksKey())||'[]')}catch(e){return []}};
+const setTicks = t => store.set(ticksKey(),JSON.stringify(t));
+const saveMini = () => {if(mini)store.set('kt_mini_'+state.sid,JSON.stringify(mini));else store.del('kt_mini_'+state.sid)};
+function startMini(i){const x=(state.tasks||[])[i];mini=x&&x.m?{i,endAt:Date.now()+x.m*60000,rung:false}:null;saveMini()}
+function renderKidList(){
+  const tasks = Array.isArray(state.tasks)?state.tasks.filter(x=>x&&x.t):[];
+  const extras = Array.isArray(state.extra)?state.extra.filter(Boolean):[];
+  const show = state.status!=='idle' && (tasks.length||extras.length);
+  $('kid').classList.toggle('haslist',!!show);
+  $('kListWrap').classList.toggle('hide',!show);
+  if(!show){listSig='';return}
+  if(listSid!==state.sid){listSid=state.sid;selTask=null;try{mini=JSON.parse(store.get('kt_mini_'+state.sid))}catch(e){mini=null}if(mini)selTask=mini.i}
+  const sig=state.sid+JSON.stringify(tasks)+extras.join('|');
+  if(sig!==listSig){
+    listSig=sig;
+    const ul=$('kTasks');ul.innerHTML='';
+    tasks.forEach((x,i)=>{
+      const li=document.createElement('li');li.dataset.i=i;
+      li.innerHTML='<div class="trow"><button class="box" aria-label="Afvinken"></button><button class="tname"></button><span class="tmin"></span></div><div class="tdetail hide"><div class="say"></div><button class="mbtn"></button></div>';
+      li.querySelector('.tname').textContent=(i+1)+'. '+x.t;
+      li.querySelector('.tmin').textContent=x.m?x.m+' min':'';li.querySelector('.tmin').classList.toggle('hide',!x.m);
+      ul.append(li);
+    });
+    $('kExtraList').innerHTML='';
+    extras.forEach(e=>{const li=document.createElement('li');li.textContent=e;$('kExtraList').append(li)});
+  }
+  const ticks=getTicks();let doneCount=0;
+  [...$('kTasks').children].forEach((li,i)=>{
+    const x=tasks[i], ok=ticks.includes(i);if(ok)doneCount++;
+    const running=mini&&mini.i===i, r=running?mini.endAt-Date.now():0;
+    li.classList.toggle('ok',ok);li.classList.toggle('sel',selTask===i);li.classList.toggle('over',running&&r<=0&&!ok);
+    li.querySelector('.box').textContent=ok?'✓':'';
+    li.querySelector('.tdetail').classList.toggle('hide',selTask!==i);
+    if(selTask!==i)return;
+    const say=li.querySelector('.say'), b=li.querySelector('.mbtn');
+    if(running){
+      say.innerHTML='';const m=document.createElement('div');m.className='mini'+(r<=0?' over':'');
+      if(r>0) m.textContent=calm?'Nog ongeveer '+minTxt(Math.ceil(r/60000)):fmt(r);
+      else m.textContent=calm?'Je tijd voor deze taak is om':'+'+fmt(-r)+' over je tijd';
+      say.append(m);
+      if(r<=0){const o=document.createElement('div');o.className='overmsg';o.textContent='Rond af en ga door naar de volgende taak.';say.append(o)}
+      b.textContent='Stop taaktimer';b.classList.remove('hide');
+    } else {
+      say.innerHTML=x.m?'Hier krijg je <b>'+minTxt(x.m)+'</b> voor.':'Voor deze taak is geen tijd ingesteld.';
+      b.textContent='Start taaktimer';b.classList.toggle('hide',!x.m||ok);
+    }
+  });
+  $('kProg').textContent=tasks.length?`${doneCount} van ${tasks.length} af`:'';
+  const all=tasks.length>0&&doneCount===tasks.length;
+  $('kAllDone').classList.toggle('hide',!(all&&extras.length));
+  $('kExtras').classList.toggle('hide',!extras.length);
+}
+$('kTasks').addEventListener('click',e=>{
+  const li=e.target.closest('li');if(!li)return;const i=+li.dataset.i;
+  const tasks=state.tasks||[];
+  if(e.target.closest('.box')){
+    let t=getTicks();
+    if(t.includes(i))t=t.filter(x=>x!==i);
+    else{t.push(i);if(mini&&mini.i===i){mini=null;saveMini()}
+      const next=tasks.findIndex((x,j)=>j>i&&!t.includes(j));
+      selTask=next>=0?next:null;
+      if(next>=0&&(!mini||mini.i!==next))startMini(next);   // volgende taak start vanzelf
+    }
+    setTicks(t);
+  } else if(e.target.closest('.mbtn')){
+    if(mini&&mini.i===i){mini=null;saveMini()}else{startMini(i);unlockAudio()}
+  } else if(e.target.closest('.trow')){
+    selTask=selTask===i?null:i;
+  }
+  renderKidList();
+});
+$('kCalm').addEventListener('click',()=>{calm=!calm;store.set('kt_calm',calm?'1':'0');render()});
+
+/* =================== melding naar alle iPads =================== */
+let curMsg=null, msgRingAt=0;
+const PRESETS=['Kom terug naar de klas','Kijk naar het bord','Ruim je spullen op','Tijd voor de pauze'];
+function msgActive(){return curMsg&&srvNow()-(curMsg.at||0)<15*60000}
+function renderMsg(){
+  if(role==='kid'){
+    const show=msgActive()&&store.get('kt_msgseen')!==curMsg.id;
+    $('kAlert').classList.toggle('hide',!show);
+    if(show){
+      $('kAlertTxt').textContent=curMsg.text;
+      if(Date.now()-msgRingAt>20000){msgRingAt=Date.now();chime();keepAwake()}   // herhaalt tot op Oké is getikt
+    } else msgRingAt=0;
+  } else if(role==='teacher'){
+    const a=msgActive();$('mClear').disabled=!a;
+    $('mInfo').textContent=a?`Verstuurd om ${clock(curMsg.at-offset)}: "${curMsg.text}"`:'De melding komt over het hele scherm met een geluid, op elke iPad waar de Focuz open staat.';
+  }
+}
+$('mPresets').innerHTML=PRESETS.map(p=>`<button data-p="${p}">${p}</button>`).join('');
+$('mPresets').addEventListener('click',e=>{const b=e.target.closest('button');if(b)sendMsg(b.dataset.p)});
+$('mSend').addEventListener('click',()=>{const t=$('mText2').value.trim();if(t){sendMsg(t);$('mText2').value=''}});
+$('mText2').addEventListener('keydown',e=>{if(e.key==='Enter')$('mSend').click()});
+$('mClear').addEventListener('click',()=>{curMsg=null;T&&T.sendMsg(null);renderMsg()});
+function sendMsg(text){curMsg={id:newCode(),text:text.slice(0,80),at:srvNow()};T&&T.sendMsg(curMsg);renderMsg()}
+$('kAlertOk').addEventListener('click',()=>{if(curMsg)store.set('kt_msgseen',curMsg.id);renderMsg()});
+
+/* =================== geluid & scherm =================== */
+function chime(soft){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    (soft?[880,660]:[660,880,990]).forEach((f,i)=>{const d=i*0.35,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,audioCtx.currentTime+d);g.gain.exponentialRampToValueAtTime(soft?0.14:0.3,audioCtx.currentTime+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+d+0.9);
+      o.connect(g).connect(audioCtx.destination);o.start(audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d+1)});
+  }catch(e){}
+}
+function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume&&audioCtx.resume()}catch(e){}}
+async function keepAwake(){try{if('wakeLock' in navigator) await navigator.wakeLock.request('screen')}catch(e){}}
+
+/* =================== schermen =================== */
+function show(id){['home','login','kid','teacher'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
+function startKid(c){role='kid';code=c;store.set('kt_kid_code',c);store.set('kt_role','kid');$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
+
+async function startTeacher(){
+  store.set('kt_role','teacher');
+  if(!USE_FB){
+    role='teacher';code=store.get('kt_teacher_code');
+    if(!validCode(code||'')){code=newCode();store.set('kt_teacher_code',code)}
+    plan=normPlan(readLocalPlan());show('teacher');setupTeacher();connect();return;
+  }
+  show('login');$('loginErr').textContent='Laden…';
+  try{await fbInit()}catch(e){$('loginErr').textContent='Kan de server niet bereiken. Controleer de internetverbinding.';return}
+  $('loginErr').textContent='';
+  try{await fb.auth.getRedirectResult()}catch(e){$('loginErr').textContent='Inloggen mislukt: '+(e.code||e.message)}
+  fb.auth.onAuthStateChanged(async u=>{
+    if(role==='teacher'&&fbUser&&u&&u.uid===fbUser.uid)return;
+    if(!u||u.isAnonymous){fbUser=null;role=null;show('login');return}
+    fbUser=u;role='teacher';
+    try{
+      const snap=await fb.db.ref('teachers/'+u.uid).once('value');const d=snap.val()||{};
+      plan=normPlan(d.plan||readLocalPlan());
+      code=d.code;
+      if(!validCode(code||'')) code=await claimCode();
+      $('tWho').textContent=u.email||u.displayName||'';$('tLogout').classList.remove('hide');
+      show('teacher');setupTeacher();connect();
+      if(!d.plan)savePlan();
+    }catch(e){show('login');$('loginErr').textContent='Laden mislukt: '+(e.code||e.message)+'. Kloppen de databaseregels?'}
+  });
+}
+async function claimCode(){
+  for(let n=0;n<5;n++){
+    const c=newCode();
+    try{await fb.db.ref('klassen/'+c+'/owner').set(fbUser.uid);await fb.db.ref('teachers/'+fbUser.uid+'/code').set(c);return c}catch(e){}
+  }
+  throw new Error('Geen klascode kunnen maken');
+}
+$('btnGoogle').addEventListener('click',async()=>{
+  $('loginErr').textContent='';
+  const p=new firebase.auth.GoogleAuthProvider();
+  try{await fb.auth.signInWithPopup(p)}
+  catch(e){if(/popup/.test(e.code||'')){try{await fb.auth.signInWithRedirect(p)}catch(e2){$('loginErr').textContent='Inloggen mislukt: '+(e2.code||e2.message)}}
+           else $('loginErr').textContent='Inloggen mislukt: '+(e.code||e.message)}
+});
+$('btnLoginBack').addEventListener('click',()=>{store.del('kt_role');show('home')});
+$('tLogout').addEventListener('click',async()=>{if(!await ask({title:'Uitloggen?',ok:'Uitloggen'}))return;T&&T.stop();T=null;fbUser=null;role=null;store.del('kt_role');await fb.auth.signOut();show('home')});
+
+/* =================== planning (vakken + rooster) =================== */
+const DEFAULT = {
+  'Rekenen':{title:'',doel:'',tasks:[{t:'Instructie aan de instructietafel',m:10},{t:'Basisopdrachten in je werkboek',m:20},{t:'Nakijken en verbeteren',m:5}],extra:'Plusblad rekenen\nRekenspel op de iPad'},
+  'Spelling':{title:'',doel:'',tasks:[{t:'Dictee-woorden oefenen',m:10},{t:'Werkboek opdracht 1 t/m 4',m:15}],extra:'Woordzoeker\nLezen in je leesboek'},
+  'Taal':{title:'',doel:'',tasks:[{t:'Opdrachten uit het werkboek',m:20}],extra:'Lezen in je leesboek'}
+};
+const arr = v => Array.isArray(v)?v:(v&&typeof v==='object'?Object.values(v):[]);
+const cleanName = s => String(s||'').replace(/[.#$\[\]\/]/g,'').trim().slice(0,30);
+function readLocalPlan(){try{return JSON.parse(store.get('kt_plan'))}catch(e){return null}}
+function normPlan(p){
+  if(!p||typeof p!=='object')p={};
+  if(!p.vakken){const old=p;p={vakken:{}};for(const k in old)if(old[k]&&old[k].tasks)p.vakken[cleanName(k)]=old[k]}
+  if(!Object.keys(p.vakken).length)p.vakken=JSON.parse(JSON.stringify(DEFAULT));
+  for(const k in p.vakken){const v=p.vakken[k]||{};p.vakken[k]={title:v.title||'',doel:v.doel||'',extra:v.extra||'',tasks:arr(v.tasks).map(x=>({t:(x&&x.t)||'',m:+(x&&x.m)||0}))}}
+  const r=p.rooster||{};p.rooster={};for(let d=1;d<=5;d++)p.rooster[d]=arr(r[d]).filter(x=>x&&x.at).map(x=>({at:x.at,vak:x.vak||''}));
+  p.auto=p.auto!==false;
+  return p;
+}
+let plan, curVak, rDay=Math.min(5,Math.max(1,new Date().getDay()||1)), cloudTimer=null;
+function savePlan(){
+  store.set('kt_plan',JSON.stringify(plan));store.set('kt_curvak',curVak);
+  if(USE_FB&&fbUser){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>fb.db.ref('teachers/'+fbUser.uid+'/plan').set(plan).catch(()=>{}),800)}
+}
+const V = () => plan.vakken[curVak];
+const vakTasks = v => (plan.vakken[v]||{tasks:[]}).tasks.filter(x=>x.t.trim()).map(x=>({t:x.t.trim().slice(0,80),m:Math.max(0,Math.min(240,Math.round(+x.m||0)))}));
+const vakExtra = v => ((plan.vakken[v]||{}).extra||'').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,12).map(s=>s.slice(0,80));
+const sumMin = v => vakTasks(v).reduce((a,x)=>a+x.m,0);
+
+function renderVakBar(){
+  $('tVak').innerHTML='';Object.keys(plan.vakken).forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v;$('tVak').append(o)});
+  $('tVak').value=curVak;$('tTask').value=V().title;$('tDoel').value=V().doel;$('tExtra').value=V().extra;
+  renderRows();renderRooster();
+}
+function renderRows(){
+  const box=$('tRows');box.innerHTML='';
+  V().tasks.forEach((x,i)=>{
+    const r=document.createElement('div');r.className='tr';r.dataset.i=i;
+    r.innerHTML='<span class="n"></span><input class="tt" maxlength="80" placeholder="Taak" aria-label="Taak"><div class="mwrap"><input class="tm" type="number" inputmode="numeric" min="0" max="240" aria-label="Minuten"><span>min</span></div><button class="del" aria-label="Verwijder taak">×</button>';
+    r.querySelector('.n').textContent=i+1;r.querySelector('.tt').value=x.t;r.querySelector('.tm').value=x.m||'';
+    box.append(r);
+  });
+  const s=sumMin(curVak);$('tSum').textContent=s?'Samen '+minTxt(s):'';
+}
+let liveTimer=null;
+function pushLive(){
+  savePlan();
+  if(state.status!=='idle'&&state.vak===curVak){clearTimeout(liveTimer);liveTimer=setTimeout(()=>publishState({...state,task:V().title,doel:V().doel,tasks:vakTasks(curVak),extra:vakExtra(curVak)}),700)}
+}
+let chosenMin=null;
+const MINS=[10,15,20,30,45,60];
+function markChips(m){[...$('tChips').children].forEach(b=>b.classList.toggle('sel',+b.dataset.m===m))}
+function renderChips(){
+  const s=sumMin(curVak);const opts=[...new Set([s,...MINS].filter(Boolean))].sort((a,b)=>a-b);
+  $('tChips').innerHTML=opts.map(m=>`<button data-m="${m}">${m} min${m===s?' (taken)':''}</button>`).join('');
+  markChips(chosenMin!==null?chosenMin:($('tTime').value?null:s));
+}
+
+/* rooster */
+function renderRooster(){
+  $('rDays').innerHTML=DAGEN.slice(1).map((d,i)=>`<button data-d="${i+1}" class="${rDay===i+1?'sel':''}">${d}</button>`).join('');
+  const rows=plan.rooster[rDay];rows.sort((a,b)=>a.at.localeCompare(b.at));
+  const opts=Object.keys(plan.vakken);
+  $('rRows').innerHTML='';
+  if(!rows.length){const p=document.createElement('div');p.className='muted small';p.textContent='Nog geen blokken op '+['','maandag','dinsdag','woensdag','donderdag','vrijdag'][rDay]+'.';$('rRows').append(p)}
+  rows.forEach((x,i)=>{
+    const r=document.createElement('div');r.className='rr';r.dataset.i=i;
+    r.innerHTML='<input type="time" class="rt" aria-label="Begintijd"><select class="rv" aria-label="Vak"></select><button class="rdel" aria-label="Verwijder blok">×</button>';
+    r.querySelector('.rt').value=x.at;
+    const sel=r.querySelector('.rv');opts.forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v+(sumMin(v)?` (${sumMin(v)} min)`:'');o.value=v;sel.append(o)});
+    if(!opts.includes(x.vak)){const o=document.createElement('option');o.value=x.vak;o.textContent=x.vak+' (verwijderd)';sel.append(o)}
+    sel.value=x.vak;$('rRows').append(r);
+  });
+  $('rAuto').checked=plan.auto;renderNext();
+}
+function slotTime(at){const [h,m]=at.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()}
+function renderNext(){
+  const d=new Date().getDay();const n=Date.now();
+  let txt='';
+  if(d>=1&&d<=5){const nx=plan.rooster[d].filter(x=>plan.vakken[x.vak]&&slotTime(x.at)>n).sort((a,b)=>a.at.localeCompare(b.at))[0];
+    if(nx)txt=`Vandaag volgende: ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':'');else txt='Vandaag geen blokken meer.'}
+  else txt='Het is weekend.';
+  $('rNext').textContent=txt;
+}
+function autoCheck(){
+  if(role!=='teacher'||!plan||!plan.auto)return;
+  const d=new Date().getDay();if(d<1||d>5)return;
+  const n=Date.now();
+  for(const x of plan.rooster[d]){
+    const t=slotTime(x.at);if(n<t||n-t>3*60000||!plan.vakken[x.vak])continue;
+    const key=today()+'_'+x.at+'_'+x.vak;
+    if(state.auto===key||store.get('kt_auto_'+key))continue;
+    store.set('kt_auto_'+key,'1');
+    startVak(x.vak,null,key);
+  }
+  renderNext();
+}
+function startVak(v,endAt,autoKey){
+  const t=srvNow();
+  if(!endAt){const m=sumMin(v)||30;endAt=t+m*60000}
+  const pv=plan.vakken[v];
+  publishState({v:3,sid:newCode(),status:'running',endAt,total:endAt-t,vak:v,task:pv.title||'',doel:pv.doel||'',tasks:vakTasks(v),extra:vakExtra(v),sound:$('tSound').checked,auto:autoKey||''});
+}
+
+function setupTeacher(){
+  curVak=store.get('kt_curvak');if(!plan.vakken[curVak])curVak=Object.keys(plan.vakken)[0];
+  renderVakBar();renderChips();
+  $('tCode').textContent=code;
+  const url=location.origin+location.pathname+'?klas='+code;$('tLink').value=url;
+  try{const q=qrcode(0,'M');q.addData(url);q.make();$('tQr').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true});$('tQr').classList.remove('hide')}catch(e){$('tQr').classList.add('hide')}
+  $('tQrNote').textContent=/^https?:$/.test(location.protocol)?'Laat de leerlingen deze QR-code scannen met de camera van de iPad, of de klascode intypen.':'Let op: de QR-code werkt pas als deze app online staat. De klascode intypen werkt wel.';
+  $('tSound').checked=store.get('kt_sound')!=='0';
+  $('tMode').textContent=USE_FB?'Eigen server: alleen jij kunt de timer besturen. Planning staat in je account.':'Openbare server. Planning staat alleen op dit apparaat. Koppel een eigen server voor meer veiligheid (zie handleiding).';
+}
+
+function bindTeacher(){
+  $('tVak').addEventListener('change',()=>{curVak=$('tVak').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
+  $('tVakAdd').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Nieuw vak',text:'Hoe heet het vak?',input:''}));if(!n)return;if(!plan.vakken[n])plan.vakken[n]={title:'',doel:'',tasks:[{t:'',m:15}],extra:''};curVak=n;savePlan();renderVakBar();renderChips()});
+  $('tVakRen').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Vak hernoemen',input:curVak}));if(!n||n===curVak||plan.vakken[n])return;
+    const nv={};for(const k in plan.vakken)nv[k===curVak?n:k]=plan.vakken[k];plan.vakken=nv;
+    for(let d=1;d<=5;d++)plan.rooster[d].forEach(x=>{if(x.vak===curVak)x.vak=n});curVak=n;savePlan();renderVakBar()});
+  $('tVakDel').addEventListener('click',async()=>{if(Object.keys(plan.vakken).length<2)return;if(!await ask({title:'Vak verwijderen?',text:`"${curVak}", de takenlijst en de blokken in het rooster worden verwijderd.`,ok:'Verwijder'}))return;
+    delete plan.vakken[curVak];for(let d=1;d<=5;d++)plan.rooster[d]=plan.rooster[d].filter(x=>x.vak!==curVak);curVak=Object.keys(plan.vakken)[0];savePlan();renderVakBar();renderChips()});
+  $('tRows').addEventListener('input',e=>{const r=e.target.closest('.tr');if(!r)return;const x=V().tasks[+r.dataset.i];
+    if(e.target.classList.contains('tt'))x.t=e.target.value;else x.m=Math.max(0,Math.round(+e.target.value||0));
+    const s=sumMin(curVak);$('tSum').textContent=s?'Samen '+minTxt(s):'';pushLive()});
+  $('tRows').addEventListener('change',()=>{renderChips();renderRooster()});
+  $('tRows').addEventListener('click',e=>{if(!e.target.classList.contains('del'))return;V().tasks.splice(+e.target.closest('.tr').dataset.i,1);renderRows();renderChips();pushLive()});
+  $('tAddRow').addEventListener('click',()=>{if(V().tasks.length>=15)return;V().tasks.push({t:'',m:10});renderRows();const all=$('tRows').querySelectorAll('.tt');all[all.length-1].focus();savePlan()});
+  $('tTask').addEventListener('input',()=>{V().title=$('tTask').value;pushLive()});
+  $('tDoel').addEventListener('input',()=>{V().doel=$('tDoel').value;pushLive()});
+  $('tExtra').addEventListener('input',()=>{V().extra=$('tExtra').value;pushLive()});
+  $('tChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;chosenMin=+b.dataset.m;$('tTime').value='';markChips(chosenMin);$('tErr').textContent=''});
+  $('tTime').addEventListener('input',()=>{chosenMin=null;markChips(null);$('tErr').textContent=''});
+  $('tSound').addEventListener('change',()=>{store.set('kt_sound',$('tSound').checked?'1':'0');if(state.status!=='idle')publishState({...state,sound:$('tSound').checked})});
+  $('tStart').addEventListener('click',()=>{
+    let endAt=null;
+    if($('tTime').value){const e=slotTime($('tTime').value);if(e<=Date.now()+30000){$('tErr').textContent='Die eindtijd is al voorbij. Kies een latere tijd.';return}endAt=e+offset}
+    else{const m=chosenMin!==null?chosenMin:sumMin(curVak);if(!m){$('tErr').textContent='Vul minuten in bij de taken, of kies een totale tijd.';return}endAt=srvNow()+m*60000}
+    $('tErr').textContent='';startVak(curVak,endAt);
+  });
+  $('tPause').addEventListener('click',()=>{
+    if(state.status==='running')publishState({...state,status:'paused',remaining:Math.max(0,state.endAt-srvNow())});
+    else if(state.status==='paused')publishState({...state,status:'running',endAt:srvNow()+state.remaining});
+  });
+  const shift=ms=>{const n=srvNow();
+    if(state.status==='running'){const e=Math.max(n+1000,Math.max(state.endAt,n)+ms);publishState({...state,endAt:e,total:Math.max(state.total,e-n)})}
+    else if(state.status==='paused'){const r=Math.max(1000,state.remaining+ms);publishState({...state,remaining:r,total:Math.max(state.total,r)})}
+  };
+  $('tPlus').addEventListener('click',()=>shift(5*60000));
+  $('tMin').addEventListener('click',()=>shift(-5*60000));
+  $('tStop').addEventListener('click',()=>publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||''}));
+  $('tCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('tLink').value);$('tCopy').textContent='Gekopieerd'}catch(e){$('tLink').select()}setTimeout(()=>$('tCopy').textContent='Kopieer',1500)});
+  $('tNewCode').addEventListener('click',async()=>{
+    if(!await ask({title:'Nieuwe klascode?',text:'Alle iPads moeten dan opnieuw koppelen.',ok:'Nieuwe code'}))return;
+    T&&T.clear();T&&T.stop();T=null;state={status:'idle'};
+    if(USE_FB){try{code=await claimCode()}catch(e){$('tErr').textContent='Nieuwe code maken mislukt.';return}}
+    else{code=newCode();store.set('kt_teacher_code',code)}
+    $('tCount').textContent='0 iPads verbonden';setupTeacher();connect();render();
+  });
+  // rooster
+  $('rDays').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;rDay=+b.dataset.d;renderRooster()});
+  $('rAdd').addEventListener('click',()=>{const rows=plan.rooster[rDay];const last=rows.length?rows[rows.length-1].at:'08:30';
+    const [h,m]=last.split(':').map(Number);const nt=`${pad(Math.min(23,h+1))}:${pad(m)}`;rows.push({at:rows.length?nt:'08:45',vak:curVak});savePlan();renderRooster()});
+  $('rRows').addEventListener('change',e=>{const r=e.target.closest('.rr');if(!r)return;const x=plan.rooster[rDay][+r.dataset.i];
+    if(e.target.classList.contains('rt')&&e.target.value)x.at=e.target.value;if(e.target.classList.contains('rv'))x.vak=e.target.value;savePlan();renderRooster()});
+  $('rRows').addEventListener('click',e=>{if(!e.target.classList.contains('rdel'))return;plan.rooster[rDay].splice(+e.target.closest('.rr').dataset.i,1);savePlan();renderRooster()});
+  $('rAuto').addEventListener('change',()=>{plan.auto=$('rAuto').checked;savePlan();renderNext()});
+}
+
+/* =================== tikken =================== */
+setInterval(()=>{
+  if(!role)return;render();renderMsg();
+  if(role==='kid'&&mini&&!mini.rung&&mini.endAt<=Date.now()&&!getTicks().includes(mini.i)){mini.rung=true;saveMini();if(state.sound!==false)chime(true)}
+},500);
+setInterval(()=>{T&&T.tick();T&&T.count()},10000);
+setInterval(autoCheck,5000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(role==='kid')keepAwake();T&&T.wake();autoCheck()}});
+
+/* =================== start =================== */
+$('btnKid').addEventListener('click',()=>{$('homeChoose').classList.add('hide');$('homeKid').classList.remove('hide');$('codeIn').focus()});
+$('btnBack').addEventListener('click',()=>{$('homeKid').classList.add('hide');$('homeChoose').classList.remove('hide')});
+$('btnTeacher').addEventListener('click',startTeacher);
+const join=()=>{const c=$('codeIn').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(!validCode(c)){$('codeErr').textContent='Die code klopt niet. Een klascode heeft 6 tekens.';return}unlockAudio();startKid(c)};
+$('btnJoin').addEventListener('click',join);
+$('codeIn').addEventListener('keydown',e=>{if(e.key==='Enter')join()});
+$('kLeave').addEventListener('click',async()=>{if(!await ask({title:'Andere klascode invoeren?',ok:'Ja'}))return;store.del('kt_kid_code');store.del('kt_role');T&&T.stop();T=null;role=null;state={status:'idle'};show('home');$('homeChoose').classList.add('hide');$('homeKid').classList.remove('hide');setConn(false,'Niet verbonden')});
+document.addEventListener('pointerdown',unlockAudio,{passive:true});
+bindTeacher();
+
+const qs=new URLSearchParams(location.search);
+const urlCode=(qs.get('klas')||'').toUpperCase();
+if(validCode(urlCode))startKid(urlCode);
+else if(qs.has('leerkracht'))startTeacher();
+else if(store.get('kt_role')==='kid'&&validCode(store.get('kt_kid_code')||''))startKid(store.get('kt_kid_code'));
+else if(store.get('kt_role')==='teacher')startTeacher();
+else{show('home');setConn(false,'Niet verbonden')}
+}
+</script>
+</body>
+</html>
