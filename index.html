@@ -159,6 +159,40 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 .rr{display:grid;grid-template-columns:140px minmax(0,1fr) 44px;gap:8px;align-items:center}
 .rr .past{opacity:.5}
 .next{background:#eef7f2;border-radius:12px;padding:10px 14px;font-weight:800;margin-top:12px}
+/* dagritme */
+.daylist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.daylist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 16px;color:#fff}
+.daylist .dt{font-weight:900;font-variant-numeric:tabular-nums;font-size:19px;white-space:nowrap}
+.daylist .dv{font-weight:900;font-size:20px;line-height:1.2}
+.daylist .dv small{display:block;font-weight:600;font-size:15px;color:#cfe0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daylist li.past{opacity:.45}.daylist li.past .dv{text-decoration:line-through}
+.daylist li.now{background:#fff;color:var(--ink)}.daylist li.now .dv small{color:var(--soft)}
+.daylist li.now .dt::after{content:"nu";display:block;font-size:13px;background:var(--go);color:#fff;border-radius:6px;text-align:center;margin-top:2px}
+.nextbar{display:inline-block;margin-top:10px;background:rgba(255,255,255,.14);color:#fff;border-radius:999px;font-size:17px;padding:8px 18px;min-height:44px}
+.nextbar b{font-weight:900}
+.dayidle{width:min(640px,100%);margin:0 auto}
+.dayidle h3,.dayoverbox h3,.bright h3{margin:0 0 10px;font-size:24px;font-weight:900}
+.dayover{position:fixed;inset:0;z-index:15;background:rgba(10,20,35,.7);display:grid;place-items:center;padding:20px}
+.dayoverbox{background:var(--bg);border-radius:24px;padding:22px;width:min(560px,100%);max-height:90vh;overflow:auto;color:#fff}
+.dayoverbox>button{margin-top:14px;width:100%;background:#fff;color:var(--ink)}
+/* digibord */
+#board{min-height:100vh;background:#13263f;color:#fff;display:grid;grid-template-rows:1fr auto;padding:clamp(20px,3vw,48px)}
+#board.warn{background:#5c380e}#board.done{background:#17543a}
+.bmain{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:clamp(20px,3vw,56px);align-items:center}
+.bleft{text-align:center}
+.btitle{font-size:clamp(28px,3.4vw,54px);font-weight:900;line-height:1.1;margin-top:10px;text-wrap:balance}
+#board .doel{font-size:clamp(18px,1.8vw,28px)}
+.bbig{font-size:clamp(90px,15vw,260px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;margin-top:18px}
+#board.idle .bbig{font-size:clamp(48px,6vw,96px)}
+.bbar{height:18px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;margin:18px auto 0;max-width:900px}
+.bbar i{display:block;height:100%;background:var(--go);border-radius:999px;transition:width .9s linear}
+#board.warn .bbar i{background:var(--warn)}
+.bsub{font-size:clamp(20px,2vw,32px);color:#cfe0f5;margin-top:12px}
+.bright .daylist .dv{font-size:clamp(18px,1.5vw,24px)}
+.bfoot{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-top:20px;font-size:18px;color:#cfe0f5}
+.bfoot b{font-size:30px;letter-spacing:.12em;color:#fff}
+.bqr svg{width:96px;height:96px;background:#fff;border-radius:10px;padding:4px;display:block}
+@media(max-width:900px){.bmain{grid-template-columns:minmax(0,1fr)}}
 .msbox{background:#f3f6fa;border-radius:14px;padding:14px;margin-top:12px}
 .msbox .res{display:grid;gap:6px;margin-top:10px}
 .msbox .res button{text-align:left;font-weight:700;background:#fff;border:2px solid var(--line)}
@@ -218,9 +252,11 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
     <div class="task" id="kTask">&nbsp;</div>
     <div class="doel hide" id="kDoel"><b>Ik-doel</b><span id="kDoelTxt"></span></div>
     <div class="endline" id="kEnd">&nbsp;</div>
+    <button class="nextbar hide" id="kNext"></button>
   </div>
   <div class="kidmain">
-    <div class="ringwrap">
+    <div class="dayidle hide" id="kDayIdle"><h3>Vandaag</h3><ul class="daylist" id="kDayIdleList"></ul></div>
+    <div class="ringwrap" id="kRingWrap">
       <div class="ring" id="kRing">
         <svg viewBox="0 0 200 200"><circle class="bgc" cx="100" cy="100" r="88" fill="none" stroke-width="16"/>
           <circle class="fg" id="kArc" cx="100" cy="100" r="88" fill="none" stroke-width="16" stroke-linecap="round" stroke-dasharray="552.92" stroke-dashoffset="0"/></svg>
@@ -242,6 +278,9 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
   </div>
   <div class="kidfoot">Klas <b id="kCode"></b><button id="kCalm">Rustig scherm</button><button id="kLeave">Andere code</button></div>
   <div class="offline hide" id="kOff"></div>
+  <div class="dayover hide" id="kDayOver" role="dialog" aria-label="Rooster van vandaag">
+    <div class="dayoverbox"><h3>Vandaag</h3><ul class="daylist" id="kDayList"></ul><button id="kDayClose">Sluiten</button></div>
+  </div>
   <div class="alert hide" id="kAlert" role="alertdialog" aria-live="assertive">
     <div class="alertbox"><div class="alerttxt" id="kAlertTxt"></div><button id="kAlertOk">Oké, ik kom!</button></div>
   </div>
@@ -251,7 +290,7 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
 <section id="teacher" class="hide">
   <div class="thead">
     <div><h1>Focuz</h1><div class="small" style="color:#cfe0f5">Bediening voor de leerkracht</div></div>
-    <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tNewCode">Nieuwe klascode</button></div>
+    <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button><button class="ghost" id="tNewCode">Nieuwe klascode</button><button class="primary" id="tBoard">Digibord</button></div>
   </div>
   <div class="tgrid">
     <div>
@@ -335,6 +374,22 @@ label,.lbl{display:block;font-weight:800;margin:16px 0 6px}
   </div>
 </section>
 
+<!-- DIGIBORD -->
+<section id="board" class="hide">
+  <div class="bmain">
+    <div class="bleft">
+      <span class="vak hide" id="bVak"></span>
+      <div class="btitle" id="bTask"></div>
+      <div class="doel hide" id="bDoel"><b>Ik-doel</b><span id="bDoelTxt"></span></div>
+      <div class="bbig" id="bBig">--:--</div>
+      <div class="bbar"><i id="bBar"></i></div>
+      <div class="bsub" id="bSub"></div>
+    </div>
+    <div class="bright"><h3>Vandaag</h3><ul class="daylist" id="bDay"></ul></div>
+  </div>
+  <div class="bfoot"><span>Klascode <b id="bCode"></b></span><span class="bqr" id="bQr"></span><button class="ghost" id="bBack">Terug naar bediening</button></div>
+</section>
+
 <div class="modal hide" id="modal"><div class="card">
   <h2 id="mTitle"></h2><p class="muted" id="mText"></p>
   <input id="mInput" class="hide" maxlength="30">
@@ -402,7 +457,7 @@ function mqttTransport(h){
     async start(){
       if(typeof mqtt==='undefined'){try{await loadScript('https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js')}catch(e){setConn(false,'Geen internet');return}}
       client=mqtt.connect(BROKER,{clientId:'kt_'+myId+'_'+Math.random().toString(16).slice(2,6),clean:true,reconnectPeriod:2000,connectTimeout:10000,keepalive:30});
-      client.on('connect',()=>{setConn(true,'Verbonden');client.subscribe([base+'state',base+'clock',base+'ping',base+'msg'])});
+      client.on('connect',()=>{setConn(true,'Verbonden');client.subscribe([base+'state',base+'clock',base+'ping',base+'msg',base+'day'])});
       client.on('reconnect',()=>setConn(false,'Opnieuw verbinden…'));
       client.on('offline',()=>setConn(false,'Geen verbinding'));
       client.on('close',()=>setConn(false,'Geen verbinding'));
@@ -412,6 +467,7 @@ function mqttTransport(h){
         let msg;try{msg=JSON.parse(buf.toString())}catch(e){return}
         if(!msg||typeof msg!=='object')return;
         if(k==='msg'){h.onMsg(msg);return}
+        if(k==='day'){h.onDay(msg);return}
         if(k==='state')h.onState(msg);
         else if(k==='clock'&&role==='kid'&&typeof msg.now==='number')offset=msg.now-Date.now();
         else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]=Date.now();t.count()}
@@ -420,6 +476,7 @@ function mqttTransport(h){
     publish(s){client&&client.publish(base+'state',JSON.stringify(s),{qos:1,retain:true})},
     clear(){client&&client.publish(base+'state','',{retain:true})},
     sendMsg(m){client&&client.publish(base+'msg',m?JSON.stringify(m):'',{qos:1,retain:true})},
+    sendDay(d){client&&client.publish(base+'day',JSON.stringify(d),{qos:1,retain:true})},
     tick(){
       if(!client||!client.connected)return;
       if(role==='teacher')client.publish(base+'clock',JSON.stringify({now:Date.now()}));
@@ -461,12 +518,14 @@ function fbTransport(h){
       }
       ref('state').on('value',s=>h.onState(s.val()||{status:'idle'}),e=>setConn(false,'Geen toegang'));
       ref('msg').on('value',s=>h.onMsg(s.val()),()=>{});
+      ref('day').on('value',s=>h.onDay(s.val()),()=>{});
     },
+    sendDay(d){ref('day').set(JSON.parse(JSON.stringify(d))).catch(()=>{})},
     sendMsg(m){(m?ref('msg').set(m):ref('msg').remove()).catch(e=>{$('mInfo').textContent='Versturen mislukt: '+(e.code||e.message)})},
     publish(s){ref('state').set(JSON.parse(JSON.stringify(s))).catch(e=>{$('tErr').textContent='Opslaan mislukt: '+(e.code||e.message)})},
     clear(){ref('state').remove().catch(()=>{})},
     tick(){}, count(){}, wake(){},
-    stop(){try{ref('state').off();ref('kids').off();ref('msg').off();conRef&&conRef.off();me&&me.remove()}catch(e){}}
+    stop(){try{ref('state').off();ref('kids').off();ref('msg').off();ref('day').off();conRef&&conRef.off();me&&me.remove()}catch(e){}}
   };
   return t;
 }
@@ -475,7 +534,9 @@ function connect(){
   if(T)T.stop();
   const h={onState:s=>{state=s&&typeof s==='object'?s:{status:'idle'};if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
            onKids:n=>{$('tCount').textContent=n===1?'1 iPad verbonden':n+' iPads verbonden'},
-           onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()}};
+           onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
+           onDay:d=>{curDay=d&&typeof d==='object'?{date:d.date||'',blocks:arr(d.blocks)}:null;renderDay()}};
+  daySig='';
   T=USE_FB?fbTransport(h):mqttTransport(h);
   T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
 }
@@ -511,7 +572,7 @@ function render(){
     $('kCalm').textContent=calm?'Klok tonen':'Rustig scherm';
     // seintje bij 5 minuten
     if(state.status==='running'&&warn&&total>6*60000&&store.get('kt_warned')!==state.sid){store.set('kt_warned',state.sid);if(state.sound!==false)chime(true)}
-    renderKidList();renderOffline();
+    renderKidList();renderOffline();renderDay();
     if(done && !rang){rang=true;if(state.sound!==false)chime()}
   } else if(role==='teacher'){
     const p=$('tPrev');p.classList.toggle('warn',warn);p.classList.toggle('done',done);p.classList.toggle('idle',state.status==='idle'||done);
@@ -520,6 +581,7 @@ function render(){
     $('tPause').disabled=!active;$('tPause').textContent=state.status==='paused'?'Hervat':'Pauze';
     $('tPlus').disabled=!(active||done);$('tMin').disabled=!active;$('tStop').disabled=state.status==='idle';
     $('tStart').textContent=active?'Opnieuw starten':'Start dit vak';
+    renderBoard(rem,total,done,warn,big,sub,endTxt);
   }
 }
 
@@ -637,7 +699,7 @@ function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.w
 async function keepAwake(){try{if('wakeLock' in navigator) await navigator.wakeLock.request('screen')}catch(e){}}
 
 /* =================== schermen =================== */
-function show(id){['home','login','kid','teacher'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
+function show(id){['home','login','kid','teacher','board'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
 function startKid(c){role='kid';code=c;store.set('kt_kid_code',c);store.set('kt_role','kid');$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
 
 async function startTeacher(){
@@ -774,7 +836,7 @@ function renderNext(){
 }
 function autoCheck(){
   if(role!=='teacher'||!plan)return;
-  renderWordToday();
+  renderWordToday();publishDay();
   if(!plan.auto){renderNext();return}
   const n=Date.now();
   const w=wordToday();
@@ -796,6 +858,83 @@ function autoCheck(){
   }
   renderNext();
 }
+
+/* =================== dagritme =================== */
+let curDay=null, daySig='';
+function todayBlocks(){
+  const w=wordToday();
+  if(w)return w.map(b=>({at:b.at,end:b.end,vak:b.vak,title:b.title||''}));
+  const d=new Date().getDay();if(d<1||d>5)return [];
+  const rows=plan.rooster[d].filter(x=>x.vak&&x.at).slice().sort((a,b)=>a.at.localeCompare(b.at));
+  return rows.map((x,i)=>{let end=addMin(x.at,sumMin(x.vak)||30);if(rows[i+1]&&rows[i+1].at>x.at&&rows[i+1].at<end)end=rows[i+1].at;
+    return {at:x.at,end,vak:x.vak,title:(plan.vakken[x.vak]||{}).title||''}});
+}
+function publishDay(){
+  if(role!=='teacher'||!plan||!T)return;
+  const d={date:today(),blocks:todayBlocks()};const sig=JSON.stringify(d);
+  if(sig===daySig)return;daySig=sig;curDay=d;T.sendDay(d);renderBoardDay();
+}
+const hmNow = () => {const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
+function fillDay(ul,blocks,showTitle=true){
+  const n=hmNow();ul.innerHTML='';
+  blocks.forEach(b=>{
+    const li=document.createElement('li');li.className=n>=b.end?'past':(n>=b.at?'now':'');
+    li.innerHTML='<span class="dt"></span><span class="dv"><span></span><small></small></span>';
+    li.querySelector('.dt').textContent=b.at;li.querySelector('.dv span').textContent=b.vak;
+    const sm=li.querySelector('small');if(showTitle&&b.title)sm.textContent=b.title;else sm.remove();
+    ul.append(li);
+  });
+}
+const dayBlocks = () => curDay&&curDay.date===today()?curDay.blocks.filter(b=>b&&b.at):[];
+let dayRendered='';
+function renderDay(){
+  if(role!=='kid')return;
+  const blocks=dayBlocks(), live=state.status!=='idle';
+  const showIdle=!live&&blocks.length>0;
+  $('kDayIdle').classList.toggle('hide',!showIdle);$('kRingWrap').classList.toggle('hide',showIdle);
+  const key=hmNow()+JSON.stringify(blocks);
+  if(key!==dayRendered){dayRendered=key;fillDay($('kDayIdleList'),blocks);fillDay($('kDayList'),blocks)}
+  // "Straks"-balk tijdens een vak
+  const n=hmNow();const next=blocks.find(b=>b.at>n&&!(state.wordAt&&b.at===state.wordAt));
+  const nb=$('kNext');
+  if(live&&blocks.length){nb.classList.remove('hide');nb.innerHTML='';
+    if(next){nb.append('Straks: ');const b=document.createElement('b');b.textContent=next.at+' '+next.vak;nb.append(b)}else nb.textContent='Dit is het laatste blok van vandaag';
+  } else nb.classList.add('hide');
+  if(!blocks.length)$('kDayOver').classList.add('hide');
+}
+$('kNext').addEventListener('click',()=>{$('kDayOver').classList.remove('hide')});
+$('kDayClose').addEventListener('click',()=>$('kDayOver').classList.add('hide'));
+$('kDayOver').addEventListener('click',e=>{if(e.target===$('kDayOver'))$('kDayOver').classList.add('hide')});
+
+/* =================== digibord =================== */
+let boardDayKey='';
+function renderBoardDay(){
+  if($('board').classList.contains('hide'))return;
+  const blocks=curDay&&curDay.date===today()?curDay.blocks:todayBlocks();
+  const key=hmNow()+JSON.stringify(blocks);if(key===boardDayKey)return;boardDayKey=key;
+  fillDay($('bDay'),blocks);
+  if(!blocks.length)$('bDay').innerHTML='<li><span class="dt"></span><span class="dv">Geen rooster voor vandaag</span></li>';
+}
+function renderBoard(rem,total,done,warn,big,sub,endTxt){
+  if($('board').classList.contains('hide'))return;
+  const b=$('board'),live=state.status!=='idle';
+  b.classList.toggle('warn',warn);b.classList.toggle('done',done);b.classList.toggle('idle',!live||done);
+  $('bVak').textContent=state.vak||'';$('bVak').classList.toggle('hide',!live||!state.vak);
+  $('bTask').textContent=live?(state.task||''):'';
+  $('bDoelTxt').textContent=state.doel||'';$('bDoel').classList.toggle('hide',!live||!state.doel);
+  $('bBig').textContent=!live?'Even wachten':big;
+  $('bSub').textContent=!live?'':[sub,endTxt].filter(Boolean).join(' · ');
+  $('bBar').style.width=(!live?0:done?0:Math.max(0,Math.min(1,rem/total))*100)+'%';
+  renderBoardDay();
+}
+$('tBoard').addEventListener('click',()=>{
+  show('board');$('bCode').textContent=code;
+  try{const q=qrcode(0,'M');q.addData(location.origin+location.pathname+'?klas='+code);q.make();$('bQr').innerHTML=q.createSvgTag({cellSize:3,margin:1,scalable:true})}catch(e){}
+  boardDayKey='';render();
+  try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}
+});
+$('bBack').addEventListener('click',()=>{try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}show('teacher');render()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('board').classList.contains('hide'))$('bBack').click()});
 
 /* =================== Word (dagklapper) =================== */
 const MAANDEN=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];

@@ -20,6 +20,10 @@
           "$uid": {
             ".write": "auth != null && auth.uid === $uid"
           }
+        },
+        "day": {
+          ".read": true,
+          ".write": "auth != null && root.child('klassen').child($code).child('owner').val() === auth.uid"
         }
       }
     },
