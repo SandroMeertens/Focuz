@@ -678,6 +678,8 @@ function renderDay(){
   if(!blocks.length)$('kDayOver').classList.add('hide');
 }
 let morningKey='',mPop=-1;
+const fKey = () => 'fz_mfirst_'+today();
+const getFTicks = () => {try{return JSON.parse(store.get(fKey())||'[]')}catch(e){return []}};
 function renderFree(){
   const nx=curDay&&curDay.next;const now=new Date();const wd=now.getDay();
   let title='Vandaag geen lessen',text='';
@@ -713,7 +715,7 @@ function renderMorning(mo,first){
   // het eerste blok uit de dagklapper (bijv. 8:30) groot: waar de dag mee begint
   const wk=curDay&&curDay.week&&arr(curDay.week[today()]);const f=(wk&&wk.find(x=>x.at===first.at))||first;
   const mins=Math.max(0,Math.ceil((localTime(f.at)-Date.now())/60000));
-  const fk=JSON.stringify([f.at,f.vak,f.title,f.doel,mins<=90?mins:-1]);
+  const fk=JSON.stringify([f.at,f.vak,f.title,f.doel,mins<=90?mins:-1,getFTicks()]);
   if($('kMFirst').dataset.k!==fk){$('kMFirst').dataset.k=fk;const box=$('kMFirst');box.innerHTML='';
     const hd=document.createElement('div');hd.className='mfh';
     const tm=document.createElement('span');tm.className='mft';tm.textContent='Om '+f.at;const vk=document.createElement('b');vk.textContent=f.vak;hd.append(tm,vk);
@@ -721,15 +723,16 @@ function renderMorning(mo,first){
     box.append(hd);
     const ti=kidTitle(f.title||'');
     const parts=ti.split(/\s*(?:\+|;|\s&\s)\s*/).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1));
-    if(parts.length>1){const ul=document.createElement('div');ul.className='mfparts';
-      parts.forEach((x,i)=>{const it=document.createElement('div');it.className='mfpart';const n=document.createElement('span');n.className='mfn';n.textContent=i+1;const tx=document.createElement('span');tx.textContent=x;it.append(n,tx);ul.append(it)});box.append(ul)}
-    else if(ti){const d=document.createElement('div');d.className='mftitle';d.textContent=ti;box.append(d)}
+    if(parts.length){const ft=getFTicks();const ul=document.createElement('ul');ul.className='mtasks mfrows';ul.id='kMFRows';
+      parts.forEach((x,i)=>{const li=document.createElement('li');li.dataset.i=i;li.className=ft.includes(i)?'ok':'';
+        li.innerHTML='<span class="box"></span><span class="mt"></span>';li.querySelector('.box').textContent=ft.includes(i)?'✓':'';li.querySelector('.mt').textContent=x;ul.append(li)});box.append(ul)}
     if(f.doel){const d=document.createElement('div');d.className='mfdoel';const b=document.createElement('b');b.textContent='Ik-doel';const sp=document.createElement('span');sp.textContent=f.doel;d.append(b,sp);box.append(d)}
     box.classList.toggle('rich',!!(ti||f.doel));
   }
 }
 $('kMTasks').addEventListener('click',e=>{const li=e.target.closest('li[data-i]');if(!li)return;const i=+li.dataset.i;let t=getMTicks();t=t.includes(i)?t.filter(x=>x!==i):[...t,i];store.set(mKey(),JSON.stringify(t));
   mPop=t.includes(i)?i:-1;renderDay()});
+$('kMFirst').addEventListener('click',e=>{const li=e.target.closest('#kMFRows li[data-i]');if(!li)return;const i=+li.dataset.i;let t=getFTicks();t=t.includes(i)?t.filter(x=>x!==i):[...t,i];store.set(fKey(),JSON.stringify(t));renderDay()});
 $('kNext').addEventListener('click',()=>{$('kDayOver').classList.remove('hide')});
 $('kDayClose').addEventListener('click',()=>$('kDayOver').classList.add('hide'));
 /* weekplanning voor de leerling */

@@ -543,3 +543,11 @@ body.hasdemo .kidtop{padding-top:66px}
 .morning .mtasks{margin-top:0}
 .mfpart{color:#fff}
 .morning .mtasks li .box{min-height:32px}
+
+/* ochtend: blok van 8:30 in dezelfde rijen als de ochtendtaken */
+.mfirst.rich{background:none;border:0;box-shadow:none;padding:0;border-radius:0}
+.mfirst .mfh{font-size:19px}
+.mfirst .mfh b{font-size:22px}
+.mfrows{width:100%;margin:2px 0 0;animation:none}
+.mfirst .mfdoel{font-size:16px;margin-top:2px}
+.mfrows li{color:#fff}
