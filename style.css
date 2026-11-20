@@ -675,3 +675,23 @@ body.kvopen{overflow:hidden}
   #board{padding:20px 32px}
 }
 #board .bmain{overflow:hidden}
+/* meer ruimte op de ochtendschermen */
+.morning{gap:12px}
+.mdate{margin-bottom:2px}
+.morning .mtext{margin:4px 0 26px}
+.msec{padding:24px 24px 26px;gap:16px}
+.morning .mtasks{gap:12px}
+.morning .mtasks li{min-height:60px;padding:10px 18px;gap:16px}
+.bmorning{gap:16px}
+.bmtop{margin-bottom:4px}
+.bmorning .bmt{margin:2px 0 18px}
+.bml{gap:16px}
+.bmcount{margin-top:26px}
+@media(max-height:860px){
+  .bmorning{gap:10px}
+  .bmorning .bmh{font-size:clamp(48px,5.4vw,76px)}
+  .bmorning .bmt{margin:0 0 14px;font-size:21px}
+  .bml{gap:12px}
+  .bml li{padding:11px 18px;font-size:24px}
+  .bmcount{margin-top:18px}
+}
