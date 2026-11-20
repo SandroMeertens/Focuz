@@ -87,11 +87,18 @@ window.FOCUZ_MS_CLIENT_ID = null;
   </div>
   <div class="kidmain">
     <div class="morning hide" id="kMorning">
+      <div class="mdate" id="kMDate"></div>
       <div class="mhello" id="kMHello">Goedemorgen!</div>
       <p class="mtext" id="kMText"></p>
-      <div class="mprep hide" id="kMPrepH">Klaar voor de start?</div>
-      <ul class="mtasks" id="kMTasks"></ul>
-      <div class="mfirst" id="kMFirst"></div>
+      <div class="mcols">
+        <section class="msec" id="kMPrepSec">
+          <header class="msh"><span class="msn">1</span><b id="kMPrepH">Klaar voor de start?</b><span class="mcount" id="kMCount"></span></header>
+          <ul class="mtasks" id="kMTasks"></ul>
+        </section>
+        <section class="msec" id="kMFirstSec">
+          <div class="mfirst" id="kMFirst"></div>
+        </section>
+      </div>
       <div class="mtoday hide" id="kMToday"></div>
     </div>
     <div class="free hide" id="kFree">

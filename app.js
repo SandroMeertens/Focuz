@@ -487,7 +487,8 @@ function normPlan(p){
   const ko=p.kidOpts&&typeof p.kidOpts==='object'?p.kidOpts:{};p.kidOpts={calm:ko.calm!==false,week:ko.week!==false};
   const mo=p.morning&&typeof p.morning==='object'?p.morning:{};
   p.morning={on:mo.on!==false,auto:mo.auto!==false,text:typeof mo.text==='string'?mo.text:'Fijn dat je er bent! Begin rustig aan de dag.',
-    tasks:typeof mo.tasks==='string'?(mo.v2?mo.tasks:mo.tasks.split('\n').filter(x=>!/jas ophangen/i.test(x)).join('\n')):'Agenda invullen',v2:true};
+    tasks:typeof mo.tasks==='string'?(mo.v2?mo.tasks:mo.tasks.split('\n').filter(x=>!/jas ophangen/i.test(x)).join('\n')):'Agenda invullen\niPad pakken',v2:true,v3:true};
+  if(!mo.v3&&typeof mo.tasks==='string'&&!/ipad/i.test(p.morning.tasks))p.morning.tasks=(p.morning.tasks.trim()?p.morning.tasks.trim()+'\n':'')+'iPad pakken';
   if(p.word&&typeof p.word==='object'){const days={};const src=p.word.days||{};for(const k in src)days[k]=arr(src[k]).filter(b=>b&&b.at);p.word={file:p.word.file||'',at:+p.word.at||0,days,issues:arr(p.word.issues).filter(x=>x&&x.msg),morning:p.word.morning&&typeof p.word.morning==='object'?p.word.morning:{}}}else p.word=null;
   if(!(p.msFile&&p.msFile.id))p.msFile=null;
   return p;
@@ -615,6 +616,7 @@ function todayBlocks(){
 function nextLessonDay(){ // eerstvolgende dag met lessen na vandaag (tot 3 weken vooruit)
   const d=new Date();for(let i=1;i<=28;i++){d.setDate(d.getDate()+1);const b=blocksFor(d);if(b.length)return {date:ymd(d),at:b[0].at,vak:b[0].vak}}return null}
 // ochtendscherm: rij 'Ochtend' uit de dagklapper + vaste taken + taken afgeleid uit de dag
+const NOWORKBOOK_RE=/^(hw|huiswerk|stillezen|lezen|bg lezen|kring|spel|bieb|bibliotheek|karakter|seo|dagopening|weekopening|vieren|muziek|tekenen|handvaardigheid)\b/i;
 function morningFor(dt){
   const mo=plan.morning;if(!mo.on)return null;
   const key=ymd(dt), wm=plan.word&&plan.useWord&&plan.word.morning&&plan.word.morning[key];
@@ -628,6 +630,8 @@ function morningFor(dt){
     if(bl.some(b=>GYM_RE.test(b.vak))&&!has(/gym/i))list.push('Gymspullen klaarzetten');
     const f=bl.find(b=>!BREAK_RE.test(b.vak));
     if(f&&/lezen|bookflix/i.test(f.vak+' '+(f.title||''))&&!has(/leesboek|boek/i))list.push('Leesboek op je tafel');
+    const les=bl.find(b=>!BREAK_RE.test(b.vak)&&!GYM_RE.test(b.vak)&&!NOWORKBOOK_RE.test(b.vak));
+    if(les&&!has(/werkboek/i))list.unshift('Werkboeken klaarleggen voor '+les.vak.toLowerCase());
   }
   const seen=new Set();const tasks=list.filter(x=>{const k=x.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,10).map(x=>x.slice(0,80));
   const vandaag=[...new Set(bl.filter(b=>!BREAK_RE.test(b.vak)).map(b=>b.vak))].slice(0,10);
@@ -704,7 +708,9 @@ function renderMorning(mo,first){
   const h=new Date().getHours();
   $('kMHello').textContent=h<12?'Goedemorgen!':h<18?'Goedemiddag!':'Goedenavond!';
   $('kMText').textContent=mo.text||'';$('kMText').classList.toggle('hide',!mo.text);
-  $('kMPrepH').classList.toggle('hide',!mo.tasks.length);
+  $('kMPrepSec').classList.toggle('hide',!mo.tasks.length);
+  {const d=new Date();$('kMDate').textContent=DAG[d.getDay()]+' '+d.getDate()+' '+MAAND_LANG[d.getMonth()];
+   const tk=getMTicks().filter(i=>i<mo.tasks.length).length;$('kMCount').textContent=mo.tasks.length?tk+' van '+mo.tasks.length:'';$('kMCount').classList.toggle('done',tk>=mo.tasks.length&&mo.tasks.length>0)}
   const ticks=getMTicks();
   const key=JSON.stringify(mo.tasks)+ticks.join(',');
   if(key!==morningKey){morningKey=key;const ul=$('kMTasks');ul.innerHTML='';
@@ -718,7 +724,8 @@ function renderMorning(mo,first){
   const fk=JSON.stringify([f.at,f.vak,f.title,f.doel,mins<=90?mins:-1,getFTicks()]);
   if($('kMFirst').dataset.k!==fk){$('kMFirst').dataset.k=fk;const box=$('kMFirst');box.innerHTML='';
     const hd=document.createElement('div');hd.className='mfh';
-    const tm=document.createElement('span');tm.className='mft';tm.textContent='Om '+f.at;const vk=document.createElement('b');vk.textContent=f.vak;hd.append(tm,vk);
+    const n2=document.createElement('span');n2.className='msn';n2.textContent=$('kMPrepSec').classList.contains('hide')?'1':'2';
+    const tm=document.createElement('span');tm.className='mft';tm.textContent='Om '+f.at;const vk=document.createElement('b');vk.textContent=f.vak;hd.append(n2,vk,tm);
     if(mins<=90){const c=document.createElement('span');c.className='mmin';c.textContent=mins<=1?'bijna!':'nog '+mins+' min';hd.append(c)}
     box.append(hd);
     const ti=kidTitle(f.title||'');
@@ -992,6 +999,7 @@ function shortTitle(s){
   return s.slice(0,87).replace(/\s+\S*$/,'')+'…';
 }
 let parseIssues=[],parseMorning={};
+const MAAND_LANG=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
 const MORNING_RE=/^(ochtend|ochtendtaken|inloop|binnenkomst|welkom|dagstart)$/i;
 async function parseDocx(buf){
   if(typeof JSZip==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');

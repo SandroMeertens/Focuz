@@ -565,3 +565,25 @@ body.hasdemo .kidtop{padding-top:66px}
 .morning .mfirst{justify-self:stretch;width:100%;display:grid}
 .morning .mfrows{width:100%;justify-self:stretch}
 .morning .mfirst{justify-content:stretch;grid-template-columns:minmax(0,1fr)}
+
+/* ochtendscherm v3: twee kaarten naast elkaar */
+.morning{width:min(1040px,100%);gap:6px}
+.mdate{font-size:17px;font-weight:800;color:#9fe7c4;text-transform:capitalize;letter-spacing:.02em;animation:rise .8s ease-out both}
+.mhello{font-size:clamp(40px,5.6vw,68px)}
+.mtext{margin-bottom:14px}
+.mcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;width:100%;align-items:start;animation:rise .8s .2s ease-out both}
+.msec{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:18px;text-align:left;display:grid;gap:12px}
+.msh,.morning .mfh{display:flex;align-items:center;gap:10px;font-size:19px;color:#fff;margin:0;justify-self:stretch}
+.msh b,.morning .mfh b{font-size:20px;font-weight:900;color:#fff}
+.msn{flex:none;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:15px;font-weight:900;display:grid;place-items:center}
+.mcount,.morning .mft{margin-left:auto;font-size:15px;font-weight:800;color:#cfe0f5;background:rgba(255,255,255,.1);border-radius:999px;padding:3px 12px;white-space:nowrap}
+.mcount.done{background:var(--go);color:#fff}
+.morning .mmin{display:none}
+.morning .mfirst{margin:0;gap:12px}
+.morning .mtasks,.morning .mfrows{margin:0;gap:8px;animation:none}
+.morning .mtasks li{background:rgba(255,255,255,.1);border-radius:16px;min-height:54px;font-size:18px;padding:8px 14px;gap:12px}
+.morning .mtasks li .box{width:30px;height:30px;min-height:30px;border-radius:50%;border-width:2.5px;font-size:16px}
+.morning .mtasks li.ok{background:rgba(47,182,124,.22)}
+.morning .mtasks li.alldone{background:var(--go);justify-content:center;min-height:46px}
+.mdate{text-transform:none}
+.mdate::first-letter{text-transform:uppercase}
