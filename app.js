@@ -969,9 +969,12 @@ function renderBoard(rem,total,done,warn,big,sub,endTxt){
   $('bMorning').classList.toggle('hide',!mo);
   if(mo){$('bMText').textContent=mo.text||'';const k=JSON.stringify(mo.tasks);if($('bMList').dataset.k!==k){$('bMList').dataset.k=k;$('bMList').innerHTML='';
       mo.tasks.forEach(t=>{const li=document.createElement('li');li.textContent=t;$('bMList').append(li)})}
-    const m=Math.max(0,Math.ceil((localTime(tb[0].at)-Date.now())/60000));$('bMFirst').textContent='Om '+tb[0].at+' begint '+tb[0].vak+(m<=90?' · nog '+m+' min':'');
+    const ms=Math.max(0,localTime(tb[0].at)-Date.now()),m=Math.ceil(ms/60000);
+    $('bMFirst').textContent='Om '+tb[0].at+' begint '+tb[0].vak;$('bMMin').textContent=m<=1?'bijna!':'nog '+m+' min';
+    $('bMBar').style.width=(Math.max(0,Math.min(1,1-ms/(30*60000)))*100)+'%';   // vult zich in het laatste halfuur
+    const nw=new Date();$('bMClock').textContent=hmNow();$('bMDate').textContent=DAG[nw.getDay()]+' '+nw.getDate()+' '+MAAND_LANG[nw.getMonth()];
     $('bVak').classList.add('hide');$('bTask').textContent='';$('bDoel').classList.add('hide');}
-  const between=(!live||done)&&!mo;$('bJoin').classList.toggle('hide',!between);$('bQr').classList.toggle('hide',between);$('bCode').parentElement.classList.toggle('hide',between);$('bBig').classList.toggle('hide',!live);$('bBar').parentElement.classList.toggle('hide',between);
+  const between=(!live||done)&&!mo;$('bJoin').classList.toggle('hide',!between);$('bFJoin').classList.toggle('hide',between);$('bBig').classList.toggle('hide',!live);$('bBar').parentElement.classList.toggle('hide',between);
   if(!live&&!mo){const nb=nextBlock();$('bTask').textContent=nb?nb.label+': '+nb.b.at+' '+nb.b.vak:'';}
   if(mo)$('bBar').parentElement.classList.add('hide');
   renderBoardDay();

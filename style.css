@@ -633,3 +633,45 @@ body.kvopen{overflow:hidden}
 .bml li{background:rgba(255,255,255,.1);border-radius:18px;padding:14px 20px;font-size:clamp(22px,2.2vw,32px);font-weight:800;display:flex;align-items:center;gap:14px}
 .bml li::before{content:"";flex:none;width:26px;height:26px;border-radius:50%;border:3px solid #fff;opacity:.8}
 .bmf{font-size:clamp(18px,1.6vw,24px);color:#cfe0f5;font-weight:700}
+
+/* digibord-ochtend v2 */
+#board:has(#bMorning:not(.hide)){background:radial-gradient(90% 80% at 30% 35%,#20416a 0%,#13263f 60%,#0f1f35 100%)}
+.bmorning{justify-items:start;text-align:left;gap:10px;width:min(820px,100%)}
+.bmtop{display:flex;align-items:baseline;gap:16px}
+.bmclock{font-size:clamp(28px,2.6vw,40px);font-weight:900;font-variant-numeric:tabular-nums;color:#fff}
+.bmdate{font-size:clamp(18px,1.5vw,24px);font-weight:700;color:#9fe7c4}
+.bmdate::first-letter{text-transform:uppercase}
+.bmorning .bmh{font-size:clamp(60px,7.2vw,120px);margin:0}
+.bmorning .bmt{margin:0 0 10px}
+.bml{counter-reset:bm;width:100%;gap:12px;margin:0}
+.bml li{counter-increment:bm;padding:16px 22px;gap:18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1)}
+.bml li::before{content:counter(bm);width:44px;height:44px;border:0;opacity:1;background:var(--go);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:900}
+.bmcount{width:100%;margin-top:14px;display:grid;gap:10px}
+.bmcl{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font-size:clamp(20px,1.8vw,28px);font-weight:800;color:#dfe9f6}
+.bmcl b{font-size:clamp(26px,2.4vw,38px);color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bmbar{height:14px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.bmbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2fb67c,#9fe7c4);border-radius:999px;transition:width 1s linear}
+/* nette voet: koppelen links, bediening klein rechts */
+.bfoot{align-items:flex-end}
+.bfjoin{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:10px 18px 10px 10px}
+.bfjoin .bqr svg{width:84px;height:84px;padding:4px;border-radius:10px}
+.bfjt{font-size:17px;font-weight:800;color:#fff;line-height:1.35}
+.bfjt small{font-size:14px;color:#cfe0f5;font-weight:700}
+.bfjt b{font-size:24px;letter-spacing:.14em}
+.bback{background:transparent;color:#cfe0f5;border:1px solid rgba(255,255,255,.2);min-height:40px;padding:6px 14px;font-size:14px;opacity:.45;transition:opacity .2s}
+.bback:hover,.bback:focus-visible{opacity:1}
+#board:has(#bMorning:not(.hide)) .bright .daylist li:first-child{background:rgba(47,182,124,.22)}
+@media(max-height:860px){
+  .bmorning{gap:6px}
+  .bmorning .bmh{font-size:clamp(52px,6vw,84px)}
+  .bmorning .bmt{margin:0 0 4px;font-size:22px}
+  .bml{gap:8px}
+  .bml li{padding:10px 18px;font-size:26px}
+  .bml li::before{width:36px;height:36px;font-size:20px}
+  .bmcount{margin-top:8px;gap:6px}
+  .bfjoin .bqr svg{width:64px;height:64px}
+  .bfjoin{padding:6px 14px 6px 6px}
+  .bfjt b{font-size:20px}
+  #board{padding:20px 32px}
+}
+#board .bmain{overflow:hidden}

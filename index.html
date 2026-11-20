@@ -324,10 +324,14 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <div class="bbar"><i id="bBar"></i></div>
       <div class="bsub" id="bSub"></div>
       <div class="bmorning hide" id="bMorning">
+        <div class="bmtop"><span class="bmclock" id="bMClock"></span><span class="bmdate" id="bMDate"></span></div>
         <div class="bmh" id="bMHello">Goedemorgen!</div>
         <div class="bmt" id="bMText"></div>
-        <ul class="bml" id="bMList"></ul>
-        <div class="bmf" id="bMFirst"></div>
+        <ol class="bml" id="bMList"></ol>
+        <div class="bmcount">
+          <div class="bmcl"><span id="bMFirst"></span><b id="bMMin"></b></div>
+          <div class="bmbar"><i id="bMBar"></i></div>
+        </div>
       </div>
       <div class="bjoin hide" id="bJoin">
         <div class="bjqr" id="bJoinQr"></div>
@@ -336,7 +340,10 @@ window.FOCUZ_MS_CLIENT_ID = null;
     </div>
     <div class="bright"><h3>Vandaag</h3><ul class="daylist" id="bDay"></ul></div>
   </div>
-  <div class="bfoot"><span>Klascode <b id="bCode"></b></span><span class="bqr" id="bQr"></span><button class="ghost" id="bBack">Terug naar bediening</button></div>
+  <div class="bfoot">
+    <div class="bfjoin" id="bFJoin"><span class="bqr" id="bQr"></span><span class="bfjt">Koppel je iPad<br><small>Klascode</small> <b id="bCode"></b></span></div>
+    <button class="bback" id="bBack" title="Terug naar bediening (Esc)">Terug naar bediening</button>
+  </div>
 </section>
 
 <div class="kvfull hide" id="kvModal" role="dialog" aria-label="Leerlingbeeld">
