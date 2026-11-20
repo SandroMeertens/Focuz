@@ -632,7 +632,7 @@ function morningFor(dt){
     if(/huiswerk/i.test(all)&&!has(/huiswerk/i))list.push('Huiswerk op je tafel leggen');
     if(bl.some(b=>GYM_RE.test(b.vak))&&!has(/gym/i))list.push('Gymspullen klaarzetten');
     const f=bl.find(b=>!BREAK_RE.test(b.vak));
-    if(f&&/lezen|bookflix/i.test(f.vak+' '+(f.title||''))&&!has(/leesboek|boek/i))list.push('Leesboek op je tafel');
+    if(f&&/lezen|bookflix/i.test(f.vak+' '+(f.title||''))&&!has(/leesboek/i))list.push('Leesboek op je tafel');
     const les=bl.find(b=>!BREAK_RE.test(b.vak)&&!GYM_RE.test(b.vak)&&!NOWORKBOOK_RE.test(b.vak));
     if(les&&!has(/werkboek/i))list.push('Werkboeken klaarleggen voor '+les.vak.toLowerCase());
   }
