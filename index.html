@@ -214,8 +214,8 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <h2>Dagklapper</h2>
         <p class="wstat" id="wStatus">Nog geen Word-bestand ingelezen.</p>
         <div class="wcheck" id="wCheck"></div>
-        <div class="row"><button id="wAuto" class="primary">Automatisch bijwerken</button><button id="wPick">Eenmalig inlezen</button><button id="wMsBtn" class="hide">Via Microsoft-login</button></div>
-        <div id="wAutoBox" class="msbox hide"></div>
+        <div id="wAutoBox" class="wlink"></div>
+        <div class="hide"><button id="wAuto"></button><button id="wPick"></button><button id="wMsBtn"></button></div>
         <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
         <div id="wMsBox" class="msbox hide"></div>
         <div class="toggles">
@@ -323,6 +323,12 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <div class="bbig" id="bBig">--:--</div>
       <div class="bbar"><i id="bBar"></i></div>
       <div class="bsub" id="bSub"></div>
+      <div class="bmorning hide" id="bMorning">
+        <div class="bmh" id="bMHello">Goedemorgen!</div>
+        <div class="bmt" id="bMText"></div>
+        <ul class="bml" id="bMList"></ul>
+        <div class="bmf" id="bMFirst"></div>
+      </div>
       <div class="bjoin hide" id="bJoin">
         <div class="bjqr" id="bJoinQr"></div>
         <div class="bjtxt"><b>Koppel je iPad</b><span>Scan de code met de camera, of typ de klascode:</span><strong id="bJoinCode"></strong></div>

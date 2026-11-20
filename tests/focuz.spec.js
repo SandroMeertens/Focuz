@@ -188,3 +188,14 @@ test('ochtendscherm wordt gevuld vanuit de dagklapper en de dag', async ({ brows
   expect([...t.errors, ...k.errors]).toEqual([]);
   await k.ctx.close(); await t.ctx.close();
 });
+
+test('na het laatste blok: afsluiting met de volgende lesdag', async ({ browser }) => {
+  const t = await teacher(browser, '2026-11-19T15:00:00+01:00');
+  const code = (await t.page.locator('#tCode').textContent()).trim();
+  await t.page.waitForTimeout(6000);
+  const k = await kid(browser, '2026-11-19T15:00:00+01:00', code);
+  await expect(k.page.locator('#kFreeTitle')).toHaveText('Fijne middag!', { timeout: 15000 });
+  await expect(k.page.locator('#kFreeText')).toContainText('Morgen beginnen we om 08:30');
+  expect([...t.errors, ...k.errors]).toEqual([]);
+  await k.ctx.close(); await t.ctx.close();
+});

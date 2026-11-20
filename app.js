@@ -283,8 +283,9 @@ function renderKidList(){
     if(selTask!==i)return;
     const say=li.querySelector('.say'), b=li.querySelector('.mbtn');
     if(running&&!ok){
-      say.textContent=r>0?'Je taaktimer loopt. Kijk op de klok.':'Je tijd voor deze taak is om. Rond af en vink hem af.';
-      b.textContent='Stop taaktimer';b.classList.remove('hide');
+      li.querySelector('.tdetail').classList.toggle('hide',r>0);
+      say.textContent='Je tijd voor deze taak is om. Rond af en vink hem af.';
+      b.classList.add('hide');
     } else {
       say.innerHTML=x.m?'Hier krijg je <b>'+minTxt(x.m)+'</b> voor.':'Voor deze taak is geen tijd ingesteld.';
       b.textContent='Start taaktimer';b.classList.toggle('hide',!x.m||ok);
@@ -666,11 +667,13 @@ function renderDay(){
   const blocks=dayBlocks(), live=state.status!=='idle';
   const mo=curDay&&curDay.morning, first=blocks[0];
   const showMorning=!live&&!!mo&&!!first&&hmNow()<first.at;
-  const showIdle=!live&&blocks.length>0&&!showMorning;
-  const showFree=!live&&!blocks.length&&!!curDay;
+  const lastB=blocks[blocks.length-1];
+  const showEnd=!live&&!!lastB&&hmNow()>=lastB.end;
+  const showIdle=!live&&blocks.length>0&&!showMorning&&!(lastB&&hmNow()>=lastB.end);
+  const showFree=(!live&&!blocks.length&&!!curDay)||showEnd;
   $('kMorning').classList.toggle('hide',!showMorning);$('kFree').classList.toggle('hide',!showFree);
   $('kDayIdle').classList.toggle('hide',!showIdle);$('kRingWrap').classList.toggle('hide',showIdle||showMorning||showFree);
-  if(showFree)renderFree();
+  if(showFree)renderFree(showEnd);
   $('kid').classList.toggle('ismorning',showMorning);
   if(showMorning)renderMorning(mo,first);
   const key=hmNow()+JSON.stringify(blocks);
@@ -687,7 +690,7 @@ function renderDay(){
 let morningKey='',mPop=-1;
 const fKey = () => 'fz_mfirst_'+today();
 const getFTicks = () => {try{return JSON.parse(store.get(fKey())||'[]')}catch(e){return []}};
-function renderFree(){
+function renderFree(endOfDay){
   const nx=curDay&&curDay.next;const now=new Date();const wd=now.getDay();
   let title='Vandaag geen lessen',text='';
   if(nx){const [y,m,dd]=nx.date.split('-').map(Number);const dt=new Date(y,m-1,dd);
@@ -698,6 +701,15 @@ function renderFree(){
     else if(wd===0||wd===6){title='Fijn weekend!';text='We zien je '+wanneer+' weer. Om '+nx.at+' beginnen we met '+nx.vak+'.'}
     else {title='Vandaag geen lessen';text='We zien je '+wanneer+' weer. Om '+nx.at+' beginnen we met '+nx.vak+'.'}
   } else if(wd===0||wd===6){title='Fijn weekend!'}
+  if(endOfDay){ // na het laatste blok van vandaag
+    const h=now.getHours();title=wd===5?'Fijn weekend!':h<18?'Fijne middag!':'Fijne avond!';
+    if(nx){const [y,m,dd]=nx.date.split('-').map(Number);const dt=new Date(y,m-1,dd);const days=Math.round((dt-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);
+      const wanneer=days===1?'Morgen':DAG[dt.getDay()][0].toUpperCase()+DAG[dt.getDay()].slice(1);
+      text=wanneer+' beginnen we om '+nx.at+' met '+nx.vak+'.';
+      const nb=curDay&&curDay.week&&arr(curDay.week[nx.date]);
+      if(nb&&nb.some(b=>/huiswerk/i.test((b.vak||'')+' '+(b.title||'')+' '+(b.doel||''))))text+=' Vergeet je huiswerk niet!';
+    } else text='Tot de volgende keer!';
+  }
   $('kFreeTitle').textContent=title;$('kFreeText').textContent=text;
 }
 const mKey = () => 'fz_morning_'+today();
@@ -952,8 +964,16 @@ function renderBoard(rem,total,done,warn,big,sub,endTxt){
   $('bSub').textContent=!live?'':[sub,endTxt].filter(Boolean).join(' · ');
   $('bBar').style.width=(!live?0:done?0:Math.max(0,Math.min(1,rem/total))*100)+'%';
   // tussen de vakken: grote QR-code zodat kinderen zelf hun iPad koppelen
-  const between=!live||done;$('bJoin').classList.toggle('hide',!between);$('bQr').classList.toggle('hide',between);$('bCode').parentElement.classList.toggle('hide',between);$('bBig').classList.toggle('hide',!live);$('bBar').parentElement.classList.toggle('hide',between);
-  if(!live){const nb=nextBlock();$('bTask').textContent=nb?nb.label+': '+nb.b.at+' '+nb.b.vak:'';}
+  // voor het eerste blok: ochtendscherm groot op het digibord
+  const tb=todayBlocks(),mo=plan&&tb.length&&!live&&hmNow()<tb[0].at?morningFor(new Date()):null;
+  $('bMorning').classList.toggle('hide',!mo);
+  if(mo){$('bMText').textContent=mo.text||'';const k=JSON.stringify(mo.tasks);if($('bMList').dataset.k!==k){$('bMList').dataset.k=k;$('bMList').innerHTML='';
+      mo.tasks.forEach(t=>{const li=document.createElement('li');li.textContent=t;$('bMList').append(li)})}
+    const m=Math.max(0,Math.ceil((localTime(tb[0].at)-Date.now())/60000));$('bMFirst').textContent='Om '+tb[0].at+' begint '+tb[0].vak+(m<=90?' · nog '+m+' min':'');
+    $('bVak').classList.add('hide');$('bTask').textContent='';$('bDoel').classList.add('hide');}
+  const between=(!live||done)&&!mo;$('bJoin').classList.toggle('hide',!between);$('bQr').classList.toggle('hide',between);$('bCode').parentElement.classList.toggle('hide',between);$('bBig').classList.toggle('hide',!live);$('bBar').parentElement.classList.toggle('hide',between);
+  if(!live&&!mo){const nb=nextBlock();$('bTask').textContent=nb?nb.label+': '+nb.b.at+' '+nb.b.vak:'';}
+  if(mo)$('bBar').parentElement.classList.add('hide');
   renderBoardDay();
 }
 $('tBoard').addEventListener('click',()=>{
@@ -1200,33 +1220,30 @@ async function readHandle(force){
     await importWord(await f.arrayBuffer(),f.name);fileLastMod=f.lastModified;renderAuto();
   }catch(e){$('wStatus').textContent='Bijwerken mislukt: '+e.message+'. Staat het bestand nog op dezelfde plek?'}
 }
-function renderAuto(){
+function renderAuto(){ // één regel met de koppeling, en alleen de knop die nu nodig is
   const box=$('wAutoBox');box.innerHTML='';
-  const el=(tag,txt,cls)=>{const e=document.createElement(tag);if(txt)e.textContent=txt;if(cls)e.className=cls;box.append(e);return e};
-  if(!CAN_WATCH){
-    el('div','Automatisch bijwerken werkt in Chrome of Edge op een computer (bijvoorbeeld je laptop of het digibord), niet op een iPad of in Safari. Open Focuz daar en kies je dagklapper uit je OneDrive-map.','small');return;
-  }
+  const line=(cls,txt)=>{const d=document.createElement('div');d.className='wl '+cls;const i=document.createElement('i');const t=document.createElement('span');t.textContent=txt;d.append(i,t);box.append(d);return d};
+  const btn=(txt,cls,fn)=>{const b=document.createElement('button');b.textContent=txt;if(cls)b.className=cls;b.onclick=fn;return b};
+  const once=btn('Eenmalig inlezen','link',()=>$('wFile').click());
+  const pick=async()=>{try{const [hd]=await showOpenFilePicker({types:[{description:'Word',accept:{'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx']}}],multiple:false});
+      fileHandle=hd;await saveHandle(hd);fileLastMod=0;filePerm='granted';$('wStatus').textContent='Inlezen…';await readHandle(true);renderAuto()}catch(e){if(e.name!=='AbortError')line('bad','Kiezen mislukt: '+e.message)}};
+  if(!CAN_WATCH){line('off','Automatisch bijwerken kan alleen in Chrome of Edge op een computer.');const r=document.createElement('div');r.className='wbtns';r.append(btn('Dagklapper inlezen','primary',()=>$('wFile').click()));box.append(r);return}
   if(!fileHandle){
-    el('div','Kies je dagklapper in de OneDrive-map op deze computer. Focuz kijkt daarna elke minuut of je het bestand hebt aangepast en neemt de wijzigingen vanzelf over.','small');
-    const b=el('button','Kies je dagklapper','primary');b.style.marginTop='10px';
-    b.onclick=async()=>{try{const [h]=await showOpenFilePicker({types:[{description:'Word',accept:{'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx']}}],multiple:false});
-      fileHandle=h;await saveHandle(h);fileLastMod=0;$('wStatus').textContent='Inlezen…';await readHandle(true);renderAuto()}catch(e){if(e.name!=='AbortError')el('div','Kiezen mislukt: '+e.message,'err')}};
-    return;
+    line('off','Nog niet automatisch gekoppeld');
+    const r=document.createElement('div');r.className='wbtns';r.append(btn('Dagklapper koppelen','primary',pick),once);box.append(r);return;
   }
   if(filePerm!=='granted'){
-    el('div',`Focuz mag "${fileHandle.name}" weer lezen na één klik (de browser vraagt dit na het opnieuw opstarten).`,'small');
-    const b=el('button','Toegang geven','primary');b.style.marginTop='10px';
-    b.onclick=async()=>{try{filePerm=await fileHandle.requestPermission({mode:'read'})}catch(e){}if(filePerm==='granted')await readHandle(true);renderAuto()};
-  } else el('div',`Gekoppeld: "${fileHandle.name}". Wijzigingen in Word komen binnen een minuut in Focuz (nadat OneDrive het bestand heeft opgeslagen).`,'small');
-  const row=el('div','','row');
-  const b2=document.createElement('button');b2.textContent='Ander bestand';b2.onclick=async()=>{fileHandle=null;await saveHandle(null);renderAuto()};
-  row.append(b2);
+    line('warn','Automatisch bijwerken staat even stil');
+    const r=document.createElement('div');r.className='wbtns';r.append(btn('Toegang geven','primary',async()=>{try{filePerm=await fileHandle.requestPermission({mode:'read'})}catch(e){}if(filePerm==='granted')await readHandle(true);renderAuto();statKey=''}),
+      btn('Ander bestand','link',async()=>{fileHandle=null;await saveHandle(null);pick()}));box.append(r);return;
+  }
+  line('ok','Automatisch gekoppeld aan "'+fileHandle.name+'"');
+  const r=document.createElement('div');r.className='wbtns';r.append(btn('Ander bestand','link',async()=>{fileHandle=null;await saveHandle(null);pick()}));box.append(r);
 }
-$('wAuto').addEventListener('click',()=>{const h=$('wAutoBox').classList.toggle('hide');if(!h)renderAuto()});
+
 async function initAuto(){
-  if(!CAN_WATCH)return;
-  fileHandle=await loadHandle();if(!fileHandle)return;
-  $('wAutoBox').classList.remove('hide');
+  if(!CAN_WATCH){renderAuto();return}
+  fileHandle=await loadHandle();if(!fileHandle){renderAuto();return}
   try{filePerm=await fileHandle.queryPermission({mode:'read'})}catch(e){filePerm=''}
   renderAuto();if(filePerm==='granted')readHandle(false);
 }
