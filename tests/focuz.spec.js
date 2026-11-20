@@ -199,3 +199,13 @@ test('na het laatste blok: afsluiting met de volgende lesdag', async ({ browser 
   expect([...t.errors, ...k.errors]).toEqual([]);
   await k.ctx.close(); await t.ctx.close();
 });
+
+test('"Tijd is om" verdwijnt na 10 minuten vanzelf', async ({ browser }) => {
+  const k = await kid(browser, '2026-11-20T18:26:00+01:00', 'ABCDEF', '&kijk=1');
+  await k.page.waitForTimeout(1500);
+  await k.page.evaluate(() => { tState = {v:3,sid:'OUD',status:'running',endAt:Date.now()-60*60000,total:30*60000,vak:'Stillezen',task:'Bookflix'}; state = effState(); render(); });
+  await k.page.waitForTimeout(800);
+  await expect(k.page.locator('#kid')).not.toHaveClass(/done/);
+  expect(k.errors).toEqual([]);
+  await k.ctx.close();
+});

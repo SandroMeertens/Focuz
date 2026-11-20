@@ -157,7 +157,9 @@ let tState={status:'idle'};
 function localTime(hm){const [h,m]=hm.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()}
 function effState(){
   if(typeof DEMO!=='undefined'&&DEMO)return state;
-  const t=tState||{status:'idle'};
+  let t=tState||{status:'idle'};
+  // 'Tijd is om' blijft 10 minuten staan; daarna gewoon terug naar het dagritme/afsluiting
+  if(t.status==='running'&&t.endAt<=srvNow()-10*60000)t={status:'idle',stoppedAt:t.stoppedAt};
   const tActive=(t.status==='running'&&t.endAt>srvNow())||t.status==='paused';
   if(tActive||!curDay||curDay.auto===false)return t;
   const w=curDay.week&&arr(curDay.week[today()]).length?arr(curDay.week[today()]):(curDay.date===today()?arr(curDay.blocks):[]);
