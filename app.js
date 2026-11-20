@@ -487,7 +487,8 @@ function normPlan(p){
   const ko=p.kidOpts&&typeof p.kidOpts==='object'?p.kidOpts:{};p.kidOpts={calm:ko.calm!==false,week:ko.week!==false};
   const mo=p.morning&&typeof p.morning==='object'?p.morning:{};
   p.morning={on:mo.on!==false,auto:mo.auto!==false,text:typeof mo.text==='string'?mo.text:'Fijn dat je er bent! Begin rustig aan de dag.',
-    tasks:typeof mo.tasks==='string'?(mo.v2?mo.tasks:mo.tasks.split('\n').filter(x=>!/jas ophangen/i.test(x)).join('\n')):'Agenda invullen\niPad pakken',v2:true,v3:true};
+    tasks:typeof mo.tasks==='string'?(mo.v2?mo.tasks:mo.tasks.split('\n').filter(x=>!/jas ophangen/i.test(x)).join('\n')):DEFAULT_MORNING,v2:true,v3:true,v4:true};
+  if(!mo.v4)p.morning.tasks=DEFAULT_MORNING; // nieuwe vaste volgorde op verzoek
   if(!mo.v3&&typeof mo.tasks==='string'&&!/ipad/i.test(p.morning.tasks))p.morning.tasks=(p.morning.tasks.trim()?p.morning.tasks.trim()+'\n':'')+'iPad pakken';
   if(p.word&&typeof p.word==='object'){const days={};const src=p.word.days||{};for(const k in src)days[k]=arr(src[k]).filter(b=>b&&b.at);p.word={file:p.word.file||'',at:+p.word.at||0,days,issues:arr(p.word.issues).filter(x=>x&&x.msg),morning:p.word.morning&&typeof p.word.morning==='object'?p.word.morning:{}}}else p.word=null;
   if(!(p.msFile&&p.msFile.id))p.msFile=null;
@@ -616,12 +617,14 @@ function todayBlocks(){
 function nextLessonDay(){ // eerstvolgende dag met lessen na vandaag (tot 3 weken vooruit)
   const d=new Date();for(let i=1;i<=28;i++){d.setDate(d.getDate()+1);const b=blocksFor(d);if(b.length)return {date:ymd(d),at:b[0].at,vak:b[0].vak}}return null}
 // ochtendscherm: rij 'Ochtend' uit de dagklapper + vaste taken + taken afgeleid uit de dag
+const DEFAULT_MORNING='Huiswerk klaarleggen\niPad pakken\nWerkboeken klaarleggen';
 const NOWORKBOOK_RE=/^(hw|huiswerk|stillezen|lezen|bg lezen|kring|spel|bieb|bibliotheek|karakter|seo|dagopening|weekopening|vieren|muziek|tekenen|handvaardigheid)\b/i;
 function morningFor(dt){
   const mo=plan.morning;if(!mo.on)return null;
   const key=ymd(dt), wm=plan.word&&plan.useWord&&plan.word.morning&&plan.word.morning[key];
   const bl=blocksFor(dt);
-  const fixed=mo.tasks.split('\n').map(x=>x.trim()).filter(Boolean);
+  const les0=bl.find(b=>!BREAK_RE.test(b.vak)&&!GYM_RE.test(b.vak)&&!NOWORKBOOK_RE.test(b.vak));
+  const fixed=mo.tasks.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>/^werkboeken klaarleggen$/i.test(x)&&les0?x+' voor '+les0.vak.toLowerCase():x);
   const list=[...(wm?arr(wm.tasks):[]),...fixed];
   const has=re=>list.some(x=>re.test(x));
   if(mo.auto&&bl.length){
@@ -631,7 +634,7 @@ function morningFor(dt){
     const f=bl.find(b=>!BREAK_RE.test(b.vak));
     if(f&&/lezen|bookflix/i.test(f.vak+' '+(f.title||''))&&!has(/leesboek|boek/i))list.push('Leesboek op je tafel');
     const les=bl.find(b=>!BREAK_RE.test(b.vak)&&!GYM_RE.test(b.vak)&&!NOWORKBOOK_RE.test(b.vak));
-    if(les&&!has(/werkboek/i))list.unshift('Werkboeken klaarleggen voor '+les.vak.toLowerCase());
+    if(les&&!has(/werkboek/i))list.push('Werkboeken klaarleggen voor '+les.vak.toLowerCase());
   }
   const seen=new Set();const tasks=list.filter(x=>{const k=x.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,10).map(x=>x.slice(0,80));
   const vandaag=[...new Set(bl.filter(b=>!BREAK_RE.test(b.vak)).map(b=>b.vak))].slice(0,10);
