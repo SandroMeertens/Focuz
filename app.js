@@ -709,9 +709,19 @@ function renderMorning(mo,first){
       li.innerHTML='<span class="box"></span><span class="mt"></span>';li.querySelector('.box').textContent=ticks.includes(i)?'✓':'';li.querySelector('.mt').textContent=t;ul.append(li)});
     if(mo.tasks.length&&mo.tasks.every((t,i)=>ticks.includes(i))){const li=document.createElement('li');li.className='alldone';li.textContent='Alles klaar. Lekker bezig!';ul.append(li)}
   }
-  const mins=Math.max(0,Math.ceil((localTime(first.at)-Date.now())/60000));
-  $('kMFirst').innerHTML='';const a=document.createElement('span');a.textContent='Om '+first.at+' begint ';const b=document.createElement('b');b.textContent=first.vak;
-  $('kMFirst').append(a,b);if(mins<=90){const c=document.createElement('span');c.className='mmin';c.textContent=mins<=1?'bijna!':'nog '+mins+' min';$('kMFirst').append(c)}
+  // het eerste blok uit de dagklapper (bijv. 8:30) groot: waar de dag mee begint
+  const wk=curDay&&curDay.week&&arr(curDay.week[today()]);const f=(wk&&wk.find(x=>x.at===first.at))||first;
+  const mins=Math.max(0,Math.ceil((localTime(f.at)-Date.now())/60000));
+  const fk=JSON.stringify([f.at,f.vak,f.title,f.doel,mins<=90?mins:-1]);
+  if($('kMFirst').dataset.k!==fk){$('kMFirst').dataset.k=fk;const box=$('kMFirst');box.innerHTML='';
+    const hd=document.createElement('div');hd.className='mfh';
+    const tm=document.createElement('span');tm.className='mft';tm.textContent='Om '+f.at;const vk=document.createElement('b');vk.textContent=f.vak;hd.append(tm,vk);
+    if(mins<=90){const c=document.createElement('span');c.className='mmin';c.textContent=mins<=1?'bijna!':'nog '+mins+' min';hd.append(c)}
+    box.append(hd);
+    const ti=kidTitle(f.title||'');if(ti){const d=document.createElement('div');d.className='mftitle';d.textContent=ti;box.append(d)}
+    if(f.doel){const d=document.createElement('div');d.className='mfdoel';const b=document.createElement('b');b.textContent='Ik-doel';const sp=document.createElement('span');sp.textContent=f.doel;d.append(b,sp);box.append(d)}
+    box.classList.toggle('rich',!!(ti||f.doel));
+  }
 }
 $('kMTasks').addEventListener('click',e=>{const li=e.target.closest('li[data-i]');if(!li)return;const i=+li.dataset.i;let t=getMTicks();t=t.includes(i)?t.filter(x=>x!==i):[...t,i];store.set(mKey(),JSON.stringify(t));
   mPop=t.includes(i)?i:-1;renderDay()});
