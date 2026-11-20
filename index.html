@@ -89,9 +89,10 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="morning hide" id="kMorning">
       <div class="mhello" id="kMHello">Goedemorgen!</div>
       <p class="mtext" id="kMText"></p>
-      <div class="mtoday hide" id="kMToday"></div>
-      <ul class="mtasks" id="kMTasks"></ul>
       <div class="mfirst" id="kMFirst"></div>
+      <div class="mprep hide" id="kMPrepH">Klaar voor de start?</div>
+      <ul class="mtasks" id="kMTasks"></ul>
+      <div class="mtoday hide" id="kMToday"></div>
     </div>
     <div class="free hide" id="kFree">
       <div class="fbig" id="kFreeTitle">Fijn weekend!</div>
@@ -233,13 +234,13 @@ window.FOCUZ_MS_CLIENT_ID = null;
             <div class="howto" style="margin:0 0 6px">
               <b>Vanuit je dagklapper</b>
               <p>Zet bovenaan een dag een rij met als vak <b>Ochtend</b>, de taken in Leerstof en eventueel een welkomstzin in Lesdoel:</p>
-              <code>8.15 | Ochtend | Jas ophangen; Huiswerk op tafel; Agenda invullen | Fijn dat je er bent!</code>
+              <code>8.15 | Ochtend | Huiswerk op tafel; Agenda invullen | Fijn dat je er bent!</code>
             </div>
             <label class="toggle"><input type="checkbox" id="oAuto" checked><span></span> Aanvullen uit de dag (huiswerk, gym, leesboek)</label>
             <label for="oText">Welkomstzin als er in je dagklapper geen staat</label>
             <input id="oText" maxlength="120" placeholder="Fijn dat je er bent!">
             <label for="oTasks">Vaste ochtendtaken, elke dag (één per regel)</label>
-            <textarea id="oTasks" rows="2" placeholder="Jas ophangen en tas weg&#10;Agenda invullen"></textarea>
+            <textarea id="oTasks" rows="2" placeholder="Agenda invullen"></textarea>
             <div class="mprev" id="oPrev"></div>
             <label class="toggle" style="margin-top:10px"><input type="checkbox" id="oOn" checked><span></span> Ochtendscherm tonen</label>
           </div>

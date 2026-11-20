@@ -527,3 +527,19 @@ body.hasdemo .kidtop{padding-top:66px}
 .mftitle{font-size:clamp(18px,2.2vw,22px);font-weight:800;color:#fff;line-height:1.3}
 .mfdoel{display:flex;gap:10px;align-items:baseline;font-size:17px;font-weight:700;color:#dfe9f6;line-height:1.35}
 .mfdoel b{flex:none;background:var(--go);color:#fff;border-radius:7px;padding:0 8px;font-size:14px}
+
+/* ochtend: het eerste blok centraal */
+.mfirst.rich{padding:20px 24px;border-radius:24px;background:rgba(255,255,255,.12);border:2px solid rgba(127,224,176,.5);box-shadow:0 14px 40px rgba(0,0,0,.18);animation:rise .8s .12s ease-out both}
+.mfirst .mfh{font-size:22px}
+.mfirst .mfh b{font-size:clamp(24px,3vw,32px)}
+.mftitle{font-size:clamp(24px,3vw,34px);font-weight:900;line-height:1.2}
+.mfparts{display:grid;gap:10px;width:100%;margin:4px 0}
+.mfpart{display:flex;align-items:center;gap:14px;font-size:clamp(24px,3.2vw,36px);font-weight:900;line-height:1.15}
+.mfn{flex:none;width:42px;height:42px;border-radius:50%;background:var(--go);color:#fff;font-size:22px;display:grid;place-items:center}
+.mfirst .mfdoel{font-size:18px;margin-top:4px}
+.mprep{font-size:17px;font-weight:800;color:#cfe0f5;margin-top:6px;justify-self:start}
+.morning .mtasks li{min-height:52px;font-size:19px;padding:8px 14px}
+.morning .mtasks li .box{width:32px;height:32px;font-size:18px}
+.morning .mtasks{margin-top:0}
+.mfpart{color:#fff}
+.morning .mtasks li .box{min-height:32px}

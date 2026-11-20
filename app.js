@@ -487,7 +487,7 @@ function normPlan(p){
   const ko=p.kidOpts&&typeof p.kidOpts==='object'?p.kidOpts:{};p.kidOpts={calm:ko.calm!==false,week:ko.week!==false};
   const mo=p.morning&&typeof p.morning==='object'?p.morning:{};
   p.morning={on:mo.on!==false,auto:mo.auto!==false,text:typeof mo.text==='string'?mo.text:'Fijn dat je er bent! Begin rustig aan de dag.',
-    tasks:typeof mo.tasks==='string'?mo.tasks:'Jas ophangen en tas weg\nAgenda invullen'};
+    tasks:typeof mo.tasks==='string'?(mo.v2?mo.tasks:mo.tasks.split('\n').filter(x=>!/jas ophangen/i.test(x)).join('\n')):'Agenda invullen',v2:true};
   if(p.word&&typeof p.word==='object'){const days={};const src=p.word.days||{};for(const k in src)days[k]=arr(src[k]).filter(b=>b&&b.at);p.word={file:p.word.file||'',at:+p.word.at||0,days,issues:arr(p.word.issues).filter(x=>x&&x.msg),morning:p.word.morning&&typeof p.word.morning==='object'?p.word.morning:{}}}else p.word=null;
   if(!(p.msFile&&p.msFile.id))p.msFile=null;
   return p;
@@ -702,6 +702,7 @@ function renderMorning(mo,first){
   const h=new Date().getHours();
   $('kMHello').textContent=h<12?'Goedemorgen!':h<18?'Goedemiddag!':'Goedenavond!';
   $('kMText').textContent=mo.text||'';$('kMText').classList.toggle('hide',!mo.text);
+  $('kMPrepH').classList.toggle('hide',!mo.tasks.length);
   const ticks=getMTicks();
   const key=JSON.stringify(mo.tasks)+ticks.join(',');
   if(key!==morningKey){morningKey=key;const ul=$('kMTasks');ul.innerHTML='';
@@ -718,7 +719,11 @@ function renderMorning(mo,first){
     const tm=document.createElement('span');tm.className='mft';tm.textContent='Om '+f.at;const vk=document.createElement('b');vk.textContent=f.vak;hd.append(tm,vk);
     if(mins<=90){const c=document.createElement('span');c.className='mmin';c.textContent=mins<=1?'bijna!':'nog '+mins+' min';hd.append(c)}
     box.append(hd);
-    const ti=kidTitle(f.title||'');if(ti){const d=document.createElement('div');d.className='mftitle';d.textContent=ti;box.append(d)}
+    const ti=kidTitle(f.title||'');
+    const parts=ti.split(/\s*(?:\+|;|\s&\s)\s*/).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1));
+    if(parts.length>1){const ul=document.createElement('div');ul.className='mfparts';
+      parts.forEach((x,i)=>{const it=document.createElement('div');it.className='mfpart';const n=document.createElement('span');n.className='mfn';n.textContent=i+1;const tx=document.createElement('span');tx.textContent=x;it.append(n,tx);ul.append(it)});box.append(ul)}
+    else if(ti){const d=document.createElement('div');d.className='mftitle';d.textContent=ti;box.append(d)}
     if(f.doel){const d=document.createElement('div');d.className='mfdoel';const b=document.createElement('b');b.textContent='Ik-doel';const sp=document.createElement('span');sp.textContent=f.doel;d.append(b,sp);box.append(d)}
     box.classList.toggle('rich',!!(ti||f.doel));
   }

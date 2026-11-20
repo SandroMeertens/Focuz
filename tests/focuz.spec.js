@@ -180,6 +180,7 @@ test('ochtendscherm wordt gevuld vanuit de dagklapper en de dag', async ({ brows
   const k = await kid(browser, '2026-11-20T08:05:00+01:00', code);
   await expect(k.page.locator('#kMText')).toHaveText('Fijne vrijdag!', { timeout: 15000 });
   await expect(k.page.locator('#kMTasks')).toContainText('Huiswerk op tafel');
+  await expect(k.page.locator('#kMTasks')).not.toContainText('Jas ophangen en tas weg');
   await expect(k.page.locator('#kMTasks')).toContainText('Leesboek op je tafel');
   await expect(k.page.locator('#kMToday')).toContainText('Rekenen');
   await expect(k.page.locator('#kMFirst')).toContainText('08:30'); // de ochtendrij is geen timerblok
