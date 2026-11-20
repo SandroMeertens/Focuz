@@ -711,3 +711,60 @@ body:has(#board:not(.hide)) .status{display:none}
 #board:has(#bMorning:not(.hide)) .bmtop,#board:has(#bMorning:not(.hide)) .bright h3{height:40px;line-height:1;margin:0 0 18px;display:flex;align-items:center}
 #board:has(#bMorning:not(.hide)) .bmclock{line-height:1}
 #board:has(#bMorning:not(.hide)) #bSub{display:none}
+
+/* ===== Geen scroll: opties openen als eigen paneel ===== */
+textarea.auto{resize:none;overflow:hidden;min-height:48px}
+.ohint{margin:0 0 4px;font-size:14px;color:var(--soft)}
+.panel:has(details.opt[open])>h2,.panel:has(details.opt[open])>p,.panel:has(details.opt[open])>details.opt:not([open]){display:none}
+.panel:has(details.opt[open])>details.opt[open]{margin-top:0;border:0}
+details.opt[open]>summary{padding:0 0 10px 30px;border-bottom:2px solid var(--line);margin-bottom:10px}
+details.opt[open]>summary::after{left:4px;right:auto;transform:translateY(-80%) rotate(135deg)}
+details.opt[open]>.optbody{padding:0}
+#teacher details.opt label,#teacher details.opt .lbl{margin:8px 0 3px}
+.mprev{margin-top:8px;padding:10px 12px}
+.mprev .small{margin:2px 0 6px}
+.mprev ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}
+.mprev li{background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px}
+@media(max-width:860px){.tab:has(details.opt[open])>.col:first-child{display:none}}
+/* ===== Telefoon: alles past op één scherm, geen scroll ===== */
+@media(max-width:700px){
+  #teacher{height:100vh;height:100dvh;min-height:0;overflow:hidden;padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+  .tab.on,.tab[data-tab=nu].on{grid-template-rows:auto minmax(0,1fr);gap:10px;min-height:0}
+  .tab.on>.col{min-height:0}
+  .tab.on>.col:last-child{overflow:hidden}
+  .col>.grow{overflow:hidden}
+  /* Nu */
+  .nowcard{padding:12px 14px}
+  .nvak{font-size:22px}.nsub{font-size:14px}
+  .ntime span{font-size:46px}
+  .nprog,.ndoel{display:none}
+  .nctl{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .nctl button{min-height:44px;font-size:15px;padding:4px}
+  #tab-nu .dlist,.tab[data-tab=nu] .dlist{overflow:hidden}
+  .tab[data-tab=nu] .panel.grow{display:flex;flex-direction:column;-webkit-mask-image:linear-gradient(#000 85%,transparent);mask-image:linear-gradient(#000 85%,transparent)}
+  .tab[data-tab=nu] .dlist li{padding-top:4px;padding-bottom:4px}
+  /* Rooster */
+  .rmain .howto{display:none}
+  details.opt summary span{display:none}
+  details.opt summary{padding:10px 40px 10px 14px}
+  .toggles .toggle{font-size:15px}
+  /* Klas */
+  .klascard{padding:14px;gap:10px}
+  .kqr{display:flex;align-items:center;gap:14px;justify-content:center}
+  .klascard .qr svg{width:120px;height:120px}
+  .ksteps h2{font-size:20px;margin:0 0 4px}
+  .ksteps li{font-size:14px}
+  .kalt,#tMode{display:none}
+}
+@media(max-width:700px){
+  .thead{flex-wrap:nowrap}
+  .tclock{flex:none;min-width:0}
+  .tclock span{font-size:11px}
+  .who{min-width:0}
+  .spill span{max-width:70px}
+  .rmain h2+.wstat{font-size:14px}
+  .tab[data-tab=rooster] .col:last-child .panel>p{display:none}
+  .tab[data-tab=rooster] .panel h2{margin-bottom:4px}
+  .kcode b{font-size:30px;letter-spacing:.1em}
+  .klink input{min-width:0;flex:1}.klink button{flex:none;padding:8px 12px;font-size:14px}
+}

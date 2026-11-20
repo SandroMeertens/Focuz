@@ -510,7 +510,7 @@ const sumMin = v => vakTasks(v).reduce((a,x)=>a+x.m,0);
 function renderVakBar(){
   $('tVak').innerHTML='';Object.keys(plan.vakken).forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v;$('tVak').append(o)});
   $('tVak').value=curVak;
-  $('tVak2').innerHTML=$('tVak').innerHTML;$('tVak2').value=curVak;$('tTask').value=V().title;$('tDoel').value=V().doel;$('tExtra').value=V().extra;
+  $('tVak2').innerHTML=$('tVak').innerHTML;$('tVak2').value=curVak;$('tTask').value=V().title;$('tDoel').value=V().doel;$('tExtra').value=V().extra;fitTa($('tExtra'));
   renderRows();renderRooster();
 }
 function renderRows(){
@@ -1278,17 +1278,21 @@ function bindKidOpts(){$('oCalm').checked=plan.kidOpts.calm;$('oWeek').checked=p
 $('oCalm').addEventListener('change',()=>{plan.kidOpts.calm=$('oCalm').checked;savePlan();publishDay()});
 $('oWeek').addEventListener('change',()=>{plan.kidOpts.week=$('oWeek').checked;savePlan();publishDay()});
 function bindMorning(){bindKidOpts();
-  $('oText').value=plan.morning.text;$('oTasks').value=plan.morning.tasks;$('oOn').checked=plan.morning.on;$('oAuto').checked=plan.morning.auto;renderMorningPrev();
+  $('oText').value=plan.morning.text;$('oTasks').value=plan.morning.tasks;$('oOn').checked=plan.morning.on;$('oAuto').checked=plan.morning.auto;fitTa($('oTasks'));renderMorningPrev();
 }
 function renderMorningPrev(){ // voorbeeld van wat de iPads morgenochtend (of vandaag) tonen
   if(!plan)return;const now=new Date();let d=now;const bl=blocksFor(now);
   if(!bl.length||hmNow()>=bl[0].at)d=nextSchoolDay();
   const m=morningFor(d);const box=$('oPrev');box.innerHTML='';
   if(!m){box.textContent='Het ochtendscherm staat uit.';return}
-  const h=document.createElement('b');h.textContent=dayName(d).split(',')[0]+(ymd(d)===today()?'':', '+DAG[d.getDay()]+' '+d.getDate()+' '+MAAND[d.getMonth()])+' op de iPads:';box.append(h);
+  const h=document.createElement('b');h.textContent=(ymd(d)===today()?'Vandaag':DAG[d.getDay()].replace(/^./,c=>c.toUpperCase())+' '+d.getDate()+' '+MAAND[d.getMonth()])+' op de iPads:';box.append(h);
   const p=document.createElement('div');p.className='small';p.textContent=m.text;box.append(p);
   const ul=document.createElement('ul');(m.tasks.length?m.tasks:['(geen taken)']).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.append(li)});box.append(ul);
 }
+function fitTa(el){if(!el||!el.offsetParent)return;el.style.height='auto';el.style.height=(el.scrollHeight+4)+'px'}
+function fitAllTa(){document.querySelectorAll('textarea.auto').forEach(fitTa)}
+document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('textarea.auto'))fitTa(e.target)});
+document.addEventListener('toggle',e=>{if(e.target.matches&&e.target.matches('details.opt'))fitAllTa()},true);
 function bindTeacher(){
   $('oText').addEventListener('input',()=>{plan.morning.text=$('oText').value;savePlan();renderMorningPrev()});
   $('oTasks').addEventListener('input',()=>{plan.morning.tasks=$('oTasks').value;savePlan();renderMorningPrev()});
