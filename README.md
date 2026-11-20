@@ -16,6 +16,7 @@ Focuz leest de dagtabellen uit je dagklapper (kolommen Tijd, Vak, Leerstof, Lesd
 Per blok worden de tijd, het vak, de leerstof (titel) en het lesdoel (ik-doel) overgenomen. "klaar: ..." in de leerstof wordt een klaaropdracht.
 Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: `Instructie (10 min); Werkboek opdr. 1-4 (20 min); klaar: plusblad`. Staan er geen taken in Word, dan gebruikt Focuz de afvinklijst van het vak met dezelfde naam.
 
+- **Ochtendscherm:** zet bovenaan een dag een rij met als vak `Ochtend` (bijv. `8.15 | Ochtend | Jas ophangen; Huiswerk op tafel | Fijne vrijdag!`). De leerstof wordt de ochtendtaken, het lesdoel de welkomstzin. Focuz vult aan met huiswerk, gymspullen en leesboek als die bij de dag horen, en toont de vakken van vandaag.
 - **Handmatig:** "Kies Word-bestand" → kies je dagklapper (ook uit OneDrive).
 - **Automatisch, zonder Microsoft-login:** open Focuz in Chrome of Edge op een computer waar OneDrive gesynchroniseerd is, tik op "Automatisch bijwerken" en kies je dagklapper in de OneDrive-map. Focuz kijkt elke minuut of het bestand is aangepast.
 - **Automatisch via Microsoft-login (optioneel):** eenmalig een app-registratie bij Microsoft:

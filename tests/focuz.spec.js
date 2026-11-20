@@ -167,3 +167,22 @@ test('oefenstand in het leerlingbeeld gebruikt echte blokken', async ({ browser 
   expect(k.errors).toEqual([]);
   await k.ctx.close(); await t.ctx.close();
 });
+
+test('ochtendscherm wordt gevuld vanuit de dagklapper en de dag', async ({ browser }) => {
+  const t = await teacher(browser, '2026-11-20T08:05:00+01:00');
+  await t.page.click('#tTabs [data-tab=rooster]');
+  await t.page.click('details.opt >> nth=0');
+  await expect(t.page.locator('#oPrev')).toContainText('Fijne vrijdag!');
+  await expect(t.page.locator('#oPrev')).toContainText('Weektaak pakken');
+  await expect(t.page.locator('#oPrev')).toContainText('Gymspullen klaarzetten');
+  const code = (await t.page.locator('#tCode').textContent()).trim();
+  await t.page.waitForTimeout(6000);
+  const k = await kid(browser, '2026-11-20T08:05:00+01:00', code);
+  await expect(k.page.locator('#kMText')).toHaveText('Fijne vrijdag!', { timeout: 15000 });
+  await expect(k.page.locator('#kMTasks')).toContainText('Huiswerk op tafel');
+  await expect(k.page.locator('#kMTasks')).toContainText('Leesboek op je tafel');
+  await expect(k.page.locator('#kMToday')).toContainText('Rekenen');
+  await expect(k.page.locator('#kMFirst')).toContainText('08:30'); // de ochtendrij is geen timerblok
+  expect([...t.errors, ...k.errors]).toEqual([]);
+  await k.ctx.close(); await t.ctx.close();
+});

@@ -510,3 +510,10 @@ body.hasdemo .kidtop{padding-top:66px}
 .modal .card{color:var(--ink)}
 @media(max-width:420px){.tr{grid-template-columns:minmax(0,1fr) 84px 44px}.tr .n{display:none}.rr{grid-template-columns:100px minmax(0,1fr) 44px}}
 @media(prefers-reduced-motion:reduce){.ring .fg,#kid,.lamps i{transition:none}}
+
+/* ochtend uit de planning */
+.mtoday{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;animation:rise .8s .18s ease-out both}
+.mtl{color:#cfe0f5;font-weight:800;font-size:16px;margin-right:2px}
+.mtc{background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;font-weight:800;font-size:16px}
+.mprev{background:#f3f6fa;border-radius:12px;padding:10px 14px;margin-top:10px;font-size:14px}
+.mprev ul{margin:6px 0 0;padding-left:18px}

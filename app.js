@@ -176,7 +176,7 @@ function connect(){
   const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
            onKids:list=>{kidsInfo=list;renderNow()},
            onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
-           onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set('fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String)}:null}:null;renderDay();renderWeek()}};
+           onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set('fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null}:null;renderDay();renderWeek()}};
   daySig='';
   T=USE_FB?fbTransport(h):mqttTransport(h);
   T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
@@ -486,9 +486,9 @@ function normPlan(p){
   p.useWord=p.useWord!==false;
   const ko=p.kidOpts&&typeof p.kidOpts==='object'?p.kidOpts:{};p.kidOpts={calm:ko.calm!==false,week:ko.week!==false};
   const mo=p.morning&&typeof p.morning==='object'?p.morning:{};
-  p.morning={on:mo.on!==false,text:typeof mo.text==='string'?mo.text:'Fijn dat je er bent! Begin rustig aan de dag.',
-    tasks:typeof mo.tasks==='string'?mo.tasks:'Jas ophangen en tas weg\nHuiswerk op je tafel leggen\nLeesboek en etui pakken\nAgenda invullen'};
-  if(p.word&&typeof p.word==='object'){const days={};const src=p.word.days||{};for(const k in src)days[k]=arr(src[k]).filter(b=>b&&b.at);p.word={file:p.word.file||'',at:+p.word.at||0,days,issues:arr(p.word.issues).filter(x=>x&&x.msg)}}else p.word=null;
+  p.morning={on:mo.on!==false,auto:mo.auto!==false,text:typeof mo.text==='string'?mo.text:'Fijn dat je er bent! Begin rustig aan de dag.',
+    tasks:typeof mo.tasks==='string'?mo.tasks:'Jas ophangen en tas weg\nAgenda invullen'};
+  if(p.word&&typeof p.word==='object'){const days={};const src=p.word.days||{};for(const k in src)days[k]=arr(src[k]).filter(b=>b&&b.at);p.word={file:p.word.file||'',at:+p.word.at||0,days,issues:arr(p.word.issues).filter(x=>x&&x.msg),morning:p.word.morning&&typeof p.word.morning==='object'?p.word.morning:{}}}else p.word=null;
   if(!(p.msFile&&p.msFile.id))p.msFile=null;
   return p;
 }
@@ -614,12 +614,31 @@ function todayBlocks(){
 }
 function nextLessonDay(){ // eerstvolgende dag met lessen na vandaag (tot 3 weken vooruit)
   const d=new Date();for(let i=1;i<=28;i++){d.setDate(d.getDate()+1);const b=blocksFor(d);if(b.length)return {date:ymd(d),at:b[0].at,vak:b[0].vak}}return null}
+// ochtendscherm: rij 'Ochtend' uit de dagklapper + vaste taken + taken afgeleid uit de dag
+function morningFor(dt){
+  const mo=plan.morning;if(!mo.on)return null;
+  const key=ymd(dt), wm=plan.word&&plan.useWord&&plan.word.morning&&plan.word.morning[key];
+  const bl=blocksFor(dt);
+  const fixed=mo.tasks.split('\n').map(x=>x.trim()).filter(Boolean);
+  const list=[...(wm?arr(wm.tasks):[]),...fixed];
+  const has=re=>list.some(x=>re.test(x));
+  if(mo.auto&&bl.length){
+    const all=bl.map(b=>(b.vak||'')+' '+(b.title||'')+' '+(b.doel||'')).join(' ');
+    if(/huiswerk/i.test(all)&&!has(/huiswerk/i))list.push('Huiswerk op je tafel leggen');
+    if(bl.some(b=>GYM_RE.test(b.vak))&&!has(/gym/i))list.push('Gymspullen klaarzetten');
+    const f=bl.find(b=>!BREAK_RE.test(b.vak));
+    if(f&&/lezen|bookflix/i.test(f.vak+' '+(f.title||''))&&!has(/leesboek|boek/i))list.push('Leesboek op je tafel');
+  }
+  const seen=new Set();const tasks=list.filter(x=>{const k=x.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,10).map(x=>x.slice(0,80));
+  const vandaag=[...new Set(bl.filter(b=>!BREAK_RE.test(b.vak)).map(b=>b.vak))].slice(0,10);
+  return {text:((wm&&wm.text)||mo.text||'').slice(0,120),tasks,vandaag};
+}
 function publishDay(){
   if(role!=='teacher'||!plan||!T)return;
-  const mo=plan.morning;
+  const mo=morningFor(new Date());
   const nl=nextLessonDay();
   const d={date:today(),blocks:todayBlocks(),week:weekBlocks(),auto:!!plan.auto,sound:$('tSound').checked,next:nl,opts:plan.kidOpts,
-    morning:mo.on?{text:mo.text.slice(0,120),tasks:mo.tasks.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,10).map(x=>x.slice(0,80))}:null};const sig=JSON.stringify(d);
+    morning:mo};const sig=JSON.stringify(d);
   if(sig===daySig)return;daySig=sig;curDay=d;T.sendDay(d);renderBoardDay();
 }
 const hmNow = () => {const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
@@ -675,6 +694,11 @@ function renderFree(){
 const mKey = () => 'fz_morning_'+today();
 const getMTicks = () => {try{return JSON.parse(store.get(mKey())||'[]')}catch(e){return []}};
 function renderMorning(mo,first){
+  const vd=arr(mo.vandaag);const vk=vd.join('|');
+  if($('kMToday').dataset.k!==vk){$('kMToday').dataset.k=vk;$('kMToday').innerHTML='';
+    if(vd.length){const h=document.createElement('span');h.className='mtl';h.textContent='Vandaag:';$('kMToday').append(h);
+      vd.forEach(v=>{const c=document.createElement('span');c.className='mtc';c.textContent=v;$('kMToday').append(c)})}}
+  $('kMToday').classList.toggle('hide',!vd.length);
   const h=new Date().getHours();
   $('kMHello').textContent=h<12?'Goedemorgen!':h<18?'Goedemiddag!':'Goedenavond!';
   $('kMText').textContent=mo.text||'';$('kMText').classList.toggle('hide',!mo.text);
@@ -950,13 +974,14 @@ function shortTitle(s){
   const dot=s.indexOf('. ');if(dot>10&&dot<=90)return s.slice(0,dot+1);
   return s.slice(0,87).replace(/\s+\S*$/,'')+'…';
 }
-let parseIssues=[];
+let parseIssues=[],parseMorning={};
+const MORNING_RE=/^(ochtend|ochtendtaken|inloop|binnenkomst|welkom|dagstart)$/i;
 async function parseDocx(buf){
   if(typeof JSZip==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const zip=await JSZip.loadAsync(buf);
   const f=zip.file('word/document.xml');if(!f)throw new Error('Dit lijkt geen Word-bestand (.docx).');
   const xml=new DOMParser().parseFromString(await f.async('string'),'application/xml');
-  const days={};parseIssues=[];
+  const days={};parseIssues=[];parseMorning={};
   for(const tbl of xml.getElementsByTagNameNS(W_NS,'tbl')){
     const rows=kids(tbl,'tr');if(rows.length<3)continue;
     const cellsOf=tr=>kids(tr,'tc').map(wText);
@@ -967,6 +992,9 @@ async function parseDocx(buf){
     const blocks=[];
     for(const tr of rows.slice(2)){
       const c=cellsOf(tr);const at=toHM(c[0]||'');const vak=cleanName((c[iV]||'').split('\n')[0]);
+      if(MORNING_RE.test(vak)){ // geen timerblok: dit zijn de ochtendtaken van die dag
+        const tasks=(iL>=0?(c[iL]||''):'').split(/\s*(?:;|\n)\s*/).map(x=>x.replace(/^[-–•*]\s*/,'').trim()).filter(Boolean).slice(0,10).map(x=>x.slice(0,80));
+        parseMorning[date]={tasks,text:(iD>=0?(c[iD]||''):'').replace(/\n/g,' ').slice(0,120)};continue;}
       if(!at&&vak&&!/^tijd$/i.test(vak))parseIssues.push({date,msg:vak+': geen begintijd gevonden'});
       if(!at||!vak)continue;
       let leer=iL>=0?(c[iL]||''):'', klaar='';
@@ -992,8 +1020,9 @@ async function importWord(buf,fileName){
   const all=await parseDocx(buf);
   const n=Object.keys(all).length;if(!n)throw new Error('Geen dagtabellen gevonden (kolommen Tijd, Vak, Leerstof, Lesdoel).');
   const kd=keepDays(all),last=Object.keys(kd).sort().pop()||today();
-  plan.word={file:fileName||'Word-bestand',at:Date.now(),days:kd,issues:parseIssues.filter(x=>x.date>=today()&&x.date<=last).slice(0,20)};
-  savePlan();renderWordToday();renderNext();
+  const km={};for(const k in parseMorning)if(kd[k]||(k>=today()&&k<=last))km[k]=parseMorning[k];
+  plan.word={file:fileName||'Word-bestand',at:Date.now(),days:kd,morning:km,issues:parseIssues.filter(x=>x.date>=today()&&x.date<=last).slice(0,20)};
+  savePlan();renderWordToday();renderNext();renderMorningPrev();
   // lopend vak bijwerken als de leerstof of het doel is veranderd
   const w=wordToday();if(w&&state.status!=='idle'&&state.wordAt){const b=w.find(x=>x.at===state.wordAt&&x.vak===state.vak);
     if(b&&(b.title!==state.task||b.doel!==state.doel||JSON.stringify(blockTasks(b))!==JSON.stringify(state.tasks||[])))publishState({...state,task:b.title,doel:b.doel,tasks:blockTasks(b),extra:blockExtra(b)})}
@@ -1198,12 +1227,22 @@ function bindKidOpts(){$('oCalm').checked=plan.kidOpts.calm;$('oWeek').checked=p
 $('oCalm').addEventListener('change',()=>{plan.kidOpts.calm=$('oCalm').checked;savePlan();publishDay()});
 $('oWeek').addEventListener('change',()=>{plan.kidOpts.week=$('oWeek').checked;savePlan();publishDay()});
 function bindMorning(){bindKidOpts();
-  $('oText').value=plan.morning.text;$('oTasks').value=plan.morning.tasks;$('oOn').checked=plan.morning.on;
+  $('oText').value=plan.morning.text;$('oTasks').value=plan.morning.tasks;$('oOn').checked=plan.morning.on;$('oAuto').checked=plan.morning.auto;renderMorningPrev();
+}
+function renderMorningPrev(){ // voorbeeld van wat de iPads morgenochtend (of vandaag) tonen
+  if(!plan)return;const now=new Date();let d=now;const bl=blocksFor(now);
+  if(!bl.length||hmNow()>=bl[0].at)d=nextSchoolDay();
+  const m=morningFor(d);const box=$('oPrev');box.innerHTML='';
+  if(!m){box.textContent='Het ochtendscherm staat uit.';return}
+  const h=document.createElement('b');h.textContent=dayName(d).split(',')[0]+(ymd(d)===today()?'':', '+DAG[d.getDay()]+' '+d.getDate()+' '+MAAND[d.getMonth()])+' op de iPads:';box.append(h);
+  const p=document.createElement('div');p.className='small';p.textContent=m.text;box.append(p);
+  const ul=document.createElement('ul');(m.tasks.length?m.tasks:['(geen taken)']).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.append(li)});box.append(ul);
 }
 function bindTeacher(){
-  $('oText').addEventListener('input',()=>{plan.morning.text=$('oText').value;savePlan()});
-  $('oTasks').addEventListener('input',()=>{plan.morning.tasks=$('oTasks').value;savePlan()});
-  $('oOn').addEventListener('change',()=>{plan.morning.on=$('oOn').checked;savePlan()});
+  $('oText').addEventListener('input',()=>{plan.morning.text=$('oText').value;savePlan();renderMorningPrev()});
+  $('oTasks').addEventListener('input',()=>{plan.morning.tasks=$('oTasks').value;savePlan();renderMorningPrev()});
+  $('oOn').addEventListener('change',()=>{plan.morning.on=$('oOn').checked;savePlan();renderMorningPrev()});
+  $('oAuto').addEventListener('change',()=>{plan.morning.auto=$('oAuto').checked;savePlan();renderMorningPrev()});
   // tabbladen
   const setTab=t=>{document.querySelectorAll('#tTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
     document.querySelectorAll('#teacher .tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));store.set('fz_tab',t)};
