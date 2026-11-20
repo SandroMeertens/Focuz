@@ -1278,15 +1278,18 @@ function bindTeacher(){
   $('tTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
   if(['nu','rooster','klas'].includes(store.get('fz_tab')))setTab(store.get('fz_tab'));
   $('tVak2').addEventListener('change',()=>{curVak=$('tVak2').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
-  // leerlingbeeld
-  const fit=()=>{const f=$('kvFrame'),i=f.querySelector('iframe');if(!i)return;const sc=Math.min(f.clientWidth/1180,f.clientHeight/820);i.style.transform=`scale(${sc})`;i.style.left=((f.clientWidth-1180*sc)/2)+'px'};
+  // leerlingbeeld: schermvullend, op ware grootte, zelf rondklikken
+  const kvClose=()=>{try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}$('kvModal').classList.add('hide');$('kvFrame').innerHTML='';document.body.classList.remove('kvopen')};
   $('tKidView').addEventListener('click',()=>{
     const url=location.origin+location.pathname+'?klas='+code+'&kijk=1';$('kvOpen').href=url;
-    $('kvFrame').innerHTML='';const i=document.createElement('iframe');i.src=url;i.title='Leerlingbeeld';$('kvFrame').append(i);
-    $('kvModal').classList.remove('hide');requestAnimationFrame(fit);
+    $('kvFrame').innerHTML='';const i=document.createElement('iframe');i.src=url;i.title='Leerlingbeeld';i.allow='fullscreen';$('kvFrame').append(i);
+    $('kvModal').classList.remove('hide');document.body.classList.add('kvopen');
+    try{const el=$('kvModal');(el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el)}catch(e){}
+    setTimeout(()=>{try{i.focus()}catch(e){}},300);
   });
-  window.addEventListener('resize',fit);
-  $('kvClose').addEventListener('click',()=>{$('kvModal').classList.add('hide');$('kvFrame').innerHTML=''});
+  $('kvClose').addEventListener('click',kvClose);
+  document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('kvModal').classList.contains('hide')){/* blijft open als venster */}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('kvModal').classList.contains('hide'))kvClose()});
   $('tVak').addEventListener('change',()=>{curVak=$('tVak').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
   $('tVakAdd').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Nieuw vak',text:'Hoe heet het vak?',input:''}));if(!n)return;if(!plan.vakken[n])plan.vakken[n]={title:'',doel:'',tasks:[{t:'',m:15}],extra:''};curVak=n;savePlan();renderVakBar();renderChips()});
   $('tVakRen').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Vak hernoemen',input:curVak}));if(!n||n===curVak||plan.vakken[n])return;
