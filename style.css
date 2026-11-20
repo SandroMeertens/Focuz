@@ -695,3 +695,19 @@ body.kvopen{overflow:hidden}
   .bml li{padding:11px 18px;font-size:24px}
   .bmcount{margin-top:18px}
 }
+/* digibord: strak uitlijnen */
+body:has(#board:not(.hide)) .status{display:none}
+#board:has(#bMorning:not(.hide)) .bmain{align-items:stretch;padding-top:12px}
+#board:has(#bMorning:not(.hide)) .bleft{display:flex;flex-direction:column;justify-content:flex-start}
+#board:has(#bMorning:not(.hide)) .bmorning{height:100%;grid-template-rows:auto auto auto 1fr auto;align-content:stretch}
+#board:has(#bMorning:not(.hide)) .bml{align-self:start}
+#board:has(#bMorning:not(.hide)) .bmcount{align-self:end;margin-top:0}
+#board:has(#bMorning:not(.hide)) .bright{justify-content:flex-start;display:flex;flex-direction:column}
+#board:has(#bMorning:not(.hide)) .bright h3{line-height:1;margin:0 0 18px;font-size:clamp(26px,2.4vw,38px);height:clamp(28px,2.6vw,40px);display:flex;align-items:center}
+#board:has(#bMorning:not(.hide)) .bmtop{height:clamp(28px,2.6vw,40px);align-items:center;margin:0 0 18px}
+#board:has(#bMorning:not(.hide)) .bright .daylist{flex:1;align-content:space-between}
+.bfoot{padding-top:16px}
+#board:has(#bMorning:not(.hide)) #bTask{display:none}
+#board:has(#bMorning:not(.hide)) .bmtop,#board:has(#bMorning:not(.hide)) .bright h3{height:40px;line-height:1;margin:0 0 18px;display:flex;align-items:center}
+#board:has(#bMorning:not(.hide)) .bmclock{line-height:1}
+#board:has(#bMorning:not(.hide)) #bSub{display:none}
