@@ -52,18 +52,19 @@ window.FOCUZ_MS_CLIENT_ID = null;
 <div class="status"><span class="dot" id="dot"></span><span id="conn">Verbinden…</span></div>
 
 <section id="home" class="center hide">
-  <div class="card">
+  <div class="card homecard">
+    <img class="hicon" src="icons/icon-192.png" alt="" width="88" height="88">
     <h1>Focuz</h1>
-    <p class="muted">De leerkracht plant per vak de taken en de tijd. Op elke iPad verschijnt de afvinklijst met de timer.</p>
-    <div id="homeChoose" class="stackbtn">
+    <p class="htag">Focus op je taak. Tijd voor jezelf.</p>
+    <div id="homeChoose" class="hbtns">
       <button class="primary" id="btnKid">Ik ben leerling</button>
       <button id="btnTeacher">Ik ben leerkracht</button>
     </div>
     <div id="homeKid" class="hide">
-      <label for="codeIn">Typ de klascode van het bord</label>
-      <input id="codeIn" class="codeinput" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <label for="codeIn" class="hlabel">Typ de klascode van het bord</label>
+      <input id="codeIn" class="codeinput" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="••••••">
       <p class="err" id="codeErr"></p>
-      <div class="stackbtn"><button class="primary" id="btnJoin">Verbinden</button><button id="btnBack">Terug</button></div>
+      <div class="hbtns"><button class="primary" id="btnJoin">Verbinden</button><button id="btnBack">Terug</button></div>
     </div>
   </div>
 </section>
