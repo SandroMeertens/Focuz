@@ -136,7 +136,6 @@ test('leerling: ochtendscherm en pauzescherm', async ({ browser }) => {
   await t.page.waitForTimeout(6000);
   const k = await kid(browser, '2026-11-19T08:10:00+01:00', code);
   await expect(k.page.locator('#kMHello')).toHaveText('Goedemorgen!', { timeout: 15000 });
-  await expect(k.page.locator('#kMFirst')).toContainText('08:30');
   await k.ctx.close();
   const k2 = await kid(browser, '2026-11-19T10:05:00+01:00', code);
   await expect(k2.page.locator('#kTask')).toHaveText('Pauze', { timeout: 15000 });
@@ -184,8 +183,7 @@ test('ochtendscherm wordt gevuld vanuit de dagklapper en de dag', async ({ brows
   await expect(k.page.locator('#kMTasks')).toContainText('Leesboek op je tafel');
   await expect(k.page.locator('#kMTasks')).toContainText('Werkboeken klaarleggen voor rekenen');
   await expect(k.page.locator('#kMTasks')).toContainText('iPad pakken');
-  await expect(k.page.locator('#kMFirst')).toContainText('08:30'); // de ochtendrij is geen timerblok
-  await expect(k.page.locator('#kMFirst')).toContainText('Bookflix'); // het blok van 8:30 uit de dagklapper
+  await expect(k.page.locator('#kMFirstSec')).toBeHidden();
   expect([...t.errors, ...k.errors]).toEqual([]);
   await k.ctx.close(); await t.ctx.close();
 });

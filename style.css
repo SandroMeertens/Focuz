@@ -587,3 +587,7 @@ body.hasdemo .kidtop{padding-top:66px}
 .morning .mtasks li.alldone{background:var(--go);justify-content:center;min-height:46px}
 .mdate{text-transform:none}
 .mdate::first-letter{text-transform:uppercase}
+
+/* ochtend: alleen Klaar voor de start */
+.mcols{grid-template-columns:minmax(0,1fr);width:min(640px,100%);margin:0 auto}
+.msh .msn{display:none}

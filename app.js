@@ -709,6 +709,7 @@ function renderMorning(mo,first){
   $('kMHello').textContent=h<12?'Goedemorgen!':h<18?'Goedemiddag!':'Goedenavond!';
   $('kMText').textContent=mo.text||'';$('kMText').classList.toggle('hide',!mo.text);
   $('kMPrepSec').classList.toggle('hide',!mo.tasks.length);
+  $('kMFirstSec').classList.add('hide'); // alleen 'Klaar voor de start?'
   {const d=new Date();$('kMDate').textContent=DAG[d.getDay()]+' '+d.getDate()+' '+MAAND_LANG[d.getMonth()];
    const tk=getMTicks().filter(i=>i<mo.tasks.length).length;$('kMCount').textContent=mo.tasks.length?tk+' van '+mo.tasks.length:'';$('kMCount').classList.toggle('done',tk>=mo.tasks.length&&mo.tasks.length>0)}
   const ticks=getMTicks();
