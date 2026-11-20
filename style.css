@@ -551,3 +551,17 @@ body.hasdemo .kidtop{padding-top:66px}
 .mfrows{width:100%;margin:2px 0 0;animation:none}
 .mfirst .mfdoel{font-size:16px;margin-top:2px}
 .mfrows li{color:#fff}
+
+/* ochtend: rustiger */
+.morning{gap:10px}
+.mhello{font-size:clamp(40px,6vw,72px)}
+.mtext{font-size:clamp(18px,2.2vw,22px);margin-bottom:8px}
+.mfirst .mfh,.mprep{font-size:18px;color:#cfe0f5;font-weight:800;margin-top:6px}
+.mfirst .mfh b{font-size:18px;color:#fff}
+.mfirst .mmin{font-size:15px;padding:1px 10px}
+.mfirst{justify-items:stretch;margin-top:10px}
+.mfirst .mfh{justify-self:start}
+.mprep{justify-self:start}
+.morning .mfirst{justify-self:stretch;width:100%;display:grid}
+.morning .mfrows{width:100%;justify-self:stretch}
+.morning .mfirst{justify-content:stretch;grid-template-columns:minmax(0,1fr)}

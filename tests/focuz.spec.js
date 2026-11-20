@@ -182,7 +182,6 @@ test('ochtendscherm wordt gevuld vanuit de dagklapper en de dag', async ({ brows
   await expect(k.page.locator('#kMTasks')).toContainText('Huiswerk op tafel');
   await expect(k.page.locator('#kMTasks')).not.toContainText('Jas ophangen en tas weg');
   await expect(k.page.locator('#kMTasks')).toContainText('Leesboek op je tafel');
-  await expect(k.page.locator('#kMToday')).toContainText('Rekenen');
   await expect(k.page.locator('#kMFirst')).toContainText('08:30'); // de ochtendrij is geen timerblok
   await expect(k.page.locator('#kMFirst')).toContainText('Bookflix'); // het blok van 8:30 uit de dagklapper
   expect([...t.errors, ...k.errors]).toEqual([]);

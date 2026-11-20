@@ -700,7 +700,7 @@ function renderMorning(mo,first){
   if($('kMToday').dataset.k!==vk){$('kMToday').dataset.k=vk;$('kMToday').innerHTML='';
     if(vd.length){const h=document.createElement('span');h.className='mtl';h.textContent='Vandaag:';$('kMToday').append(h);
       vd.forEach(v=>{const c=document.createElement('span');c.className='mtc';c.textContent=v;$('kMToday').append(c)})}}
-  $('kMToday').classList.toggle('hide',!vd.length);
+  $('kMToday').classList.add('hide'); // rustiger: vakken van vandaag staan in de weekplanning
   const h=new Date().getHours();
   $('kMHello').textContent=h<12?'Goedemorgen!':h<18?'Goedemiddag!':'Goedenavond!';
   $('kMText').textContent=mo.text||'';$('kMText').classList.toggle('hide',!mo.text);
@@ -726,7 +726,6 @@ function renderMorning(mo,first){
     if(parts.length){const ft=getFTicks();const ul=document.createElement('ul');ul.className='mtasks mfrows';ul.id='kMFRows';
       parts.forEach((x,i)=>{const li=document.createElement('li');li.dataset.i=i;li.className=ft.includes(i)?'ok':'';
         li.innerHTML='<span class="box"></span><span class="mt"></span>';li.querySelector('.box').textContent=ft.includes(i)?'✓':'';li.querySelector('.mt').textContent=x;ul.append(li)});box.append(ul)}
-    if(f.doel){const d=document.createElement('div');d.className='mfdoel';const b=document.createElement('b');b.textContent='Ik-doel';const sp=document.createElement('span');sp.textContent=f.doel;d.append(b,sp);box.append(d)}
     box.classList.toggle('rich',!!(ti||f.doel));
   }
 }
