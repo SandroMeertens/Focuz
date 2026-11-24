@@ -1314,6 +1314,7 @@ function bindTeacher(){
     setTimeout(()=>{try{i.focus()}catch(e){}},300);
   });
   $('kvClose').addEventListener('click',kvClose);
+  $('tKidBtn').addEventListener('click',()=>$('tKidView').click());
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('kvModal').classList.contains('hide')){/* blijft open als venster */}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('kvModal').classList.contains('hide'))kvClose()});
   $('tVak').addEventListener('change',()=>{curVak=$('tVak').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});

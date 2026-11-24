@@ -768,3 +768,4 @@ details.opt[open]>.optbody{padding:0}
   .kcode b{font-size:30px;letter-spacing:.1em}
   .klink input{min-width:0;flex:1}.klink button{flex:none;padding:8px 12px;font-size:14px}
 }
+@media(max-width:700px){#tKidBtn{display:none}}
