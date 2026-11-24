@@ -938,3 +938,4 @@ details.opt[open]>.optbody{padding:0}
 .updbtn.okflash{background:#dff3e9;color:#17734a}
 .wrbtns{display:flex;align-items:center;gap:14px;flex:none}
 .dhead{display:flex;align-items:center;gap:12px}.dhead h2{margin-right:auto}
+#dPast{white-space:nowrap}
