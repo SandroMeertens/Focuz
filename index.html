@@ -246,7 +246,6 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="col">
       <div class="panel grow">
         <h2>Extra opties</h2>
-        <p class="small muted" style="margin-top:-4px">Aanvullingen op je dagklapper.</p>
         <details class="opt" name="opt">
           <summary><b>Huiswerk en toetsen</b><span id="hwSum">Nog geen tabel gevonden</span></summary>
           <div class="optbody">
@@ -258,6 +257,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <details class="opt" name="opt">
           <summary><b>Ochtend</b><span>Welkomstboodschap en ochtendtaken vóór het eerste vak</span></summary>
           <div class="optbody">
+            <label class="toggle"><input type="checkbox" id="oOn" checked><span></span> Ochtendscherm tonen</label>
             <p class="ohint">Of zet in je dagklapper een rij met vak <b>Ochtend</b>: taken in Leerstof, welkomstzin in Lesdoel.</p>
             <label class="toggle"><input type="checkbox" id="oAuto" checked><span></span> Aanvullen uit de dag (huiswerk, gym, leesboek)</label>
             <label for="oText">Welkomstzin als er in je dagklapper geen staat</label>
@@ -265,7 +265,6 @@ window.FOCUZ_MS_CLIENT_ID = null;
             <label for="oTasks">Vaste ochtendtaken, elke dag (één per regel)</label>
             <textarea id="oTasks" class="auto" rows="1" placeholder="Huiswerk klaarleggen&#10;iPad pakken&#10;Werkboeken klaarleggen"></textarea>
             <div class="mprev" id="oPrev"></div>
-            <label class="toggle"><input type="checkbox" id="oOn" checked><span></span> Ochtendscherm tonen</label>
           </div>
         </details>
         <details class="opt" name="opt">
@@ -368,9 +367,9 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="jbrand"><img src="icons/icon-192.png" alt=""><b>Focuz</b></div>
     <h1>Doe mee met de klas</h1>
     <ol class="jsteps">
-      <li>Ga naar <b id="jUrl">sandromeertens.github.io/Focuz</b></li>
-      <li>Kies <b>Ik ben leerling</b></li>
-      <li>Typ de klascode</li>
+      <li><span>Ga naar <b id="jUrl">sandromeertens.github.io/Focuz</b></span></li>
+      <li><span>Kies <b>Ik ben leerling</b></span></li>
+      <li><span>Typ de klascode</span></li>
     </ol>
     <div class="jcode" id="jCode" aria-label="Klascode"></div>
     <div class="jcount" id="jCount"><i></i><span>Nog geen iPads gekoppeld</span></div>

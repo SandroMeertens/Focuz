@@ -199,7 +199,7 @@ function render(){
   if(state.status==='idle'){big='Even wachten';sub='De timer is nog niet gestart'}
   else if(done){big='Tijd is om!';sub='Leg je spullen neer en kijk naar voren'}
   else {big=fmt(rem);sub=state.status==='paused'?'De timer staat even stil':(warn?'Nog even! Rond je werk af':'Werk rustig door');
-        if(state.status==='running') endTxt='Klaar om '+clock(state.endAt-offset)}
+        if(state.status==='running') endTxt='Klaar om '+clock(Math.round((state.endAt-offset)/60000)*60000)}
   if(role==='kid'){
     calm=calmPref&&calmAllowed();$('kCalm').classList.toggle('hide',!calmAllowed());
     const k=$('kid'),live=state.status!=='idle';
@@ -217,7 +217,7 @@ function render(){
     else if(special){big=fmt(rem);sub=state.status==='paused'?'Staat even stil':brk?'Pauze tot '+clock(state.endAt-offset):'Omkleden en naar de gymzaal';arc=rem/total;line=nb?'Daarna: '+nb.at+' '+nb.vak:''}
     else if(tm){const r=tm.endAt-Date.now();overT=r<=0;big=overT?'+'+fmt(-r):fmt(r);sub=tm.t;arc=overT?0:r/(tm.m*60000);
       line=(overT?'Over je tijd, rond af en ga door. ':'')+'Hele vak: nog '+minTxt(Math.max(1,Math.ceil(rem/60000)))+' · klaar om '+clock(state.endAt-offset)}
-    else {arc=rem/total;line=state.status==='running'?'Klaar om '+clock(state.endAt-offset):''}
+    else {arc=rem/total;line=state.status==='running'?'Klaar om '+clock(Math.round((state.endAt-offset)/60000)*60000):''}
     if(calm&&live&&!done){const r=tm?tm.endAt-Date.now():rem;big=r>0?'nog '+Math.max(1,Math.ceil(r/60000))+' min':'tijd om';}
     if(done)$('kBig').innerHTML='<div class="doneicon">✓</div>Tijd is om!';else $('kBig').textContent=big;
     $('kSub').textContent=sub;$('kVakLine').textContent=line;
@@ -705,7 +705,7 @@ let morningKey='',mPop=-1;
 const fKey = () => 'fz_mfirst_'+today();
 const getFTicks = () => {try{return JSON.parse(store.get(fKey())||'[]')}catch(e){return []}};
 function renderFree(endOfDay){
-  const nx=curDay&&curDay.next;const now=new Date();const wd=now.getDay();
+  const nx0=curDay&&curDay.next;const nx=nx0&&nx0.date>today()?nx0:null;const now=new Date();const wd=now.getDay(); // verouderde 'volgende dag' negeren
   let title='Vandaag geen lessen',text='';
   if(nx){const [y,m,dd]=nx.date.split('-').map(Number);const dt=new Date(y,m-1,dd);
     const days=Math.round((dt-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);
@@ -722,6 +722,7 @@ function renderFree(endOfDay){
       text=wanneer+' beginnen we om '+nx.at+' met '+nx.vak+'.';
       const nb=curDay&&curDay.week&&arr(curDay.week[nx.date]);
       if(nb&&nb.some(b=>/huiswerk/i.test((b.vak||'')+' '+(b.title||'')+' '+(b.doel||''))))text+=' Vergeet je huiswerk niet!';
+      const tm=arr(curDay&&curDay.hw).filter(x=>x.date===nx.date).map(x=>x.vak);if(tm.length)text+=' Denk aan: '+tm.slice(0,3).join(', ')+'.';
     } else text='Tot de volgende keer!';
   }
   $('kFreeTitle').textContent=title;$('kFreeText').textContent=text;
@@ -1031,7 +1032,7 @@ function renderBoardFrom(v){
   const big=done?'Tijd is om!':active?fmt(rem):'Even wachten';
   const sub=done?'Leg je spullen neer en kijk naar voren':s.status==='paused'?'De timer staat even stil':warn?'Nog even! Rond je werk af':active?'Werk rustig door':'';
   const save=state;state=active||done?s:{status:'idle'};
-  renderBoard(rem,total,done,warn,big,sub,active&&s.status==='running'?'Klaar om '+clock(s.endAt-offset):'');
+  renderBoard(rem,total,done,warn,big,sub,active&&s.status==='running'?'Klaar om '+clock(Math.round((s.endAt-offset)/60000)*60000):'');
   state=save;
 }
 function renderBoard(rem,total,done,warn,big,sub,endTxt){

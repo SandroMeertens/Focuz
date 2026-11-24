@@ -939,3 +939,33 @@ details.opt[open]>.optbody{padding:0}
 .wrbtns{display:flex;align-items:center;gap:14px;flex:none}
 .dhead{display:flex;align-items:center;gap:12px}.dhead h2{margin-right:auto}
 #dPast{white-space:nowrap}
+/* ===== Review: uitlijning en rust ===== */
+/* Rooster: geopende optie heeft dezelfde koptekst als de panelen */
+details.opt[open]>summary b{font-size:19px}
+.panel h2+details.opt{margin-top:0}
+.vpreset .link,#tVakPreset{text-decoration:underline;color:var(--ink);font-weight:800}
+.vakbar .link{min-height:44px;text-decoration:underline;color:var(--soft);font-weight:700}
+#teacher details.opt .ohint{margin:2px 0 6px}
+/* Nu-kaart: info boven, tijd in het midden, knoppen onder */
+#nActive{justify-content:flex-start;gap:6px}
+#nActive .ntime{margin-top:auto}
+#nActive .nctl{margin-top:auto}
+#nActive .nprog{margin-top:4px}
+/* Zelf starten: gelijke knoppen */
+#tChips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#tChips button{min-width:0}
+/* Koppelscherm: tekst in stappen zonder gaten */
+.jsteps li>span{display:inline}
+.jsteps li>span b{margin-left:.25em}
+.jr h1{text-wrap:balance}
+/* Digibord: bovenkant van beide kolommen gelijk */
+#board:not(:has(#bMorning:not(.hide))) .bmain{align-items:start;align-content:center}
+#board:not(:has(#bMorning:not(.hide))) .bright{justify-content:flex-start;align-self:start}
+/* Rustig scherm (stoplicht) past in de hoogte */
+.lamps i{width:min(12vh,110px)}
+.lamps{padding:14px;gap:10px}
+.jsteps li>span b{margin-left:0}
+#nActive .ntime{margin-top:auto}
+#nActive .nprog{margin-bottom:auto}
+#nActive .nctl{margin-top:16px}
+#nCard .ntime span{font-size:clamp(64px,19vh,190px)}
