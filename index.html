@@ -178,16 +178,15 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <div class="tab on" data-tab="nu">
     <div class="col">
       <div class="nowcard grow" id="nCard">
-        <div class="nhead"><span class="nlabel" id="nLabel">Nu</span><span class="nsrc" id="nSrc"></span><button class="qbtn" id="qToggle" aria-expanded="false">Zelf een timer starten</button></div>
+        <div class="nhead"><span class="nlabel" id="nLabel">Nu</span><span class="nsrc" id="nSrc"></span></div>
         <div id="nActive">
           <div class="nvak" id="nVak"></div>
           <div class="ntitle" id="nTitle"></div>
           <div class="ndoel hide" id="nDoel"><b>Ik-doel</b><span id="nDoelTxt"></span></div>
-          <div class="ntime"><span id="nBig">--:--</span><small id="nEnd"></small></div>
-          <div class="nbar"><i id="nBar"></i></div>
+          <div class="nclock"><div class="ntime"><span id="nBig">--:--</span></div><small class="nend" id="nEnd"></small><div class="nbar"><i id="nBar"></i></div></div>
           <div class="nprog" id="nProg"></div>
           <div class="nctl" id="nCtl">
-            <button id="tPause">Pauze</button><button id="tPlus">+5 min</button><button id="tMin">−5 min</button><button class="danger" id="tStop">Stop</button>
+            <button id="tPause">Pauze</button><button id="tMin">−5 min</button><button id="tPlus">+5 min</button><button class="danger" id="tStop">Stop</button>
           </div>
         </div>
         <div id="nIdle" class="hide">
@@ -195,7 +194,15 @@ window.FOCUZ_MS_CLIENT_ID = null;
           <div class="nnext" id="nNext"></div>
         </div>
         <div class="nafter" id="nAfter"></div>
-        <div class="quick">
+
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel grow">
+        <div class="dhead"><h2 id="dHead">Vandaag</h2><button class="link" id="dPast"></button><button class="updbtn" id="dUpd" title="Lees je dagklapper opnieuw in" aria-label="Dagklapper bijwerken">Bijwerken</button></div>
+        <ul class="dlist" id="dList"></ul>
+        <button class="addblk" id="qToggle" aria-expanded="false">+ Los blok starten</button>
+        <div class="quick qright">
           <div class="qbox hide" id="qBox">
             <div class="qrow"><select id="tVak2" aria-label="Vak om te starten"></select><input id="tTime" type="time" aria-label="Klaar om"></div>
             <div class="chips" id="tChips"></div>
@@ -203,12 +210,6 @@ window.FOCUZ_MS_CLIENT_ID = null;
             <button class="primary" id="tStart">Start</button>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="panel grow">
-        <div class="dhead"><h2 id="dHead">Vandaag</h2><button class="link" id="dPast"></button><button class="updbtn" id="dUpd" title="Lees je dagklapper opnieuw in" aria-label="Dagklapper bijwerken">Bijwerken</button></div>
-        <ul class="dlist" id="dList"></ul>
       </div>
     </div>
   </div>

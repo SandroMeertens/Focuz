@@ -909,7 +909,7 @@ function renderNow(){
   const warn=active&&rem<=5*60000&&rem<total;
   const card=$('nCard');card.classList.toggle('warn',warn);card.classList.toggle('done',v.src==='done');card.classList.toggle('paused',s.status==='paused'&&active);
   $('nActive').classList.toggle('hide',!(active||v.src==='done'));$('nIdle').classList.toggle('hide',active||v.src==='done');
-  $('nLabel').textContent=v.src==='done'?'Tijd is om':s.status==='paused'&&active?'Gepauzeerd':'Nu';$('nLabel').classList.toggle('hide',!(active||v.src==='done'));
+  $('nLabel').textContent=v.src==='done'?'Tijd is om':s.status==='paused'&&active?'Gepauzeerd':'Nu';$('nLabel').classList.toggle('hide',!(v.src==='done'||(active&&s.status==='paused')));
   $('nSrc').textContent=v.src==='auto'?'Gestart volgens rooster':v.src==='teacher'?(s.auto||s.wordAt?'Gestart volgens rooster':'Zelf gestart'):'';
   const nb=nextBlock();
   if(active||v.src==='done'){
@@ -927,7 +927,7 @@ function renderNow(){
       h.textContent=here.length?`${fin} van ${here.length} klaar`:'Taken';pr.append(h);pr.classList.toggle('noprog',!here.length);
       tasks.slice(0,6).forEach((x,i)=>{const c=here.filter(k=>k.ticks.includes(i)).length;const pct=here.length?c/here.length*100:0;
         const r=document.createElement('div');r.className='npr';r.innerHTML='<span class="t"></span><span class="b"><i></i></span><span class="c"></span>';
-        r.querySelector('.t').textContent=(i+1)+'. '+x.t;r.querySelector('i').style.width=pct+'%';r.querySelector('.c').textContent=here.length?c+'/'+here.length:'';pr.append(r)});
+        r.querySelector('.t').innerHTML='<em></em><span></span>';r.querySelector('.t em').textContent=i+1;r.querySelector('.t span').textContent=x.t;r.querySelector('i').style.width=pct+'%';r.querySelector('.c').textContent=here.length?c+'/'+here.length:(x.m?x.m+' min':'');pr.append(r)});
     }
   } else {
     const tb=todayBlocks(),hm=hmNow();
@@ -1014,7 +1014,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.pop'))closePops()})
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePops()});
 let showPast=false;
 $('dPast').addEventListener('click',()=>{showPast=!showPast;dayKey='';renderDayCard()});
-$('qToggle').addEventListener('click',()=>{const h=$('qBox').classList.toggle('hide');$('qToggle').setAttribute('aria-expanded',String(!h));$('qToggle').textContent=h?'Zelf een timer starten':'Sluiten'});
+$('qToggle').addEventListener('click',()=>{const h=$('qBox').classList.toggle('hide');$('qToggle').setAttribute('aria-expanded',String(!h));$('qToggle').textContent=h?'+ Los blok starten':'Sluiten'});
 
 /* =================== digibord =================== */
 let boardDayKey='';

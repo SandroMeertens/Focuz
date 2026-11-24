@@ -969,3 +969,43 @@ details.opt[open]>summary b{font-size:19px}
 #nActive .nprog{margin-bottom:auto}
 #nActive .nctl{margin-top:16px}
 #nCard .ntime span{font-size:clamp(64px,19vh,190px)}
+/* ===== Nu-kaart, opnieuw opgebouwd: één lijn, drie zones ===== */
+#nCard{position:relative;display:flex;flex-direction:column;padding:26px 28px 22px}
+#nCard .nhead{position:absolute;top:22px;right:24px}
+#nCard .nlabel{font-size:14px;padding:4px 14px}
+#nCard #nActive{flex:1 1 auto;display:flex;flex-direction:column;gap:0;min-height:0}
+#nCard .nvak{font-size:clamp(28px,2.6vw,36px);margin:0;line-height:1.1;padding-right:120px}
+#nCard .ntitle{font-size:17px;font-weight:600;color:#b9cbe3;margin-top:4px}
+#nCard .ndoel{margin-top:12px;display:block;font-size:15px;font-weight:500;line-height:1.45;color:#dfe9f6}
+#nCard .ndoel b{background:none;padding:0;color:#7fe0b0;font-size:15px;font-weight:800;margin-right:6px}
+#nCard .ndoel b::after{content:":"}
+#nCard .ndoel span{display:inline;-webkit-line-clamp:unset}
+#nCard .ndoel{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#nCard .nclock{margin:auto 0;padding:14px 0;display:grid;justify-items:center;gap:6px}
+#nCard .ntime{margin:0;display:block}
+#nCard .ntime span{font-size:clamp(72px,17vh,170px);line-height:.9;letter-spacing:-.02em;display:block}
+#nCard .nend{font-size:18px;color:#b9cbe3;font-weight:600}
+#nCard .nbar{width:100%;height:10px;margin-top:10px}
+#nCard .nprog{margin:0 0 14px;padding:12px 14px;background:rgba(255,255,255,.06);border-radius:14px;gap:2px}
+#nCard .nph{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9fb6d3;margin-bottom:4px}
+#nCard .nprog.noprog .nph{font-size:12px}
+#nCard .npr{grid-template-columns:minmax(0,1fr) 110px 56px;min-height:30px;font-size:15px;font-weight:600}
+#nCard .npr .t{display:flex;gap:10px;align-items:baseline;min-width:0}
+#nCard .npr .t em{font-style:normal;color:#9fb6d3;font-weight:800;width:14px;flex:none;text-align:right}
+#nCard .npr .t span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#nCard .nprog.noprog .npr{grid-template-columns:minmax(0,1fr) auto}
+#nCard .nprog.noprog .npr .b{display:none}
+#nCard .nprog.noprog .npr .c{visibility:visible;color:#9fb6d3;font-weight:700}
+#nCard .nctl{margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#nCard .nctl button{min-height:50px;font-size:16px}
+#nCard .nctl.hide{display:none}
+/* Los blok starten onderaan Vandaag */
+.col>.panel.grow:has(#dList){position:relative;display:flex;flex-direction:column}
+#dList{flex:1 1 auto;min-height:0}
+.addblk{align-self:flex-start;margin-top:10px;min-height:40px;padding:6px 16px;border-radius:999px;background:#eef3f9;color:var(--ink);font-weight:800;font-size:15px}
+.qright .qbox{position:absolute;left:14px;right:14px;top:auto;bottom:64px;z-index:5;box-shadow:0 16px 40px rgba(0,0,0,.25);border:1px solid var(--line)}
+#dList{flex:1 1 auto;align-content:start;grid-auto-rows:max-content;overflow:hidden}
+#tChips{display:flex;flex-wrap:wrap;gap:8px}
+#tChips button{flex:1 1 auto;white-space:nowrap}
+#nCard .ntime span{font-size:clamp(64px,min(17vh,21vw),170px)}
+@media(max-width:700px){#dPast{display:none}}
