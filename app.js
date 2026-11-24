@@ -78,7 +78,7 @@ function mqttTransport(h){
       await ready;
       if(typeof mqtt==='undefined'){try{await loadScript('https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js')}catch(e){setConn(false,'Geen internet');return}}
       client=mqtt.connect(BROKER,{clientId:'kt_'+myId+'_'+Math.random().toString(16).slice(2,6),clean:true,reconnectPeriod:2000,connectTimeout:10000,keepalive:30});
-      client.on('connect',()=>{setConn(true,'Verbonden');client.subscribe([base+'state',base+'clock',base+'ping',base+'msg',base+'day'])});
+      client.on('connect',()=>{setConn(true,'Verbonden');client.subscribe([base+'state',base+'clock',base+'ping',base+'msg',base+'day']);setTimeout(()=>{try{t.tick()}catch(e){}},400)});
       client.on('reconnect',()=>setConn(false,'Opnieuw verbinden…'));
       client.on('offline',()=>setConn(false,'Geen verbinding'));
       client.on('close',()=>setConn(false,'Geen verbinding'));
@@ -176,7 +176,7 @@ function effState(){
 function connect(){
   if(T)T.stop();
   const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
-           onKids:list=>{kidsInfo=list;renderNow()},
+           onKids:list=>{kidsInfo=list;renderNow();renderJoin()},
            onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
            onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set('fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null}:null;renderDay();renderWeek()}};
   daySig='';
@@ -1096,7 +1096,7 @@ function renderCheck(){
   const fmtD=k=>{const [y,m,d]=k.split('-').map(Number);const dt=new Date(y,m-1,d);return DAG[dt.getDay()].slice(0,2)+' '+d+' '+MAAND[m-1]};
   const up=Object.keys(plan.word.days).filter(k=>k>=today()).sort();
   const iss=plan.word.issues.filter(x=>x.date>=today());
-  const key=JSON.stringify([up,iss]);if(key===checkKey)return;checkKey=key;
+  const key=JSON.stringify([up,iss]);updReady();if(key===checkKey)return;checkKey=key;
   const box=$('wCheck');box.innerHTML='';
   const head=document.createElement('div');head.className='wcok'+(iss.length?' warn':'');
   head.textContent=iss.length?`Gelezen: ${up.length} lesdagen. Controleer ${iss.length===1?'dit punt':'deze '+iss.length+' punten'}:`:`Alles goed gelezen: ${up.length} lesdagen${up.length?' (t/m '+fmtD(up[up.length-1])+')':''}.`;
@@ -1225,7 +1225,19 @@ async function readHandle(force){
     await importWord(await f.arrayBuffer(),f.name);fileLastMod=f.lastModified;renderAuto();
   }catch(e){$('wStatus').textContent='Bijwerken mislukt: '+e.message+'. Staat het bestand nog op dezelfde plek?'}
 }
-function renderAuto(){ // één regel met de koppeling, en alleen de knop die nu nodig is
+let wShowAll=false;
+if(/[?&]fztest\b/.test(location.search))window.__fz={link:n=>{fileHandle={name:n};filePerm='granted';if(plan&&plan.word)plan.word.issues=[];renderAuto()}};
+function updReady(){ // alles ingesteld en in orde: alleen een korte bevestiging tonen
+  const m=document.querySelector('.rmain');if(!m)return;
+  const iss=plan&&plan.word?plan.word.issues.filter(x=>x.date>=today()):[1];
+  const ok=!!(plan&&plan.word&&fileHandle&&filePerm==='granted'&&!iss.length&&plan.useWord!==false);
+  m.classList.toggle('ready',ok&&!wShowAll);m.classList.toggle('readyopen',ok&&wShowAll);
+  if(ok){const up=Object.keys(plan.word.days).filter(k=>k>=today()).sort();const last=up[up.length-1];
+    let t='Werkt automatisch bij · '+up.length+' lesdagen';if(last){const [y,mo,d]=last.split('-').map(Number);const dt=new Date(y,mo-1,d);t+=' t/m '+DAG[dt.getDay()].slice(0,2)+' '+d+' '+MAAND[mo-1]}
+    $('wReadyTxt').textContent=t;$('wReadyMore').textContent=wShowAll?'Inklappen':'Instellingen'}
+}
+function renderAuto(){renderAuto0();updReady()}
+function renderAuto0(){ // één regel met de koppeling, en alleen de knop die nu nodig is
   const box=$('wAutoBox');box.innerHTML='';
   const line=(cls,txt)=>{const d=document.createElement('div');d.className='wl '+cls;const i=document.createElement('i');const t=document.createElement('span');t.textContent=txt;d.append(i,t);box.append(d);return d};
   const btn=(txt,cls,fn)=>{const b=document.createElement('button');b.textContent=txt;if(cls)b.className=cls;b.onclick=fn;return b};
@@ -1293,6 +1305,21 @@ function fitTa(el){if(!el||!el.offsetParent)return;el.style.height='auto';el.sty
 function fitAllTa(){document.querySelectorAll('textarea.auto').forEach(fitTa)}
 document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('textarea.auto'))fitTa(e.target)});
 document.addEventListener('toggle',e=>{if(e.target.matches&&e.target.matches('details.opt'))fitAllTa()},true);
+function renderJoin(){
+  const el=$('jScreen');if(!el||el.classList.contains('hide'))return;
+  const n=kidsInfo.length;const c=$('jCount');c.classList.toggle('on',n>0);
+  c.querySelector('span').textContent=n?(n===1?'1 iPad gekoppeld':n+' iPads gekoppeld'):'Nog geen iPads gekoppeld';
+}
+function openJoin(){
+  const url=location.origin+location.pathname+'?klas='+code;
+  try{const q=qrcode(0,'M');q.addData(url);q.make();$('jQr').innerHTML=q.createSvgTag({cellSize:6,margin:1,scalable:true})}catch(e){$('jQr').textContent=''}
+  $('jUrl').textContent=(location.host+location.pathname).replace(/\/(index\.html)?$/,'')||'sandromeertens.github.io/Focuz';
+  const box=$('jCode');box.innerHTML='';String(code).split('').forEach(ch=>{const b=document.createElement('span');b.textContent=ch;box.append(b)});
+  $('jScreen').classList.remove('hide');document.body.classList.add('kvopen');
+  try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}
+  renderJoin();
+}
+function closeJoin(){$('jScreen').classList.add('hide');document.body.classList.remove('kvopen');try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}}
 function bindTeacher(){
   $('oText').addEventListener('input',()=>{plan.morning.text=$('oText').value;savePlan();renderMorningPrev()});
   $('oTasks').addEventListener('input',()=>{plan.morning.tasks=$('oTasks').value;savePlan();renderMorningPrev()});
@@ -1315,6 +1342,9 @@ function bindTeacher(){
   });
   $('kvClose').addEventListener('click',kvClose);
   $('tKidBtn').addEventListener('click',()=>$('tKidView').click());
+  $('wReadyMore').addEventListener('click',()=>{wShowAll=!wShowAll;updReady()});
+  $('tJoin').addEventListener('click',openJoin);$('jClose').addEventListener('click',closeJoin);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('jScreen').classList.contains('hide'))closeJoin()});
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('kvModal').classList.contains('hide')){/* blijft open als venster */}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('kvModal').classList.contains('hide'))kvClose()});
   $('tVak').addEventListener('change',()=>{curVak=$('tVak').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});

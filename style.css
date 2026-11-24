@@ -772,3 +772,43 @@ details.opt[open]>.optbody{padding:0}
 /* Laatste minuten: kaart blijft blauw, alleen oranje accent */
 .nowcard.warn{background:#152b48;box-shadow:inset 0 0 0 3px var(--warn)}
 .nowcard.warn .ntime span{color:#ffc46b}
+/* ===== Koppelscherm (digibord) ===== */
+.joinfull{position:fixed;inset:0;z-index:90;background:radial-gradient(circle at 20% 10%,#2a4d7a,#13263f 70%);color:#fff;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6vw;padding:6vh 7vw}
+.joinfull.hide{display:none}
+.jq{display:grid;justify-items:center;gap:2vh}
+.jqr{background:#fff;border-radius:3vh;padding:2.5vh;width:min(62vh,42vw);aspect-ratio:1;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.jqr svg{width:100%;height:100%;display:block}
+.jq p{margin:0;font-size:clamp(16px,2.4vh,26px);color:#cfe0f5;font-weight:700}
+.jr{display:grid;gap:3.2vh;min-width:0}
+.jbrand{display:flex;align-items:center;gap:12px}.jbrand img{width:clamp(36px,5.5vh,56px);height:auto;border-radius:12px}.jbrand b{font-size:clamp(22px,3.4vh,34px);font-weight:900}
+.jr h1{margin:0;font-size:clamp(34px,6.5vh,72px);line-height:1.05;font-weight:900}
+.jsteps{margin:0;padding:0;list-style:none;counter-reset:j;display:grid;gap:1.4vh;font-size:clamp(18px,3vh,32px);color:#dbe7f6}
+.jsteps li{counter-increment:j;display:flex;align-items:center;gap:16px}
+.jsteps li::before{content:counter(j);flex:none;width:1.6em;height:1.6em;border-radius:50%;background:var(--go);color:#fff;font-weight:900;display:grid;place-items:center;font-size:.85em}
+.jsteps b{color:#fff}
+.jcode{display:flex;gap:1.2vw;flex-wrap:nowrap}
+.jcode span{flex:0 1 auto;width:min(11vh,7.5vw);aspect-ratio:.82;background:#fff;color:var(--ink);border-radius:2vh;display:grid;place-items:center;font-size:min(8vh,5.4vw);font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.jcount{display:inline-flex;align-items:center;gap:14px;font-size:clamp(18px,3vh,30px);font-weight:800;color:#cfe0f5;background:rgba(255,255,255,.08);border-radius:999px;padding:1.2vh 2.2vh;justify-self:start}
+.jcount i{width:.7em;height:.7em;border-radius:50%;background:#8a9bb2}
+.jcount.on{color:#fff;background:rgba(47,182,124,.18)}.jcount.on i{background:var(--go);animation:jpulse 1.6s infinite}
+@keyframes jpulse{0%{box-shadow:0 0 0 0 rgba(47,182,124,.7)}70%{box-shadow:0 0 0 .8em rgba(47,182,124,0)}100%{box-shadow:0 0 0 0 rgba(47,182,124,0)}}
+.jclose{position:absolute;right:3vw;bottom:4vh;background:#fff;color:var(--ink);font-weight:900;font-size:18px;padding:12px 28px;border-radius:999px;min-height:48px}
+.khead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.khead h2{margin:0}
+@media(orientation:portrait){.joinfull{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;gap:4vh;align-content:center}.jqr{width:min(38vh,70vw)}.jr{justify-items:center}.jsteps li{justify-content:center}.jcount{justify-self:center}.jcode span{width:min(9vh,12vw);font-size:min(6.5vh,8.5vw)}}
+@media(prefers-reduced-motion:reduce){.jcount.on i{animation:none}}
+/* ===== Dagklapper ingesteld: alleen een korte bevestiging ===== */
+.wready{display:none;align-items:center;justify-content:space-between;gap:16px}
+.rmain.ready>.wready,.rmain.readyopen>.wready{display:flex}
+.rmain.readyopen>.wready{padding-bottom:12px;margin-bottom:6px;border-bottom:2px solid var(--line)}
+.rmain.ready>:not(.wready){display:none!important}
+.rmain.readyopen>h2,.rmain.readyopen>#wStatus{display:none}
+.wrok{display:flex;align-items:center;gap:14px;min-width:0}
+.wrok i{flex:none;width:44px;height:44px;border-radius:50%;background:var(--go);position:relative}
+.wrok i::after{content:"";position:absolute;left:16px;top:10px;width:10px;height:19px;border:solid #fff;border-width:0 4px 4px 0;transform:rotate(45deg)}
+.wrok div{display:grid;gap:2px;min-width:0}.wrok b{font-size:19px}.wrok span{font-size:14px;color:var(--soft)}
+.tab[data-tab=rooster]:has(.rmain.ready){grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+.tab[data-tab=rooster]:has(.rmain.ready) .rmain{flex:none}
+/* koppelscherm staand + kopieerknop */
+@media(orientation:portrait){.joinfull{gap:2.6vh;padding:5vh 6vw 12vh}.jqr{width:min(30vh,60vw)}.jr{gap:2.2vh}.jr h1{font-size:clamp(30px,4.6vh,56px)}.jclose{top:3vh;bottom:auto}}
+.klink button{flex:none}.klink input{min-width:0;flex:1}
+.rmain.readyopen>#wCheck{display:none}

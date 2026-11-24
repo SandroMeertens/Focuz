@@ -211,6 +211,10 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <div class="tab" data-tab="rooster">
     <div class="col">
       <div class="panel grow rmain">
+        <div class="wready" id="wReady">
+          <div class="wrok"><i></i><div><b>Dagklapper gekoppeld</b><span id="wReadyTxt"></span></div></div>
+          <button class="link" id="wReadyMore">Instellingen</button>
+        </div>
         <h2>Dagklapper</h2>
         <p class="wstat" id="wStatus">Nog geen Word-bestand ingelezen.</p>
         <div class="wcheck" id="wCheck"></div>
@@ -286,7 +290,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <div class="kcode"><span>Klascode</span><b id="tCode"></b></div>
       </div>
       <div class="ksteps">
-        <h2>iPads koppelen</h2>
+        <div class="khead"><h2>iPads koppelen</h2><button class="primary" id="tJoin">Koppelscherm tonen</button></div>
         <ol>
           <li><span><b>Open de camera</b> op de iPad en richt hem op de QR-code.</span></li>
           <li><span><b>Tik op de link</b> die verschijnt. Focuz opent meteen in de klas.</span></li>
@@ -342,6 +346,21 @@ window.FOCUZ_MS_CLIENT_ID = null;
   </div>
 </section>
 
+<div class="joinfull hide" id="jScreen" role="dialog" aria-label="Koppelscherm">
+  <div class="jq"><div class="jqr" id="jQr"></div><p>Scan met de camera van je iPad</p></div>
+  <div class="jr">
+    <div class="jbrand"><img src="icons/icon-192.png" alt=""><b>Focuz</b></div>
+    <h1>Doe mee met de klas</h1>
+    <ol class="jsteps">
+      <li>Ga naar <b id="jUrl">sandromeertens.github.io/Focuz</b></li>
+      <li>Kies <b>Ik ben leerling</b></li>
+      <li>Typ de klascode</li>
+    </ol>
+    <div class="jcode" id="jCode" aria-label="Klascode"></div>
+    <div class="jcount" id="jCount"><i></i><span>Nog geen iPads gekoppeld</span></div>
+  </div>
+  <button class="jclose" id="jClose">Klaar</button>
+</div>
 <div class="kvfull hide" id="kvModal" role="dialog" aria-label="Leerlingbeeld">
   <div class="kvbar"><b>Leerlingbeeld</b><a id="kvOpen" target="_blank" rel="noopener">Nieuw tabblad</a><button id="kvClose">Terug naar bediening</button></div>
   <div class="kvframe" id="kvFrame"></div>
