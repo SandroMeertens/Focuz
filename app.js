@@ -240,7 +240,7 @@ function render(){
 
 const BREAK_RE=/^(pauze|eten|lunch|eten en drinken|fruit|buitenspelen)$/i, GYM_RE=/^(gym|bewegingsonderwijs|gymles)$/i;
 function splitDoel(d){d=String(d||'').trim();const m=d.match(/^(.*?)[\s.;]*\bAutomatiseren\s*:\s*(.+)$/i);return m&&m[1].trim()?[m[1].trim(),m[2].trim()]:[d,'']}
-function kidTitle(t){t=String(t||'').trim();const i=t.indexOf(':');if(i>=3&&i<=40)return t.slice(0,i).trim();return t}
+function kidTitle(t){t=String(t||'').trim().replace(/^blok\s*\d+\s*[,–—-]?\s*week\s*\d+\s*[,–—-]?\s*/i,'');if(t)t=t[0].toUpperCase()+t.slice(1);const i=t.indexOf(':');if(i>=3&&i<=40)return t.slice(0,i).trim();return t}
 function taskTimer(){ // lopende taaktimer van een taak die nog niet af is
   if(!mini||state.status!=='running')return null;const x=(state.tasks||[])[mini.i];if(!x||!x.m||getTicks().includes(mini.i))return null;
   return {endAt:mini.endAt,m:x.m,t:x.t,i:mini.i};
@@ -1033,7 +1033,7 @@ function renderBoard(rem,total,done,warn,big,sub,endTxt){
   const b=$('board'),live=state.status!=='idle';
   b.classList.toggle('warn',warn);b.classList.toggle('done',done);b.classList.toggle('idle',!live||done);
   $('bVak').textContent=state.vak||'';$('bVak').classList.toggle('hide',!live||!state.vak);
-  $('bTask').textContent=live?(state.task||''):'';
+  $('bTask').textContent=live?kidTitle(state.task||''):'';
   {const dm=splitDoel(state.doel)[0];$('bDoelTxt').textContent=dm;$('bDoel').classList.toggle('hide',!live||!dm)}
   $('bBig').textContent=!live?'Even wachten':big;
   $('bSub').textContent=!live?'':[sub,endTxt].filter(Boolean).join(' · ');
@@ -1455,6 +1455,17 @@ function bindTeacher(){
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('kvModal').classList.contains('hide')){/* blijft open als venster */}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('kvModal').classList.contains('hide'))kvClose()});
   $('tVak').addEventListener('change',()=>{curVak=$('tVak').value;chosenMin=null;$('tTime').value='';savePlan();renderVakBar();renderChips()});
+  $('tVakPreset').addEventListener('click',async()=>{
+    const P={Rekenen:{tasks:[{t:'Instructie aan de instructietafel',m:15},{t:'Opdrachten in je werkboek',m:30},{t:'Nakijken met een andere kleur',m:5}],extra:'Weektaak Gynzy maken\nRedactiesommen.nl oefenen\nAutomatiseren op Gynzy'},
+      Spelling:{tasks:[{t:'Instructie',m:10},{t:'Opdrachten in je werkboek',m:25},{t:'Nakijken',m:5}],extra:'Spelling peiltaken op Basispoort\nWerkwoordspelling oefenen'},
+      Taal:{tasks:[{t:'Instructie',m:10},{t:'Opdrachten in je werkboek',m:15},{t:'Nakijken',m:5}],extra:'Woorden van de week oefenen\nLezen in je leesboek'}};
+    const done=[],skip=[];
+    for(const v in P){const cur=plan.vakken[v];const has=cur&&(cur.tasks.some(x=>x.t.trim())||String(cur.extra||'').trim());
+      if(has){skip.push(v);continue}
+      plan.vakken[v]={title:cur?cur.title:'',doel:cur?cur.doel:'',tasks:P[v].tasks.map(x=>({...x})),extra:P[v].extra};done.push(v)}
+    if(done.length){curVak=done[0];savePlan();renderVakBar();renderChips()}
+    await ask({title:'Voorstel ingevuld',text:(done.length?'Ingevuld: '+done.join(', ')+'. ':'')+(skip.length?'Niet aangepast, want je had al iets ingesteld: '+skip.join(', ')+'. ':'')+'Je kunt alles hieronder nog aanpassen.'});
+  });
   $('tVakAdd').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Nieuw vak',text:'Hoe heet het vak?',input:''}));if(!n)return;if(!plan.vakken[n])plan.vakken[n]={title:'',doel:'',tasks:[{t:'',m:15}],extra:''};curVak=n;savePlan();renderVakBar();renderChips()});
   $('tVakRen').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Vak hernoemen',input:curVak}));if(!n||n===curVak||plan.vakken[n])return;
     const nv={};for(const k in plan.vakken)nv[k===curVak?n:k]=plan.vakken[k];plan.vakken=nv;

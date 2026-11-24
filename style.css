@@ -916,3 +916,20 @@ details.opt[open]>.optbody{padding:0}
 .hwteach .hwlist li{grid-template-columns:minmax(0,1fr) auto}
 #thuis .jbrand{display:none}
 #thuis{padding:14px 12px}
+.vpreset{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--soft);margin-bottom:6px;flex-wrap:wrap}
+/* ===== Weekplanning groot in beeld ===== */
+#kWeekOver .weekbox{width:96vw;max-width:1500px;height:94vh;height:94dvh;max-height:none;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;padding:2.2vh 2vw;gap:1.4vh}
+#kWeekOver .weekbox h3{font-size:clamp(22px,3.2vh,34px);margin:0}
+#kWeekTabs button{min-height:clamp(52px,7vh,76px);font-size:clamp(17px,2.4vh,24px)}
+#kWeekList{min-height:0;gap:1vh 1.2vw;align-content:stretch}
+@media(min-width:800px){#kWeekList{grid-template-rows:repeat(var(--rows,5),minmax(0,1fr))}}
+#kWeekList li{padding:0 1.2vw;gap:1.2vw;min-height:0;align-items:center}
+#kWeekList .dt{font-size:clamp(18px,2.6vh,28px)}
+#kWeekList .dv{font-size:clamp(19px,2.9vh,30px)}
+#kWeekList .dv small,#kWeekList .dv small.d{font-size:clamp(14px,2vh,20px)}
+#kWeekList li.past{opacity:.55}
+#kWeekList li.past .dv{text-decoration:none}
+#kWeekOver .weekbox>button{margin-top:0;min-height:clamp(48px,6vh,64px);font-size:clamp(17px,2.2vh,22px)}
+/* ring past altijd in de hoogte */
+.ring{width:min(70vmin,540px,calc(100dvh - 400px));min-width:220px}
+#kid.haslist .ring{width:min(42vw,60vh,440px,calc(100dvh - 400px))}
