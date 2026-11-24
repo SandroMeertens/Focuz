@@ -769,3 +769,6 @@ details.opt[open]>.optbody{padding:0}
   .klink input{min-width:0;flex:1}.klink button{flex:none;padding:8px 12px;font-size:14px}
 }
 @media(max-width:700px){#tKidBtn{display:none}}
+/* Laatste minuten: kaart blijft blauw, alleen oranje accent */
+.nowcard.warn{background:#152b48;box-shadow:inset 0 0 0 3px var(--warn)}
+.nowcard.warn .ntime span{color:#ffc46b}
