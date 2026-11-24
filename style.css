@@ -812,3 +812,21 @@ details.opt[open]>.optbody{padding:0}
 @media(orientation:portrait){.joinfull{gap:2.6vh;padding:5vh 6vw 12vh}.jqr{width:min(30vh,60vw)}.jr{gap:2.2vh}.jr h1{font-size:clamp(30px,4.6vh,56px)}.jclose{top:3vh;bottom:auto}}
 .klink button{flex:none}.klink input{min-width:0;flex:1}
 .rmain.readyopen>#wCheck{display:none}
+/* ===== Klas: alleen het nodige ===== */
+.klascard.kc2{width:min(520px,100%);grid-template-columns:minmax(0,1fr);gap:18px;align-items:stretch;align-self:start;margin:0 auto}
+.kc2 h2{margin:0;font-size:26px}
+.krow{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#f3f6fa;border-radius:16px;padding:14px 18px}
+.kc2 .kcode{justify-items:start}
+.kc2 .kcode b{font-size:clamp(30px,3.2vw,40px);letter-spacing:.14em;padding-left:0}
+.krow button{flex:none}
+.kjoin{display:none}
+.kc2 .kopts{margin-top:0;padding-top:0;border-top:0}
+.kc2 .kfoot{margin-top:0;justify-content:flex-start}
+.tab[data-tab=klas].on{display:flex;justify-content:center;align-items:flex-start}
+@media(max-width:700px){#tJoinBtn{display:none}.kjoin{display:block;min-height:52px}}
+/* kopbalk op één regel */
+.thead{flex-wrap:nowrap}
+.ttabs{flex:none}
+.who{gap:6px}
+@media(max-width:1280px){.thead h1{display:none}}
+@media(max-width:1100px){.who button{padding:6px 10px;font-size:14px}.ttabs button{padding:6px 12px}.thead{gap:10px 12px}}

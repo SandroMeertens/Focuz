@@ -885,7 +885,7 @@ function renderStatus(){
   const lvl=items.some(x=>x[0]==='bad')?'bad':(warns.length||items.some(x=>x[0]==='warn'))?'warn':nk?'ok':'off';
   const nw=warns.length+items.filter(x=>x[0]==='bad').length;
   $('sPill').className='spill '+lvl;
-  $('sPillTxt').textContent=(nk===1?'1 iPad':nk+' iPads')+' · '+(nw?(nw===1?'1 aandachtspunt':nw+' aandachtspunten'):'alles in orde');
+  $('sPillTxt').textContent=(nk===1?'1 iPad':nk+' iPads');$('sPill').title=nw?(nw===1?'1 aandachtspunt':nw+' aandachtspunten'):'Alles in orde';
   $('sList').innerHTML='';items.forEach(([c,t])=>{const li=document.createElement('li');li.className=c;li.textContent=t;$('sList').append(li)});
   $('sWarn').innerHTML='';warns.forEach(t=>{const d=document.createElement('div');d.textContent=t;$('sWarn').append(d)});
 }
@@ -1343,7 +1343,7 @@ function bindTeacher(){
   $('kvClose').addEventListener('click',kvClose);
   $('tKidBtn').addEventListener('click',()=>$('tKidView').click());
   $('wReadyMore').addEventListener('click',()=>{wShowAll=!wShowAll;updReady()});
-  $('tJoin').addEventListener('click',openJoin);$('jClose').addEventListener('click',closeJoin);
+  $('tJoin').addEventListener('click',openJoin);$('tJoinBtn').addEventListener('click',openJoin);$('jClose').addEventListener('click',closeJoin);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('jScreen').classList.contains('hide'))closeJoin()});
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('kvModal').classList.contains('hide')){/* blijft open als venster */}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('kvModal').classList.contains('hide'))kvClose()});
@@ -1383,7 +1383,7 @@ function bindTeacher(){
   $('tPlus').addEventListener('click',()=>{takeOver();shift(5*60000)});
   $('tMin').addEventListener('click',()=>{takeOver();shift(-5*60000)});
   $('tStop').addEventListener('click',async()=>{if(!await ask({title:'Vak stoppen?',text:'De timer stopt op alle iPads. Het volgende blok start weer gewoon op tijd.',ok:'Stop'}))return;publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||'',stoppedAt:srvNow()})});
-  $('tCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('tLink').value);$('tCopy').textContent='Gekopieerd'}catch(e){$('tLink').select()}setTimeout(()=>$('tCopy').textContent='Kopieer',1500)});
+  $('tCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('tLink').value);$('tCopy').textContent='Gekopieerd'}catch(e){$('tLink').select()}setTimeout(()=>$('tCopy').textContent='Kopieer link',1500)});
   $('tNewCode').addEventListener('click',async()=>{
     if(!await ask({title:'Nieuwe klascode?',text:'Alle iPads moeten dan opnieuw koppelen.',ok:'Nieuwe code'}))return;
     T&&T.clear();T&&T.stop();T=null;state={status:'idle'};

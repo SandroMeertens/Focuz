@@ -78,7 +78,7 @@ test('dagklapper met fouten: controle noemt de punten', async ({ browser }) => {
   await expect(t.page.locator('#wCheck')).toContainText('geen begintijd');
   await expect(t.page.locator('#wCheck')).toContainText('taken samen 80 min');
   await t.page.click('#tTabs [data-tab=nu]');
-  await expect(t.page.locator('#sPillTxt')).toContainText('aandachtspunt');
+  await expect(t.page.locator('#sPill')).toHaveAttribute('title', /aandachtspunt/);
   await t.ctx.close();
 });
 

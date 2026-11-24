@@ -155,7 +155,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
     </nav>
     <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button>
       <button class="spill" id="sPill" aria-expanded="false"><i></i><span id="sPillTxt">Status</span></button>
-      <button class="ghost" id="mBtn">Melding</button><button class="ghost" id="tKidBtn" title="Bekijk en bedien Focuz zoals een leerling het ziet">Leerlingscherm</button><button class="primary" id="tBoard">Digibord</button></div>
+      <button class="ghost" id="tJoinBtn">iPads koppelen</button><button class="ghost" id="mBtn">Melding</button><button class="ghost" id="tKidBtn" title="Bekijk en bedien Focuz zoals een leerling het ziet">Leerlingscherm</button><button class="primary" id="tBoard">Digibord</button></div>
     <div class="pop hide" id="sPop">
       <ul class="slist" id="sList"></ul>
       <div class="swarn" id="sWarn"></div>
@@ -284,31 +284,22 @@ window.FOCUZ_MS_CLIENT_ID = null;
 
   <!-- TAB: KLAS -->
   <div class="tab" data-tab="klas">
-    <div class="klascard">
-      <div class="kqr">
-        <div class="qrframe"><div class="qr" id="tQr"></div></div>
+    <div class="klascard kc2">
+      <h2>Klas</h2>
+      <div class="krow">
         <div class="kcode"><span>Klascode</span><b id="tCode"></b></div>
+        <button id="tCopy">Kopieer link</button>
       </div>
-      <div class="ksteps">
-        <div class="khead"><h2>iPads koppelen</h2><button class="primary" id="tJoin">Koppelscherm tonen</button></div>
-        <ol>
-          <li><span><b>Open de camera</b> op de iPad en richt hem op de QR-code.</span></li>
-          <li><span><b>Tik op de link</b> die verschijnt. Focuz opent meteen in de klas.</span></li>
-          <li><span><b>Zet Focuz op het beginscherm:</b> Delen → Zet op beginscherm. De volgende keer opent hij vanzelf.</span></li>
-        </ol>
-        <p class="kalt" id="tQrNote">Geen camera? Ga naar <b>sandromeertens.github.io/Focuz</b>, kies "Ik ben leerling" en typ de klascode.</p>
-        <div class="klink"><input id="tLink" readonly aria-label="Link voor leerlingen"><button id="tCopy">Kopieer link</button></div>
-        <div class="kopts">
-          <b>Wat mogen leerlingen zelf?</b>
-          <label class="toggle"><input type="checkbox" id="oCalm" checked><span></span> Rustig scherm (stoplicht) aanzetten</label>
-          <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken</label>
-        </div>
-        <div class="kfoot">
-          <span class="mode" id="tMode"></span>
-          <button class="link" id="tKidView">Bekijk als leerling</button>
-          <button class="link" id="tNewCode">Nieuwe klascode maken</button>
-        </div>
+      <button class="primary kjoin" id="tJoin">iPads koppelen</button>
+      <div class="kopts">
+        <b>Wat mogen leerlingen zelf?</b>
+        <label class="toggle"><input type="checkbox" id="oCalm" checked><span></span> Rustig scherm (stoplicht) aanzetten</label>
+        <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken</label>
       </div>
+      <div class="kfoot">
+        <button class="link" id="tNewCode">Nieuwe klascode maken</button>
+      </div>
+      <div class="hide"><div class="qr" id="tQr"></div><p id="tQrNote"></p><input id="tLink" readonly><span id="tMode"></span><button id="tKidView"></button></div>
     </div>
   </div>
 </section>
