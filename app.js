@@ -379,7 +379,13 @@ function manageWake(){
 
 /* =================== schermen =================== */
 function show(id){['home','login','kid','teacher','board','thuis'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
-const VIEW=new URLSearchParams(location.search).has('kijk');
+// Kijk-/oefenstand alleen voor de leerkracht: in het leerlingbeeld van de leerkrachtmodule,
+// of op een apparaat waar de leerkrachtmodule is gebruikt. Op een leerling-iPad wordt ?kijk=1 genegeerd.
+const VIEW=(()=>{if(!new URLSearchParams(location.search).has('kijk'))return false;
+  let framed=false;try{framed=window.top!==window.self}catch(e){framed=true}
+  const ok=framed||!!store.get('kt_teacher_code')||store.get('kt_role')==='teacher';
+  if(!ok){try{const u=new URL(location.href);u.searchParams.delete('kijk');u.searchParams.delete('mini');history.replaceState(null,'',u)}catch(e){}}
+  return ok})();
 const HOME=new URLSearchParams(location.search).has('thuis');
 /* ---- oefenstand in het leerlingbeeld ---- */
 let DEMO=false, demoN=0;
@@ -1329,6 +1335,16 @@ async function readHandle(force){
   }catch(e){$('wStatus').textContent='Bijwerken mislukt: '+e.message+'. Staat het bestand nog op dezelfde plek?'}
 }
 let wShowAll=false;
+async function updateDagklapper(btn){ // knop 'Dagklapper bijwerken'
+  const lab=btn.textContent;const done=(t,ok=true)=>{btn.textContent=t;btn.classList.toggle('okflash',ok);setTimeout(()=>{btn.textContent=lab;btn.classList.remove('okflash')},2500)};
+  if(fileHandle){
+    try{let p=await fileHandle.queryPermission({mode:'read'});if(p!=='granted')p=await fileHandle.requestPermission({mode:'read'});filePerm=p;
+      if(p!=='granted'){done('Geen toegang',false);renderAuto();return}
+      btn.textContent='Bijwerken…';await readHandle(true);done('Bijgewerkt ✓')}catch(e){done('Mislukt',false)}
+    return}
+  if(plan&&plan.msFile&&typeof msRefresh==='function'){btn.textContent='Bijwerken…';try{await msRefresh(true);done('Bijgewerkt ✓')}catch(e){done('Mislukt',false)}return}
+  $('wFile').click(); // geen koppeling (bijv. iPad): kies het bestand
+}
 if(/[?&]fztest\b/.test(location.search))window.__fz={link:n=>{fileHandle={name:n};filePerm='granted';if(plan&&plan.word)plan.word.issues=[];renderAuto()}};
 function updReady(){ // alles ingesteld en in orde: alleen een korte bevestiging tonen
   const m=document.querySelector('.rmain');if(!m)return;
@@ -1446,6 +1462,7 @@ function bindTeacher(){
   $('kvClose').addEventListener('click',kvClose);
   $('tKidBtn').addEventListener('click',()=>$('tKidView').click());$('tKidView2').addEventListener('click',()=>$('tKidView').click());
   $('wReadyMore').addEventListener('click',()=>{wShowAll=!wShowAll;updReady()});
+  $('wUpd').addEventListener('click',e=>updateDagklapper(e.currentTarget));$('dUpd').addEventListener('click',e=>updateDagklapper(e.currentTarget));
   $('hwCopy').addEventListener('click',async()=>{const url=location.origin+location.pathname+'?thuis='+code;
     try{await navigator.clipboard.writeText(url);$('hwCopy').textContent='Gekopieerd'}catch(e){prompt('Kopieer deze link:',url)}
     setTimeout(()=>$('hwCopy').textContent='Kopieer link',1500)});

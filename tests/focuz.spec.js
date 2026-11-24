@@ -156,13 +156,16 @@ test('oefenstand in het leerlingbeeld gebruikt echte blokken', async ({ browser 
   const t = await teacher(browser, '2026-11-19T17:05:00+01:00');
   const code = (await t.page.locator('#tCode').textContent()).trim();
   await t.page.waitForTimeout(6000);
-  const k = await kid(browser, '2026-11-19T17:05:00+01:00', code, '&kijk=1');
+  // leerlingbeeld opent op het apparaat van de leerkracht (zelfde browserprofiel)
+  const kp = await t.ctx.newPage(); const kerr = []; watchErrors(kp, kerr);
+  await kp.goto(APP + '?broker=' + BROKER + '&klas=' + code + '&kijk=1');
+  const k = { page: kp, errors: kerr, ctx: { close: async () => {} } };
   await k.page.waitForTimeout(3000);
   await k.page.click('#demoBar [data-a=start]');
   await expect(k.page.locator('#kVak')).not.toHaveText('');
   const tasks = await k.page.locator('#kTasks li').allTextContents();
   expect(tasks.join(' ')).not.toContain('instructietafel'); // geen verzonnen taken
-  expect(await k.page.evaluate(() => localStorage.getItem('kt_role'))).toBeNull(); // leerkracht blijft leerkracht
+  expect(await k.page.evaluate(() => localStorage.getItem('kt_role'))).toBe('teacher'); // leerkracht blijft leerkracht
   expect(k.errors).toEqual([]);
   await k.ctx.close(); await t.ctx.close();
 });
@@ -240,4 +243,31 @@ test('huiswerk en toetsen: uit de dagklapper naar iPad, leerkracht en thuis', as
   await expect(hp.locator('#kid')).toBeHidden();
   expect([...t.errors, ...k.errors, ...herr]).toEqual([]);
   await t.ctx.close(); await k.ctx.close(); await h.close();
+});
+
+test('oefenbalk alleen voor de leerkracht, niet op een leerling-iPad', async ({ browser }) => {
+  const iso = '2026-11-19T09:20:00+01:00';
+  const k = await kid(browser, iso, 'ABCDEF', '&kijk=1');
+  await k.page.waitForTimeout(1200);
+  await expect(k.page.locator('#demoBar')).toHaveCount(0);
+  expect(k.page.url()).not.toContain('kijk');
+  await k.ctx.close();
+  // op het apparaat van de leerkracht werkt het leerlingbeeld wel
+  const t = await teacher(browser, iso, { docx: false });
+  const code = await t.page.locator('#tCode').innerText();
+  const p2 = await t.ctx.newPage();
+  await p2.goto(APP + '?broker=' + BROKER + '&klas=' + code + '&kijk=1');
+  await expect(p2.locator('#demoBar')).toBeVisible();
+  await t.ctx.close();
+});
+
+test('knop Dagklapper bijwerken leest het bestand opnieuw in', async ({ browser }) => {
+  const t = await teacher(browser, '2026-11-19T09:20:00+01:00');
+  await expect(t.page.locator('#dUpd')).toBeVisible();
+  const [fc] = await Promise.all([t.page.waitForEvent('filechooser'), t.page.click('#dUpd')]);
+  await fc.setFiles(FIX('dagklapper-voorbeeld.docx'));
+  await t.page.click('#tTabs [data-tab=rooster]');
+  await expect(t.page.locator('#wStatus')).toContainText('Ingelezen');
+  expect(t.errors).toEqual([]);
+  await t.ctx.close();
 });

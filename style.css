@@ -933,3 +933,8 @@ details.opt[open]>.optbody{padding:0}
 /* ring past altijd in de hoogte */
 .ring{width:min(70vmin,540px,calc(100dvh - 400px));min-width:220px}
 #kid.haslist .ring{width:min(42vw,60vh,440px,calc(100dvh - 400px))}
+.updbtn{min-height:36px;padding:6px 14px;font-size:14px;font-weight:800;border-radius:999px;background:#eef3f9;color:var(--ink);white-space:nowrap}
+.updbtn::before{content:"↻ ";font-weight:900}
+.updbtn.okflash{background:#dff3e9;color:#17734a}
+.wrbtns{display:flex;align-items:center;gap:14px;flex:none}
+.dhead{display:flex;align-items:center;gap:12px}.dhead h2{margin-right:auto}
