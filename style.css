@@ -830,3 +830,37 @@ details.opt[open]>.optbody{padding:0}
 .who{gap:6px}
 @media(max-width:1280px){.thead h1{display:none}}
 @media(max-width:1100px){.who button{padding:6px 10px;font-size:14px}.ttabs button{padding:6px 12px}.thead{gap:10px 12px}}
+/* ===== Leerling: vak groot, les klein, rustige randen ===== */
+#kVak{background:none;padding:0;font-size:clamp(30px,4.6vw,50px);line-height:1.05;display:block}
+#kVak:not(.hide)+.task{font-size:clamp(17px,2.2vw,23px);font-weight:700;color:#cfe0f5;margin-top:4px}
+.autod{margin-top:6px;font-size:clamp(14px,1.7vw,17px);color:#cfe0f5;font-weight:700;max-width:900px;margin-left:auto;margin-right:auto;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+#kLeave{display:none}
+.sronly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.soundtip{left:auto;right:40px;transform:none;width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:50%}
+.soundtip.hide{display:none}
+.status{user-select:none;-webkit-user-select:none;padding:6px;margin:-6px}
+/* ===== Weergave-menu ===== */
+.vpop{width:min(340px,calc(100vw - 24px));gap:8px;padding:10px}
+.vpop button{display:grid;gap:2px;text-align:left;background:#f3f6fa;color:var(--ink);border-radius:14px;padding:12px 14px;min-height:56px}
+.vpop button:hover{background:#e8eef6}
+.vpop b{font-size:17px}.vpop span{font-size:13px;color:var(--soft);font-weight:600}
+#tBoard{display:grid!important}
+.kphone{display:none}
+@media(max-width:700px){#vBtn{display:none}.kphone{display:inline-block}}
+/* ===== Nu-kaart: inhoud in het midden ===== */
+#nActive,#nIdle{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:0}
+#nIdle.hide,#nActive.hide{display:none}
+#nAfter{display:none}
+.nph{font-weight:700}
+/* ===== Digibord: vak groot, les klein ===== */
+#bVak{background:none;padding:0;font-size:clamp(40px,5vw,80px);font-weight:900;line-height:1.05;display:block}
+#bVak:not(.hide)+.btitle{font-size:clamp(20px,2.2vw,34px);font-weight:700;color:#cfe0f5;margin-top:6px}
+.bright .daylist li.past{display:none}
+.ndoel span{-webkit-line-clamp:2}
+.howlink{margin-top:14px}
+.howlink summary{cursor:pointer;color:var(--soft);font-weight:700;font-size:15px;text-decoration:underline;list-style:none}
+.howlink summary::-webkit-details-marker{display:none}
+.howlink .howto{margin-top:10px}
+@media(max-width:700px){.rmain .howlink{display:none}}
+.nprog.noprog .npr .b,.nprog.noprog .npr .c{visibility:hidden}.nprog.noprog .nph{color:#9fb6d3;text-transform:uppercase;font-size:12px;letter-spacing:.06em}
+#nCard .ntime span{font-size:clamp(64px,14vh,150px);line-height:.95}

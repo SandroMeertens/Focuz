@@ -47,7 +47,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="iburst"><i style="--a:0deg;--d:0.0s"></i><i style="--a:30deg;--d:0.05s"></i><i style="--a:60deg;--d:0.1s"></i><i style="--a:90deg;--d:0.15000000000000002s"></i><i style="--a:120deg;--d:0.0s"></i><i style="--a:150deg;--d:0.05s"></i><i style="--a:180deg;--d:0.1s"></i><i style="--a:210deg;--d:0.15000000000000002s"></i><i style="--a:240deg;--d:0.0s"></i><i style="--a:270deg;--d:0.05s"></i><i style="--a:300deg;--d:0.1s"></i><i style="--a:330deg;--d:0.15000000000000002s"></i></div>
   </div>
   <div class="iword"><span style="--i:0">F</span><span style="--i:1">o</span><span style="--i:2">c</span><span style="--i:3">u</span><span style="--i:4">z</span></div>
-  <div class="itag">Focus op je taak. Tijd voor jezelf.</div>
+  <div class="itag">Werk rustig, in je eigen tempo.</div>
 </div>
 <div class="status"><span class="dot" id="dot"></span><span id="conn">Verbinden…</span></div>
 
@@ -55,7 +55,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <div class="card homecard">
     <img class="hicon" src="icons/icon-192.png" alt="" width="88" height="88">
     <h1>Focuz</h1>
-    <p class="htag">Focus op je taak. Tijd voor jezelf.</p>
+    <p class="htag">Werk rustig, in je eigen tempo.</p>
     <div id="homeChoose" class="hbtns">
       <button class="primary" id="btnKid">Ik ben leerling</button>
       <button id="btnTeacher">Ik ben leerkracht</button>
@@ -84,6 +84,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <span class="vak hide" id="kVak"></span>
     <div class="task" id="kTask">&nbsp;</div>
     <div class="doel hide" id="kDoel"><b>Ik-doel</b><span id="kDoelTxt"></span></div>
+    <div class="autod hide" id="kAuto"></div>
     <div class="endline hide" id="kEnd"></div>
   </div>
   <div class="kidmain">
@@ -129,9 +130,9 @@ window.FOCUZ_MS_CLIENT_ID = null;
     </div>
   </div>
   <div class="nextwrap"><button class="nextbar hide" id="kNext"></button></div>
-  <div class="kidfoot">Klas <b id="kCode"></b><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave" title="Houd 3 seconden ingedrukt">Andere code</button></div>
+  <div class="kidfoot"><b id="kCode" class="hide"></b><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave" title="Houd 3 seconden ingedrukt">Andere code</button></div>
   <div class="offline hide" id="kOff"></div>
-  <button class="soundtip hide" id="kSoundTip">Tik hier om het geluid aan te zetten</button>
+  <button class="soundtip hide" id="kSoundTip" aria-label="Geluid aanzetten" title="Tik om het geluid aan te zetten"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   <div class="dayover hide" id="kWeekOver" role="dialog" aria-label="Weekplanning">
     <div class="dayoverbox weekbox"><h3>Weekplanning</h3><div class="wtabs" id="kWeekTabs"></div><ul class="daylist" id="kWeekList"></ul><button id="kWeekClose">Sluiten</button></div>
   </div>
@@ -155,7 +156,8 @@ window.FOCUZ_MS_CLIENT_ID = null;
     </nav>
     <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button>
       <button class="spill" id="sPill" aria-expanded="false"><i></i><span id="sPillTxt">Status</span></button>
-      <button class="ghost" id="tJoinBtn">iPads koppelen</button><button class="ghost" id="mBtn">Melding</button><button class="ghost" id="tKidBtn" title="Bekijk en bedien Focuz zoals een leerling het ziet">Leerlingscherm</button><button class="primary" id="tBoard">Digibord</button></div>
+      <button class="ghost" id="tJoinBtn">iPads koppelen</button><button class="ghost" id="mBtn">Melding</button><button class="primary" id="vBtn" aria-haspopup="true">Weergave</button></div>
+    <div class="pop vpop hide" id="vPop"><button id="tBoard"><b>Digibord</b><span>Groot klasscherm met tijd en dagplanning</span></button><button id="tKidBtn"><b>Leerlingscherm</b><span>Bekijk en bedien Focuz zoals een leerling</span></button></div>
     <div class="pop hide" id="sPop">
       <ul class="slist" id="sList"></ul>
       <div class="swarn" id="sWarn"></div>
@@ -226,12 +228,13 @@ window.FOCUZ_MS_CLIENT_ID = null;
           <label class="toggle"><input type="checkbox" id="wUse" checked><span></span> Rooster uit de dagklapper gebruiken</label>
           <label class="toggle"><input type="checkbox" id="rAuto" checked><span></span> Vakken automatisch laten starten</label>
         </div>
-        <div class="howto">
-          <b>Zo schrijf je taken in je dagklapper</b>
-          <p>Zet ze in de kolom Leerstof, gescheiden door een puntkomma:</p>
-          <code>Blok 3 les 9; Instructie (10 min); Werkboek 1-4 (20 min); klaar: plusblad</code>
-          <p>De tekst zonder minuten wordt de titel. "klaar:" wordt een klaaropdracht. Het lesdoel wordt het ik-doel.</p>
-        </div>
+        <details class="howlink"><summary>Hoe schrijf ik taken in mijn dagklapper?</summary>
+          <div class="howto">
+            <p>Zet ze in de kolom Leerstof, gescheiden door een puntkomma:</p>
+            <code>Blok 3 les 9; Instructie (10 min); Werkboek 1-4 (20 min); klaar: plusblad</code>
+            <p>De tekst zonder minuten wordt de titel. "klaar:" wordt een klaaropdracht. Het lesdoel wordt het ik-doel.</p>
+          </div>
+        </details>
         <div class="next hide" id="rNext"></div>
         <div class="wday hide" id="wToday"></div>
       </div>
@@ -297,7 +300,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken</label>
       </div>
       <div class="kfoot">
-        <button class="link" id="tNewCode">Nieuwe klascode maken</button>
+        <button class="link kphone" id="tKidView2">Leerlingscherm</button><button class="link" id="tNewCode">Nieuwe klascode maken</button>
       </div>
       <div class="hide"><div class="qr" id="tQr"></div><p id="tQrNote"></p><input id="tLink" readonly><span id="tMode"></span><button id="tKidView"></button></div>
     </div>
