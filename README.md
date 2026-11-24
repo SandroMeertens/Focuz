@@ -43,3 +43,6 @@ Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: `Instruc
 ## Beveiliging
 - **Openbare server:** alle berichten zijn versleuteld met de klascode (AES-GCM, sleutel via PBKDF2). Wie op de server meeluistert ziet alleen onleesbare tekst en een hash als onderwerp, geen klascodes, roosters of lesdoelen. Wie de klascode kent (dus ook leerlingen) kan in theorie nog wel berichten sturen.
 - **Eigen Firebase-server:** alleen de ingelogde leerkracht kan de timer besturen (zie `database.rules.json`). Aanbevolen voor dagelijks gebruik.
+
+## Huiswerk en toetsen
+Zet in je dagklapper een tabel met de kolommen **Vak**, **Wat ga je doen** en **Voor wanneer**. In "Voor wanneer" mag een datum staan (ook een Word-datumveld, `25 nov 2026` of `25-11`), `Elke vrijdag` of `Elke week`. Leerlingen zien de lijst op hun iPad (knop *Huiswerk en toetsen*) en vinken af; jij ziet per item hoeveel iPads klaar zijn. Via Rooster → *Huiswerk en toetsen* → *Planning voor thuis* kopieer je een link (`?thuis=KLASCODE`) voor ouders: die toont alleen deze lijst.

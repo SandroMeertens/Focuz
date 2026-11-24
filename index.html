@@ -92,6 +92,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <div class="mdate" id="kMDate"></div>
       <div class="mhello" id="kMHello">Goedemorgen!</div>
       <p class="mtext" id="kMText"></p>
+      <p class="mhw hide" id="kMHw"></p>
       <div class="mcols">
         <section class="msec" id="kMPrepSec">
           <header class="msh"><span class="msn">1</span><b id="kMPrepH">Klaar voor de start?</b><span class="mcount" id="kMCount"></span></header>
@@ -130,9 +131,12 @@ window.FOCUZ_MS_CLIENT_ID = null;
     </div>
   </div>
   <div class="nextwrap"><button class="nextbar hide" id="kNext"></button></div>
-  <div class="kidfoot"><b id="kCode" class="hide"></b><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave" title="Houd 3 seconden ingedrukt">Andere code</button></div>
+  <div class="kidfoot"><b id="kCode" class="hide"></b><button id="kHwBtn" class="hide">Huiswerk en toetsen</button><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave" title="Houd 3 seconden ingedrukt">Andere code</button></div>
   <div class="offline hide" id="kOff"></div>
   <button class="soundtip hide" id="kSoundTip" aria-label="Geluid aanzetten" title="Tik om het geluid aan te zetten"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <div class="dayover hide" id="kHwOver" role="dialog" aria-label="Huiswerk en toetsen">
+    <div class="dayoverbox hwbox"><h3>Huiswerk en toetsen</h3><div class="hwwrap" id="kHwList"></div><button id="kHwClose">Sluiten</button></div>
+  </div>
   <div class="dayover hide" id="kWeekOver" role="dialog" aria-label="Weekplanning">
     <div class="dayoverbox weekbox"><h3>Weekplanning</h3><div class="wtabs" id="kWeekTabs"></div><ul class="daylist" id="kWeekList"></ul><button id="kWeekClose">Sluiten</button></div>
   </div>
@@ -242,7 +246,15 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="col">
       <div class="panel grow">
         <h2>Extra opties</h2>
-        <p class="small muted" style="margin-top:-4px">Alleen nodig als je iets wilt toevoegen aan je dagklapper.</p>
+        <p class="small muted" style="margin-top:-4px">Aanvullingen op je dagklapper.</p>
+        <details class="opt" name="opt">
+          <summary><b>Huiswerk en toetsen</b><span id="hwSum">Nog geen tabel gevonden</span></summary>
+          <div class="optbody">
+            <p class="ohint">Focuz leest de tabel met <b>Vak · Wat ga je doen · Voor wanneer</b> uit je dagklapper. Bij elk item zie je hoeveel iPads het hebben afgevinkt.</p>
+            <div class="hwwrap hwteach" id="hwT"></div>
+            <div class="krow hwhome"><div><b>Planning voor thuis</b><span>Deel deze link met ouders, bijvoorbeeld via Parro. Ze zien alleen het huiswerk en de toetsen.</span></div><button id="hwCopy">Kopieer link</button></div>
+          </div>
+        </details>
         <details class="opt" name="opt">
           <summary><b>Ochtend</b><span>Welkomstboodschap en ochtendtaken vóór het eerste vak</span></summary>
           <div class="optbody">
@@ -308,6 +320,14 @@ window.FOCUZ_MS_CLIENT_ID = null;
 </section>
 
 <!-- DIGIBORD -->
+<section id="thuis" class="hide">
+  <div class="thuisbox">
+    <div class="jbrand"><img src="icons/icon-192.png" alt=""><b>Focuz</b></div>
+    <h1>Huiswerk en toetsen</h1>
+    <div class="hwwrap" id="hList"></div>
+    <p class="hupd" id="hUpd"></p>
+  </div>
+</section>
 <section id="board" class="hide">
   <div class="bmain">
     <div class="bleft">
@@ -321,6 +341,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <div class="bmtop"><span class="bmclock" id="bMClock"></span><span class="bmdate" id="bMDate"></span></div>
         <div class="bmh" id="bMHello">Goedemorgen!</div>
         <div class="bmt" id="bMText"></div>
+        <div class="mhw hide" id="bMHw"></div>
         <ol class="bml" id="bMList"></ol>
         <div class="bmcount">
           <div class="bmcl"><span id="bMFirst"></span><b id="bMMin"></b></div>

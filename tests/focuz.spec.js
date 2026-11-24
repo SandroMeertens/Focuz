@@ -209,3 +209,35 @@ test('"Tijd is om" verdwijnt na 10 minuten vanzelf', async ({ browser }) => {
   expect(k.errors).toEqual([]);
   await k.ctx.close();
 });
+
+test('huiswerk en toetsen: uit de dagklapper naar iPad, leerkracht en thuis', async ({ browser }) => {
+  const iso = '2026-11-24T10:20:00+01:00';
+  const t = await teacher(browser, iso, { docx: 'dagklapper-huiswerk.docx' });
+  const code = await t.page.locator('#tCode').innerText();
+  await t.page.click('#tTabs [data-tab=rooster]');
+  await expect(t.page.locator('#hwSum')).toContainText('items');
+  // leerling: knop, lijst gesorteerd, morgen gemarkeerd, afvinken
+  const k = await kid(browser, iso, code);
+  await expect(k.page.locator('#kHwBtn')).toBeVisible({ timeout: 10000 });
+  await k.page.click('#kHwBtn');
+  const first = k.page.locator('#kHwList .hwlist li').first();
+  await expect(first).toContainText('Taal toets');                 // 24 nov = vandaag staat bovenaan
+  await expect(k.page.locator('#kHwList')).toContainText('Taal toets');
+  await expect(k.page.locator('#kHwList')).not.toContainText('Toets blink'); // 23 nov is voorbij
+  await expect(k.page.locator('#kHwList')).toContainText('vrijdag');
+  await k.page.locator('#kHwList li', { hasText: 'Toets Engels' }).click();
+  await expect(k.page.locator('#kHwList li', { hasText: 'Toets Engels' })).toHaveClass(/ok/);
+  // leerkracht ziet het afvinken
+  await t.page.locator('details.opt summary', { hasText: 'Huiswerk en toetsen' }).click();
+  await expect(t.page.locator('#hwT li', { hasText: 'Toets Engels' })).toContainText('1 van 1 klaar', { timeout: 20000 });
+  // thuis: alleen de planning
+  const h = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await setup(h, iso);
+  const hp = await h.newPage(); const herr = []; watchErrors(hp, herr);
+  await hp.goto(APP + '?broker=' + BROKER + '&thuis=' + code);
+  await expect(hp.locator('#thuis')).toBeVisible();
+  await expect(hp.locator('#hList')).toContainText('Toets Engels', { timeout: 10000 });
+  await expect(hp.locator('#kid')).toBeHidden();
+  expect([...t.errors, ...k.errors, ...herr]).toEqual([]);
+  await t.ctx.close(); await k.ctx.close(); await h.close();
+});

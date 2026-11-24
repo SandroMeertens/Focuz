@@ -92,7 +92,7 @@ function mqttTransport(h){
         if(k==='day'){h.onDay(msg);return}
         if(k==='state')h.onState(msg);
         else if(k==='clock'&&role==='kid'&&typeof msg.now==='number')offset=msg.now-Date.now();
-        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number)};t.count()}
+        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number),hw:arr(msg.hw).map(String)};t.count()}
       });
     },
     publish(s){pub('state',s,{qos:1,retain:true})},
@@ -102,7 +102,7 @@ function mqttTransport(h){
     tick(){
       if(!client||!client.connected)return;
       if(role==='teacher')pub('clock',{now:Date.now()});
-      if(role==='kid'&&!VIEW)pub('ping',{id:myId,sid:state.sid||'',ticks:getTicks()});
+      if(role==='kid'&&!VIEW&&!HOME)pub('ping',{id:myId,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow()});
     },
     count(){const n=Date.now();for(const k in peers)if(n-peers[k].at>50000)delete peers[k];h.onKids(Object.values(peers))},
     wake(){if(client&&!client.connected)client.reconnect()},
@@ -136,7 +136,7 @@ function fbTransport(h){
         conRef=fb.db.ref('.info/connected');
         conRef.on('value',s=>{if(s.val()){me.onDisconnect().remove();t.tick()}});
       } else {
-        ref('kids').on('value',s=>{const v=s.val()||{};h.onKids(Object.values(v).map(x=>({sid:String(x.sid||''),ticks:arr(x.ticks).map(Number)})))},()=>{});
+        ref('kids').on('value',s=>{const v=s.val()||{};h.onKids(Object.values(v).map(x=>({sid:String(x.sid||''),ticks:arr(x.ticks).map(Number),hw:arr(x.hw).map(String)})))},()=>{});
       }
       ref('state').on('value',s=>h.onState(s.val()||{status:'idle'}),e=>setConn(false,'Geen toegang'));
       ref('msg').on('value',s=>h.onMsg(s.val()),()=>{});
@@ -146,7 +146,7 @@ function fbTransport(h){
     sendMsg(m){(m?ref('msg').set(m):ref('msg').remove()).catch(e=>{$('mInfo').textContent='Versturen mislukt: '+(e.code||e.message)})},
     publish(s){ref('state').set(JSON.parse(JSON.stringify(s))).catch(e=>{$('tErr').textContent='Opslaan mislukt: '+(e.code||e.message)})},
     clear(){ref('state').remove().catch(()=>{})},
-    tick(){if(me)me.set({at:firebase.database.ServerValue.TIMESTAMP,sid:state.sid||'',ticks:getTicks()}).catch(()=>{})}, count(){}, wake(){},
+    tick(){if(me&&!HOME)me.set({at:firebase.database.ServerValue.TIMESTAMP,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow()}).catch(()=>{})}, count(){}, wake(){},
     stop(){try{ref('state').off();ref('kids').off();ref('msg').off();ref('day').off();conRef&&conRef.off();me&&me.remove()}catch(e){}}
   };
   return t;
@@ -176,9 +176,9 @@ function effState(){
 function connect(){
   if(T)T.stop();
   const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
-           onKids:list=>{kidsInfo=list;renderNow();renderJoin()},
-           onMsg:m=>{curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
-           onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set('fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null}:null;renderDay();renderWeek()}};
+           onKids:list=>{kidsInfo=list;renderNow();renderJoin();renderHwTeacher()},
+           onMsg:m=>{if(HOME)return;curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
+           onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set(HOME?'fz_day_thuis':'fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null,hw:arr(d.hw).filter(x=>x&&x.id&&x.vak).map(x=>({id:String(x.id),vak:String(x.vak),wat:String(x.wat||''),date:String(x.date||''),rep:x.rep===''||x.rep==null?'':x.rep}))}:null;renderDay();renderWeek();renderHwAll()}};
   daySig='';
   T=USE_FB?fbTransport(h):mqttTransport(h);
   T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
@@ -191,6 +191,7 @@ let calmPref = store.get('kt_calm')==='1';
 const calmAllowed = () => !(curDay&&curDay.opts&&curDay.opts.calm===false);
 let calm = calmPref;
 function render(){
+  if(HOME)return;
   const rem = remaining(), total = state.total||1;
   const done = state.status==='running' && rem<=0;
   const warn = !done && rem!==null && rem<=5*60000 && rem<total;
@@ -377,8 +378,9 @@ function manageWake(){
 }
 
 /* =================== schermen =================== */
-function show(id){['home','login','kid','teacher','board'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
+function show(id){['home','login','kid','teacher','board','thuis'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
 const VIEW=new URLSearchParams(location.search).has('kijk');
+const HOME=new URLSearchParams(location.search).has('thuis');
 /* ---- oefenstand in het leerlingbeeld ---- */
 let DEMO=false, demoN=0;
 const DEMO_BLOCKS=[{at:'08:30',end:'09:00',vak:'Stillezen',title:'Lezen in je eigen boek',doel:''},{at:'09:00',end:'10:00',vak:'Rekenen',title:'Blok 3 les 9',doel:'Ik kan breuken met elkaar vergelijken.',tasks:[{t:'Instructie',m:10},{t:'Werkboek opdracht 1 t/m 6',m:25},{t:'Nakijken',m:5}],extra:['Plusblad']},
@@ -428,6 +430,9 @@ function buildDemoBar(){
 function restoreDay(){try{const d=JSON.parse(store.get('fz_day')||'null');if(d&&d.week&&Object.keys(d.week).some(k=>k>=today())){curDay={opts:d.opts||{},next:d.next||null,date:d.date||'',blocks:arr(d.blocks),week:d.week,auto:d.auto,sound:d.sound,morning:d.morning||null}}}catch(e){}}
 function startKid(c){role='kid';code=c;if(!VIEW)restoreDay();if(!VIEW){store.set('kt_kid_code',c);store.set('kt_role','kid')}else{if(!new URLSearchParams(location.search).has('mini'))buildDemoBar();else document.body.classList.add('minimode');$('kLeave').classList.add('hide')}$('kCode').textContent=c;show('kid');offSince=Date.now();render();connect();keepAwake()}
 
+function startThuis(c){role='kid';code=c;document.title='Huiswerk en toetsen · Focuz';
+  try{const d=JSON.parse(store.get('fz_day_thuis')||'null');if(d&&typeof d==='object')curDay={hw:arr(d.hw)}}catch(e){}
+  show('thuis');renderThuis();connect()}
 async function startTeacher(){
   store.set('kt_role','teacher');
   if(!USE_FB){
@@ -649,7 +654,7 @@ function publishDay(){
   const mo=morningFor(new Date());
   const nl=nextLessonDay();
   const d={date:today(),blocks:todayBlocks(),week:weekBlocks(),auto:!!plan.auto,sound:$('tSound').checked,next:nl,opts:plan.kidOpts,
-    morning:mo};const sig=JSON.stringify(d);
+    morning:mo,hw:hwList()};const sig=JSON.stringify(d);
   if(sig===daySig)return;daySig=sig;curDay=d;T.sendDay(d);renderBoardDay();
 }
 const hmNow = () => {const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
@@ -763,6 +768,67 @@ $('kDayClose').addEventListener('click',()=>$('kDayOver').classList.add('hide'))
 /* weekplanning voor de leerling */
 const DAGNAAM=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
 let weekSel=null;
+// ===== Huiswerk & toetsen =====
+function hwList(){return plan&&plan.word&&plan.useWord!==false?arr(plan.word.hw).filter(x=>!x.date||x.date>=today()):[]}
+const hwKey = x => x.date?x.id:x.id+'@'+isoWeek(new Date());   // terugkerend: elke week opnieuw afvinken
+function hwStore(){try{return JSON.parse(store.get('fz_hw_'+code)||'{}')||{}}catch(e){return {}}}
+function hwDoneNow(){const st=hwStore();return arr(curDay&&curDay.hw).map(hwKey).filter(k=>st[k])}
+function hwDays(date){const [y,m,d]=date.split('-').map(Number);const a=new Date(y,m-1,d),n=new Date();return Math.round((a-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5)}
+function hwWhen(x){
+  if(x.date){const n=hwDays(x.date);const [y,m,d]=x.date.split('-').map(Number);const dt=new Date(y,m-1,d);
+    const lab=DAG[dt.getDay()].slice(0,2)+' '+d+' '+MAAND[m-1];
+    return {txt:n<=0?'vandaag':n===1?'morgen':lab,sub:n>1?'nog '+n+' dagen':'',hot:n<=1}}
+  if(x.rep==='week')return {txt:'',sub:'',hot:false};
+  const wd=+x.rep;const n=(wd-new Date().getDay()+7)%7;return {txt:DAG[wd],sub:n===0?'vandaag':n===1?'morgen':'',hot:n<=1&&new Date().getDay()>0&&new Date().getDay()<6};
+}
+function hwSorted(list){
+  const dated=list.filter(x=>x.date).sort((a,b)=>a.date.localeCompare(b.date));
+  const days=list.filter(x=>!x.date&&x.rep!=='week').sort((a,b)=>((+a.rep-new Date().getDay()+7)%7)-((+b.rep-new Date().getDay()+7)%7));
+  const week=list.filter(x=>!x.date&&x.rep==='week');
+  return [['Toetsen en deadlines',dated],['Elke week op een vaste dag',days],['Elke week',week]].filter(g=>g[1].length);
+}
+function renderHw(box,list,{tick=true,counts=null}={}){
+  box.innerHTML='';const st=hwStore();
+  if(!list.length){box.innerHTML='<p class="hwempty">Er staat nu geen huiswerk of toets gepland.</p>';return}
+  hwSorted(list).forEach(([title,items])=>{
+    const h=document.createElement('h4');h.textContent=title;box.append(h);
+    const ul=document.createElement('ul');ul.className='hwlist';
+    items.forEach(x=>{const k=hwKey(x),done=!!st[k],w=hwWhen(x);
+      const li=document.createElement('li');li.className=(done?'ok ':'')+(w.hot&&!done?'hot':'');
+      li.innerHTML='<span class="hwc" aria-hidden="true"></span><span class="hwt"><b></b><small></small></span><span class="hww"><b></b><small></small></span>';
+      li.querySelector('.hwt b').textContent=x.vak;li.querySelector('.hwt small').textContent=x.wat;
+      li.querySelector('.hww b').textContent=w.txt;li.querySelector('.hww small').textContent=counts?counts(x):w.sub;
+      if(tick){li.tabIndex=0;li.setAttribute('role','checkbox');li.setAttribute('aria-checked',done);
+        const flip=()=>{const s2=hwStore();if(s2[k])delete s2[k];else s2[k]=Date.now();store.set('fz_hw_'+code,JSON.stringify(s2));renderHwAll();if(T&&!HOME&&!VIEW&&!DEMO)T.tick()};
+        li.addEventListener('click',flip);li.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();flip()}})}
+      else li.querySelector('.hwc').remove();
+      ul.append(li)});
+    box.append(ul)});
+}
+function hwSoon(list){ // korte regel voor ochtendscherm en digibord
+  const up=list.filter(x=>x.date&&hwDays(x.date)>=0&&hwDays(x.date)<=6).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  return up.map(x=>{const w=hwWhen(x);return x.vak.replace(/^toets\s+/i,'Toets ')+' ('+w.txt+')'}).join(' · ');
+}
+function renderHwAll(){
+  const list=arr(curDay&&curDay.hw);
+  if(role==='kid'){
+    $('kHwBtn').classList.toggle('hide',!list.length);
+    const n=list.filter(x=>{const w=hwWhen(x);return w.hot&&!hwStore()[hwKey(x)]}).length;$('kHwBtn').classList.toggle('hasdot',n>0);
+    if(!$('kHwOver').classList.contains('hide'))renderHw($('kHwList'),list);
+    const soon=hwSoon(list);$('kMHw').textContent=soon?'Deze week: '+soon:'';$('kMHw').classList.toggle('hide',!soon);
+    if(HOME)renderThuis();
+  }
+}
+function renderThuis(){
+  const list=arr(curDay&&curDay.hw);renderHw($('hList'),list);
+  $('hUpd').textContent=curDay?'Je vinkjes worden alleen op dit apparaat bewaard.':'Planning laden…';
+}
+function renderHwTeacher(){
+  const box=$('hwT');if(!box)return;const list=hwList();
+  const here=kidsInfo.length;
+  renderHw(box,list,{tick:false,counts:x=>here?kidsInfo.filter(k=>arr(k.hw).includes(hwKey(x))).length+' van '+here+' klaar':hwWhen(x).sub});
+  $('hwSum').textContent=list.length?list.length+(list.length===1?' item':' items')+' uit je dagklapper':'Nog geen tabel gevonden';
+}
 function renderWeek(){
   if(role!=='kid')return;
   const w=curDay&&curDay.week?curDay.week:{};const keys=Object.keys(w).sort();
@@ -785,6 +851,9 @@ function renderWeek(){
     const t=li.querySelector('.t'),d=li.querySelector('.d');if(b.title)t.textContent=b.title;else t.remove();
     if(b.doel)d.textContent='Ik-doel: '+b.doel;else d.remove();ul.append(li)});
 }
+$('kHwBtn').addEventListener('click',()=>{renderHw($('kHwList'),arr(curDay&&curDay.hw));$('kHwOver').classList.remove('hide')});
+$('kHwClose').addEventListener('click',()=>$('kHwOver').classList.add('hide'));
+$('kHwOver').addEventListener('click',e=>{if(e.target===$('kHwOver'))$('kHwOver').classList.add('hide')});
 $('kWeekBtn').addEventListener('click',()=>{weekSel=null;renderWeek();$('kWeekOver').classList.remove('hide')});
 $('kWeekTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;weekSel=b.dataset.k;renderWeek()});
 $('kWeekClose').addEventListener('click',()=>$('kWeekOver').classList.add('hide'));
@@ -973,6 +1042,7 @@ function renderBoard(rem,total,done,warn,big,sub,endTxt){
   // voor het eerste blok: ochtendscherm groot op het digibord
   const tb=todayBlocks(),mo=plan&&tb.length&&!live&&hmNow()<tb[0].at?morningFor(new Date()):null;
   $('bMorning').classList.toggle('hide',!mo);
+  {const soon=hwSoon(hwList());$('bMHw').textContent=soon?'Deze week: '+soon:'';$('bMHw').classList.toggle('hide',!soon)}
   if(mo){$('bMText').textContent=mo.text||'';const k=JSON.stringify(mo.tasks);if($('bMList').dataset.k!==k){$('bMList').dataset.k=k;$('bMList').innerHTML='';
       mo.tasks.forEach(t=>{const li=document.createElement('li');li.textContent=t;$('bMList').append(li)})}
     const ms=Math.max(0,localTime(tb[0].at)-Date.now()),m=Math.ceil(ms/60000);
@@ -996,6 +1066,32 @@ $('bBack').addEventListener('click',()=>{try{document.fullscreenElement&&documen
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('board').classList.contains('hide'))$('bBack').click()});
 
 /* =================== Word (dagklapper) =================== */
+const MAAND_RE='jan|feb|mrt|maa|apr|mei|jun|jul|aug|sep|okt|nov|dec';
+function hwHash(t){let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))|0;return (h>>>0).toString(36)}
+function schoolYear(mon,ref){const r=ref||new Date();const start=r.getMonth()>=7?r.getFullYear():r.getFullYear()-1;return mon>=7?start:start+1}
+function parseWhen(txt,cell){ // "25 nov 2026", "25-11", "Elke vrijdag", "Elke week" of een Word-datumveld
+  const t=String(txt||'').toLowerCase().trim();
+  if(cell){const de=cell.getElementsByTagNameNS(W_NS,'date')[0];const fd=de&&de.getAttributeNS(W_NS,'fullDate');if(fd&&/^\d{4}-\d{2}-\d{2}/.test(fd))return {date:fd.slice(0,10)}}
+  let m=t.match(/elke\s+(maandag|dinsdag|woensdag|donderdag|vrijdag)/);if(m)return {rep:DAG.indexOf(m[1])};
+  if(/elke\s+week|wekelijks|iedere\s+week/.test(t))return {rep:'week'};
+  m=t.match(new RegExp('(\\d{1,2})\\s*('+MAAND_RE+')[a-z]*\\.?(?:\\s+(\\d{4}))?'));
+  if(m){const mon=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'].indexOf(m[2]==='maa'?'mrt':m[2]);const y=m[3]?+m[3]:schoolYear(mon);return {date:`${y}-${pad(mon+1)}-${pad(+m[1])}`}}
+  m=t.match(/(\d{1,2})[-\/.](\d{1,2})(?:[-\/.](\d{2,4}))?/);
+  if(m){const mon=+m[2]-1;if(mon<0||mon>11)return null;let y=m[3]?+m[3]:schoolYear(mon);if(y<100)y+=2000;return {date:`${y}-${pad(mon+1)}-${pad(+m[1])}`}}
+  return null;
+}
+let parseHW=[];
+function hwRows(rows,h0){
+  const iV=h0.findIndex(h=>/^vak/.test(h)),iW=h0.findIndex(h=>/wat|doen|opdracht|leerstof/.test(h)),iD=h0.findIndex(h=>/wanneer|datum|deadline|inleveren/.test(h));
+  for(const tr of rows.slice(1)){
+    const cells=kids(tr,'tc');const c=cells.map(wText);const vak=(c[iV]||'').replace(/\n/g,' ').trim();if(!vak)continue;
+    const wat=iW>=0?(c[iW]||'').replace(/\n/g,' ').trim():'';const whenTxt=(c[iD]||'').replace(/\n/g,' ').trim();
+    const w=parseWhen(whenTxt,cells[iD]);
+    if(!w){parseIssues.push({date:today(),msg:`Huiswerk/toetsen: bij "${vak}" staat geen datum of "Elke week"`});continue}
+    const it={vak:vak.slice(0,60),wat:wat.slice(0,160),date:w.date||'',rep:w.rep===undefined?'':w.rep};
+    it.id=hwHash(it.vak+'|'+it.wat+'|'+it.date+'|'+it.rep);parseHW.push(it);
+  }
+}
 const MAANDEN=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
 const W_NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 function wText(el){ // tekst van een cel, zonder geneste tabellen
@@ -1039,10 +1135,13 @@ async function parseDocx(buf){
   const zip=await JSZip.loadAsync(buf);
   const f=zip.file('word/document.xml');if(!f)throw new Error('Dit lijkt geen Word-bestand (.docx).');
   const xml=new DOMParser().parseFromString(await f.async('string'),'application/xml');
-  const days={};parseIssues=[];parseMorning={};
+  const days={};parseIssues=[];parseMorning={};parseHW=[];
   for(const tbl of xml.getElementsByTagNameNS(W_NS,'tbl')){
-    const rows=kids(tbl,'tr');if(rows.length<3)continue;
+    const rows=kids(tbl,'tr');
     const cellsOf=tr=>kids(tr,'tc').map(wText);
+    if(rows.length>=2){const h0=cellsOf(rows[0]).map(x=>x.toLowerCase().trim());
+      if(h0.some(h=>/^vak/.test(h))&&h0.some(h=>/wanneer|datum|deadline|inleveren/.test(h))){hwRows(rows,h0);continue}}
+    if(rows.length<3)continue;
     const head=cellsOf(rows[0]).join(' '), hdr=cellsOf(rows[1]).map(s=>s.toLowerCase());
     if(!/tijd/.test(hdr[0]||'')||!hdr.some(h=>/vak/.test(h)))continue;
     const date=dateFromHeader(head);if(!date)continue;
@@ -1079,8 +1178,8 @@ async function importWord(buf,fileName){
   const n=Object.keys(all).length;if(!n)throw new Error('Geen dagtabellen gevonden (kolommen Tijd, Vak, Leerstof, Lesdoel).');
   const kd=keepDays(all),last=Object.keys(kd).sort().pop()||today();
   const km={};for(const k in parseMorning)if(kd[k]||(k>=today()&&k<=last))km[k]=parseMorning[k];
-  plan.word={file:fileName||'Word-bestand',at:Date.now(),days:kd,morning:km,issues:parseIssues.filter(x=>x.date>=today()&&x.date<=last).slice(0,20)};
-  savePlan();renderWordToday();renderNext();renderMorningPrev();
+  plan.word={file:fileName||'Word-bestand',at:Date.now(),days:kd,morning:km,hw:parseHW.filter(x=>!x.date||x.date>=today()).slice(0,40),issues:parseIssues.filter(x=>x.date>=today()&&x.date<=last).slice(0,20)};
+  savePlan();renderWordToday();renderNext();renderMorningPrev();renderHwTeacher();
   // lopend vak bijwerken als de leerstof of het doel is veranderd
   const w=wordToday();if(w&&state.status!=='idle'&&state.wordAt){const b=w.find(x=>x.at===state.wordAt&&x.vak===state.vak);
     if(b&&(b.title!==state.task||b.doel!==state.doel||JSON.stringify(blockTasks(b))!==JSON.stringify(state.tasks||[])))publishState({...state,task:b.title,doel:b.doel,tasks:blockTasks(b),extra:blockExtra(b)})}
@@ -1347,6 +1446,10 @@ function bindTeacher(){
   $('kvClose').addEventListener('click',kvClose);
   $('tKidBtn').addEventListener('click',()=>$('tKidView').click());$('tKidView2').addEventListener('click',()=>$('tKidView').click());
   $('wReadyMore').addEventListener('click',()=>{wShowAll=!wShowAll;updReady()});
+  $('hwCopy').addEventListener('click',async()=>{const url=location.origin+location.pathname+'?thuis='+code;
+    try{await navigator.clipboard.writeText(url);$('hwCopy').textContent='Gekopieerd'}catch(e){prompt('Kopieer deze link:',url)}
+    setTimeout(()=>$('hwCopy').textContent='Kopieer link',1500)});
+  renderHwTeacher();
   $('tJoin').addEventListener('click',openJoin);$('tJoinBtn').addEventListener('click',openJoin);$('jClose').addEventListener('click',closeJoin);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('jScreen').classList.contains('hide'))closeJoin()});
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('kvModal').classList.contains('hide')){/* blijft open als venster */}});
@@ -1447,8 +1550,9 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventLi
 })();
 
 const qs=new URLSearchParams(location.search);
-const urlCode=(qs.get('klas')||'').toUpperCase();
-if(validCode(urlCode))startKid(urlCode);
+const urlCode=(qs.get('klas')||'').toUpperCase(),homeCode=(qs.get('thuis')||'').toUpperCase();
+if(HOME&&validCode(homeCode))startThuis(homeCode);
+else if(validCode(urlCode))startKid(urlCode);
 else if(qs.has('leerkracht'))startTeacher();
 else if(store.get('kt_role')==='kid'&&validCode(store.get('kt_kid_code')||''))startKid(store.get('kt_kid_code'));
 else if(store.get('kt_role')==='teacher')startTeacher();
