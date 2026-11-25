@@ -1009,3 +1009,18 @@ details.opt[open]>summary b{font-size:19px}
 #tChips button{flex:1 1 auto;white-space:nowrap}
 #nCard .ntime span{font-size:clamp(64px,min(17vh,21vw),170px)}
 @media(max-width:700px){#dPast{display:none}}
+.wready{flex-wrap:wrap;row-gap:12px}
+.wrok{flex:1 1 260px}
+.wrbtns{flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+@media(max-width:700px){.wrok i{width:36px;height:36px}.wrok i::after{left:12px;top:7px;width:9px;height:16px}.wrok b{font-size:17px}.wrbtns{width:100%;justify-content:space-between;margin-left:0}}
+/* Rooster: één paneel Instellingen, dagklapper als eerste optie */
+.tab[data-tab=rooster].on{grid-template-columns:minmax(0,1fr)}
+#wSum.warn{color:#b25d00;font-weight:700}
+.rmain>h2{display:none}
+.wtop{justify-content:flex-start;margin:0 0 4px}
+#wOpt .optbody{display:grid;gap:10px}
+@media(max-width:860px){.tab[data-tab=rooster]:has(details.opt[open])>.col:first-child{display:flex}}
+.howlink summary::after{display:none!important}.howlink>summary{padding:0!important;border:0!important;margin:0!important}
+#wOpt .optbody.rmain{display:block;padding:0;background:none;box-shadow:none;border-radius:0}
+.wrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.wrow #wStatus{flex:1 1 260px;margin:0}

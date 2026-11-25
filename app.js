@@ -1347,14 +1347,22 @@ async function updateDagklapper(btn){ // knop 'Dagklapper bijwerken'
   $('wFile').click(); // geen koppeling (bijv. iPad): kies het bestand
 }
 if(/[?&]fztest\b/.test(location.search))window.__fz={link:n=>{fileHandle={name:n};filePerm='granted';if(plan&&plan.word)plan.word.issues=[];renderAuto()}};
-function updReady(){ // alles ingesteld en in orde: alleen een korte bevestiging tonen
-  const m=document.querySelector('.rmain');if(!m)return;
-  const iss=plan&&plan.word?plan.word.issues.filter(x=>x.date>=today()):[1];
-  const ok=!!(plan&&plan.word&&fileHandle&&filePerm==='granted'&&!iss.length&&plan.useWord!==false);
-  m.classList.toggle('ready',ok&&!wShowAll);m.classList.toggle('readyopen',ok&&wShowAll);
-  if(ok){const up=Object.keys(plan.word.days).filter(k=>k>=today()).sort();const last=up[up.length-1];
-    let t='Werkt automatisch bij · '+up.length+' lesdagen';if(last){const [y,mo,d]=last.split('-').map(Number);const dt=new Date(y,mo-1,d);t+=' t/m '+DAG[dt.getDay()].slice(0,2)+' '+d+' '+MAAND[mo-1]}
-    $('wReadyTxt').textContent=t;$('wReadyMore').textContent=wShowAll?'Inklappen':'Instellingen'}
+let wAutoOpened=false,wAutoNow=false;
+function updReady(){ // samenvatting van de dagklapper in de optielijst; bij een probleem klapt hij open
+  const sum=$('wSum');if(!sum)return;
+  const iss=plan&&plan.word?plan.word.issues.filter(x=>x.date>=today()):[];
+  const auto=!!(fileHandle&&filePerm==='granted');
+  let t,warn=false;
+  if(!plan||!plan.word){t='Nog niet ingelezen · tik om je dagklapper te kiezen';warn=true}
+  else{const up=Object.keys(plan.word.days).filter(k=>k>=today()).sort();const last=up[up.length-1];
+    const at=new Date(plan.word.at||Date.now());const atTxt=(ymd(at)===today()?'vandaag':DAG[at.getDay()].slice(0,2)+' '+at.getDate()+' '+MAAND[at.getMonth()])+' '+clock(at.getTime());
+    t=(auto?'Gekoppeld, werkt automatisch bij':'Ingelezen '+atTxt)+' · '+up.length+' lesdagen';
+    if(last){const [y,mo,d]=last.split('-').map(Number);const dt=new Date(y,mo-1,d);t+=' t/m '+DAG[dt.getDay()].slice(0,2)+' '+d+' '+MAAND[mo-1]}
+    if(iss.length){t=iss.length+(iss.length===1?' punt':' punten')+' om na te kijken · '+t;warn=true}
+    if(fileHandle&&filePerm!=='granted'){t='Klik om de koppeling weer toegang te geven · '+t;warn=true}}
+  sum.textContent=t;sum.classList.toggle('warn',warn);
+  if(warn&&!wAutoOpened&&$('wOpt')&&!document.querySelector('details.opt[open]')){wAutoOpened=true;wAutoNow=true;$('wOpt').open=true}
+  else if(!warn&&wAutoNow&&$('wOpt').open){wAutoNow=false;$('wOpt').open=false} // ingelezen: weer inklappen
 }
 function renderAuto(){renderAuto0();updReady()}
 function renderAuto0(){ // één regel met de koppeling, en alleen de knop die nu nodig is
@@ -1462,7 +1470,6 @@ function bindTeacher(){
   });
   $('kvClose').addEventListener('click',kvClose);
   $('tKidBtn').addEventListener('click',()=>$('tKidView').click());$('tKidView2').addEventListener('click',()=>$('tKidView').click());
-  $('wReadyMore').addEventListener('click',()=>{wShowAll=!wShowAll;updReady()});
   $('wUpd').addEventListener('click',e=>updateDagklapper(e.currentTarget));$('dUpd').addEventListener('click',e=>updateDagklapper(e.currentTarget));
   $('hwCopy').addEventListener('click',async()=>{const url=location.origin+location.pathname+'?thuis='+code;
     try{await navigator.clipboard.writeText(url);$('hwCopy').textContent='Gekopieerd'}catch(e){prompt('Kopieer deze link:',url)}

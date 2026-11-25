@@ -217,13 +217,14 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <!-- TAB: ROOSTER -->
   <div class="tab" data-tab="rooster">
     <div class="col">
-      <div class="panel grow rmain">
-        <div class="wready" id="wReady">
-          <div class="wrok"><i></i><div><b>Dagklapper gekoppeld</b><span id="wReadyTxt"></span></div></div>
-          <div class="wrbtns"><button class="updbtn" id="wUpd">Dagklapper bijwerken</button><button class="link" id="wReadyMore">Instellingen</button></div>
-        </div>
-        <h2>Dagklapper</h2>
-        <p class="wstat" id="wStatus">Nog geen Word-bestand ingelezen.</p>
+      <div class="panel grow">
+        <h2>Instellingen</h2>
+        <details class="opt" name="opt" id="wOpt">
+          <summary><b>Dagklapper</b><span id="wSum">Nog niet ingelezen</span></summary>
+          <div class="optbody rmain">
+
+
+        <div class="wrow"><p class="wstat" id="wStatus">Nog geen Word-bestand ingelezen.</p><button class="updbtn" id="wUpd">Dagklapper bijwerken</button></div>
         <div class="wcheck" id="wCheck"></div>
         <div id="wAutoBox" class="wlink"></div>
         <div class="hide"><button id="wAuto"></button><button id="wPick"></button><button id="wMsBtn"></button></div>
@@ -242,11 +243,9 @@ window.FOCUZ_MS_CLIENT_ID = null;
         </details>
         <div class="next hide" id="rNext"></div>
         <div class="wday hide" id="wToday"></div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="panel grow">
-        <h2>Extra opties</h2>
+      
+          </div>
+        </details>
         <details class="opt" name="opt">
           <summary><b>Huiswerk en toetsen</b><span id="hwSum">Nog geen tabel gevonden</span></summary>
           <div class="optbody">
