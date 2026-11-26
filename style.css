@@ -5339,3 +5339,15 @@ body.probeer .pzbar {
     grid-column: 2;
   }
 }
+/* startgids past ook op een telefoon */
+.wizbox{max-height:calc(100dvh - 24px);overflow:auto}
+@media(max-width:700px),(max-height:700px){
+  .wizbox{padding:18px 18px;gap:8px;border-radius:20px}
+  .wizbox h2{font-size:22px}.wizbox>p{display:none}
+  .wizsteps{gap:8px}
+  .wizsteps li{grid-template-columns:30px minmax(0,1fr);gap:10px;padding:10px 12px}
+  .wizsteps li::before{width:28px;height:28px;font-size:14px}
+  .wizsteps span{display:none}
+  .wizbtns{margin-top:4px;gap:6px}.wizbtns button{min-height:38px;padding:6px 12px;font-size:14px}
+  .wizbtns a{display:none}
+}
