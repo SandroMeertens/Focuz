@@ -1,4 +1,4 @@
-/* Focuz – app */
+/* Focuz – app (gebouwd uit src/ met build.js; niet hier bewerken) */
 {
 /* =================== basis =================== */
 const FBCFG = window.KLASTIMER_FIREBASE;
@@ -10,6 +10,7 @@ const DAGEN = ['','Ma','Di','Wo','Do','Vr'];
 const $ = id => document.getElementById(id);
 const PROBEER = new URLSearchParams(location.search).has('probeer'); // probeerstand: eigen opslag, voorbeeldrooster
 const SK = k => PROBEER?'pz_'+k:k;
+const VERSION = '2026.11.26';
 const store = {get(k){try{return localStorage.getItem(SK(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(SK(k),v)}catch(e){}},del(k){try{localStorage.removeItem(SK(k))}catch(e){}}};
 const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>ALPH[b%ALPH.length]).join('');
 const validCode = c => /^[A-HJ-NP-Z2-9]{6}$/.test(c);
@@ -22,6 +23,14 @@ const today = () => {const d=new Date();return `${d.getFullYear()}-${pad(d.getMo
 const CIRC = 552.92;
 const loadScript = src => new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.append(s)});
 
+// ===== foutenlog: fouten worden op het apparaat bewaard en kunnen worden meegestuurd =====
+const ERRKEY='fz_errors';
+function logError(msg,src){try{const l=JSON.parse(localStorage.getItem(ERRKEY)||'[]');const m=String(msg||'').slice(0,300);
+  if(l.length&&l[l.length-1].m===m&&Date.now()-l[l.length-1].t<60000){l[l.length-1].n=(l[l.length-1].n||1)+1}else l.push({t:Date.now(),m,s:String(src||'').slice(0,200),v:VERSION});
+  while(l.length>30)l.shift();localStorage.setItem(ERRKEY,JSON.stringify(l))}catch(e){}}
+window.addEventListener('error',e=>logError(e.message,(e.filename||'').split('/').pop()+':'+e.lineno));
+window.addEventListener('unhandledrejection',e=>logError('Promise: '+(e.reason&&e.reason.message||e.reason),''));
+function recentErrors(ms){try{return JSON.parse(localStorage.getItem(ERRKEY)||'[]').filter(x=>Date.now()-x.t<ms)}catch(e){return []}}
 let code=null, role=null, state={status:'idle'}, audioCtx=null, rang=false;
 let T=null;               // verbinding (MQTT of Firebase)
 let offset=0;             // klokverschil (ms) met de leerkracht/server
@@ -85,7 +94,7 @@ function mqttTransport(h){
   const t={
     async start(){
       await ready;
-      if(typeof mqtt==='undefined'){try{await loadScript('https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js')}catch(e){setConn(false,'Geen internet');return}}
+      if(typeof mqtt==='undefined'){try{await loadScript('vendor/mqtt.min.js')}catch(e){setConn(false,'Geen internet');return}}
       client=mqtt.connect(BROKER,{clientId:'kt_'+myId+'_'+Math.random().toString(16).slice(2,6),clean:true,reconnectPeriod:2000,connectTimeout:10000,keepalive:30});
       client.on('connect',()=>{setConn(true,'Verbonden');client.subscribe([base+'state',base+'clock',base+'ping',base+'msg',base+'day']);setTimeout(()=>{try{t.tick()}catch(e){}},400)});
       client.on('reconnect',()=>setConn(false,'Opnieuw verbinden…'));
@@ -101,7 +110,7 @@ function mqttTransport(h){
         if(k==='day'){h.onDay(msg);return}
         if(k==='state')h.onState(msg);
         else if(k==='clock'&&role==='kid'&&typeof msg.now==='number')offset=msg.now-Date.now();
-        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={id:String(msg.id),at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number),hw:arr(msg.hw).map(String),grp:String(msg.grp||''),refl:msg.refl&&typeof msg.refl==='object'?msg.refl:{}};t.count()}
+        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={id:String(msg.id),at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number),hw:arr(msg.hw).map(String),grp:String(msg.grp||''),refl:msg.refl&&typeof msg.refl==='object'?msg.refl:{},err:String(msg.err||'').slice(0,120)};t.count()}
       });
     },
     publish(s){pub('state',s,{qos:1,retain:true})},
@@ -111,7 +120,7 @@ function mqttTransport(h){
     tick(){
       if(!client||!client.connected)return;
       if(role==='teacher')pub('clock',{now:Date.now()});
-      if(role==='kid'&&!VIEW&&!HOME)pub('ping',{id:myId,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow(),grp:myGroup(),refl:reflRecent()});
+      if(role==='kid'&&!VIEW&&!HOME){const er=recentErrors(600000).pop();pub('ping',{id:myId,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow(),grp:myGroup(),refl:reflRecent(),err:er?er.m.slice(0,120):''})}
     },
     count(){const n=Date.now();for(const k in peers)if(n-peers[k].at>50000)delete peers[k];h.onKids(Object.values(peers))},
     wake(){if(client&&!client.connected)client.reconnect()},
@@ -193,7 +202,6 @@ function connect(){
   T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
 }
 function publishState(s){state=s;rang=false;render();T&&T.publish(s)}
-
 /* =================== weergave timer =================== */
 const remaining = () => state.status==='running'?state.endAt-srvNow():state.status==='paused'?state.remaining:null;
 let calmPref = store.get('kt_calm')==='1';
@@ -432,7 +440,6 @@ function manageWake(){
   const need=state.status!=='idle'||!$('kMorning').classList.contains('hide')||!$('kAlert').classList.contains('hide');
   if(need)keepAwake();else if(wakeSentinel){try{wakeSentinel.release()}catch(e){}wakeSentinel=null}
 }
-
 /* =================== schermen =================== */
 function show(id){['home','login','kid','teacher','board','thuis'].forEach(s=>$(s).classList.toggle('hide',s!==id))}
 // Kijk-/oefenstand alleen voor de leerkracht: in het leerlingbeeld van de leerkrachtmodule,
@@ -563,7 +570,6 @@ $('btnGoogle').addEventListener('click',async()=>{
 });
 $('btnLoginBack').addEventListener('click',()=>{store.del('kt_role');show('home')});
 $('tLogout').addEventListener('click',async()=>{if(!await ask({title:'Uitloggen?',ok:'Uitloggen'}))return;T&&T.stop();T=null;fbUser=null;role=null;store.del('kt_role');await fb.auth.signOut();show('home')});
-
 /* =================== planning (vakken + rooster) =================== */
 const DEFAULT = {
   'Rekenen':{title:'',doel:'',tasks:[{t:'Instructie aan de instructietafel',m:10},{t:'Basisopdrachten in je werkboek',m:20},{t:'Nakijken en verbeteren',m:5}],extra:'Plusblad rekenen\nRekenspel op de iPad'},
@@ -917,8 +923,9 @@ function renderThuis(){
 // ===== reflectie en dagoverzicht (leerkracht) =====
 function logStore(){try{return JSON.parse(store.get('kt_log')||'{}')||{}}catch(e){return {}}}
 function logSave(l){const ks=Object.keys(l).sort();while(ks.length>21)delete l[ks.shift()];store.set('kt_log',JSON.stringify(l))}
-let logTimer=null;
-function logKids(list){ // bewaart per les: hoeveel iPads alles af hadden en de reflecties
+let logTimer=null;const kidErrSeen={};
+function logKids(list){
+  list.forEach(k=>{if(k.err&&!kidErrSeen[k.id+k.err]){kidErrSeen[k.id+k.err]=1;logError('iPad '+String(k.id).slice(0,4)+': '+k.err,'leerling')}}); // bewaart per les: hoeveel iPads alles af hadden en de reflecties
   const l=logStore();const d=today();const day=l[d]||(l[d]={});let ch=false;
   const cv=currentView(),cs=cv&&cv.s;
   const lessonInfo=sid=>{if(cs&&cs.sid===sid&&cs.status&&cs.status!=='idle')return {vak:cs.vak||'',at:cs.wordAt||(cs.startAt?clock(cs.startAt-offset):clock(Date.now())),t:arr(cs.tasks).filter(x=>x&&x.t).map(x=>x.t)};return null};
@@ -985,7 +992,6 @@ $('kWeekTabs').addEventListener('click',e=>{const b=e.target.closest('button');i
 $('kWeekClose').addEventListener('click',()=>$('kWeekOver').classList.add('hide'));
 $('kWeekOver').addEventListener('click',e=>{if(e.target===$('kWeekOver'))$('kWeekOver').classList.add('hide')});
 $('kDayOver').addEventListener('click',e=>{if(e.target===$('kDayOver'))$('kDayOver').classList.add('hide')});
-
 /* =================== dashboard: tabblad Nu =================== */
 let kidsInfo=[];
 const MAAND=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
@@ -1075,6 +1081,7 @@ function renderStatus(){
   const nk=kidsInfo.length;
   items.push([nk?'ok':'off',nk===1?'1 iPad verbonden':nk+' iPads verbonden']);
   if(!connected)items.push(['bad','Geen verbinding met de server']);
+  {const ne=kidsInfo.filter(k=>k.err).length;if(ne)items.push(['warn',(ne===1?'1 iPad meldt':ne+' iPads melden')+' een fout · stuur hem mee via Hulp en uitleg'])}
   if(plan.word){const age=Date.now()-plan.word.at;const auto=(fileHandle&&filePerm==='granted')||plan.msFile;
     items.push([age>2*864e5?'warn':'ok',`Dagklapper ${ago(age)} ingelezen`+(auto?' · automatisch':'')]);
     if(age>2*864e5)warns.push('Je dagklapper is al '+ago(age).replace(' geleden','')+' niet ingelezen. Klopt de planning nog?');
@@ -1198,7 +1205,6 @@ $('tBoard').addEventListener('click',()=>{
 });
 $('bBack').addEventListener('click',()=>{try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}show('teacher');render()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('board').classList.contains('hide'))$('bBack').click()});
-
 /* =================== Word (dagklapper) =================== */
 const MAAND_RE='jan|feb|mrt|maa|apr|mei|jun|jul|aug|sep|okt|nov|dec';
 function hwHash(t){let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))|0;return (h>>>0).toString(36)}
@@ -1278,7 +1284,7 @@ let parseIssues=[],parseMorning={};
 const MAAND_LANG=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
 const MORNING_RE=/^(ochtend|ochtendtaken|inloop|binnenkomst|welkom|dagstart)$/i;
 async function parseDocx(buf){
-  if(typeof JSZip==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  if(typeof JSZip==='undefined')await loadScript('vendor/jszip.min.js');
   const zip=await JSZip.loadAsync(buf);
   const f=zip.file('word/document.xml');if(!f)throw new Error('Dit lijkt geen Word-bestand (.docx).');
   const xml=new DOMParser().parseFromString(await f.async('string'),'application/xml');
@@ -1689,9 +1695,12 @@ function bindTeacher(){
     if(a==='rooster'){closeWiz();openOpt('rOpt')}
     if(a==='join'){openJoin()}
     if(a==='kid'){closeWiz();$('tKidView').click()}});
+  const refreshVer=()=>{const n=recentErrors(7*864e5).length;$('hVer').textContent='Focuz versie '+VERSION+' · '+(n?n+(n===1?' foutmelding':' foutmeldingen')+' in de afgelopen week (gaan mee met je vraag)':'geen foutmeldingen')};
+  refreshVer();$('hOpt').addEventListener('toggle',refreshVer);
   $('hWiz').addEventListener('click',()=>$('wiz').classList.remove('hide'));
   $('hFeedback').addEventListener('click',()=>{const to=window.FOCUZ_FEEDBACK_EMAIL||'';
-    const body='Mijn vraag of probleem:\n\n\n---\nApparaat: '+navigator.userAgent+'\nKlascode: '+code+'\nDatum: '+new Date().toLocaleString('nl-NL');
+    const errs=recentErrors(7*864e5).slice(-10).map(x=>new Date(x.t).toLocaleString('nl-NL')+(x.n>1?' ('+x.n+'x)':'')+' · '+x.m+(x.s?' ['+x.s+']':'')).join('\n');
+    const body='Mijn vraag of probleem:\n\n\n---\nFocuz '+VERSION+'\nApparaat: '+navigator.userAgent+'\nKlascode: '+code+'\nDatum: '+new Date().toLocaleString('nl-NL')+'\n\nFoutmeldingen (laatste 7 dagen):\n'+(errs||'geen');
     location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent('Focuz: vraag of probleem')+'&body='+encodeURIComponent(body)});
   $('dLog').addEventListener('click',()=>{renderDayLog();$('dlModal').classList.remove('hide')});
   $('dlClose').addEventListener('click',()=>$('dlModal').classList.add('hide'));
@@ -1736,7 +1745,6 @@ function bindTeacher(){
   $('rRows').addEventListener('click',e=>{if(!e.target.classList.contains('rdel'))return;plan.rooster[rDay].splice(+e.target.closest('.rr').dataset.i,1);savePlan();renderRooster()});
   $('rAuto').addEventListener('change',()=>{plan.auto=$('rAuto').checked;savePlan();renderNext()});
 }
-
 /* =================== tikken =================== */
 setInterval(()=>{
   if(role==='kid'){manageWake();renderSoundTip()}

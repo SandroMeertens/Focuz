@@ -53,3 +53,10 @@ Zet in je dagklapper een tabel met de kolommen **Vak**, **Wat ga je doen** en **
 - **Groep** en **grote letters** bij Klas en iPads; **?**-uitleg bij instellingen.
 - **Vraag of probleem doorgeven** opent een e-mail; stel het adres in met `window.FOCUZ_FEEDBACK_EMAIL` in `index.html`.
 - **Instructiegroepen**: `Taak (10 min) [basis]`; leerling kiest zijn groep. **Goed gedaan** bij alles af, **reflectie** op het ik-doel, **dagoverzicht** voor de leerkracht (lokaal, zonder namen).
+
+## Ontwikkelen
+- De code staat in `src/` (per onderdeel). `node build.js` bouwt daar `app.js` van; bewerk `app.js` niet zelf. In GitHub Actions controleert `node build.js --check` dit.
+- Bibliotheken (MQTT, JSZip, QR-code) staan in `vendor/`, zodat Focuz niet afhangt van externe websites.
+- Tests: `cd tests && npx playwright test` (Chrome). In GitHub Actions draaien ze ook in Safari (WebKit). Lokaal Safari: `SAFARI=1 npx playwright test`.
+- Visuele controle: `python3`-script maakt schermafbeeldingen; `node tests/vdiff.js mapA mapB` vergelijkt ze pixel voor pixel.
+- Fouten worden bewaard in `localStorage.fz_errors` (laatste 30) en gaan mee met "Vraag of probleem doorgeven".

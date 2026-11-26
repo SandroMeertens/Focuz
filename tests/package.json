@@ -1,13 +1,17 @@
 {
   "name": "focuz-tests",
   "private": true,
-  "scripts": { "test": "playwright test" },
+  "scripts": {
+    "test": "playwright test"
+  },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "aedes": "0.51.3",
     "aedes-server-factory": "0.2.1",
     "jszip": "3.10.1",
     "mqtt": "5.10.1",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
     "qrcode-generator": "1.4.4"
   }
 }

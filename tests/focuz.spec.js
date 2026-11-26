@@ -3,7 +3,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-const APP = 'file://' + path.resolve(__dirname, '..', 'index.html');
+const APP = 'http://localhost:8898/index.html';
 const BROKER = 'ws://localhost:8899';
 const FIX = n => path.join(__dirname, 'fixtures', n);
 const NM = n => require.resolve(n);
@@ -18,10 +18,8 @@ async function setup(context, iso) {
   await context.addInitScript(fakeTime(iso));
   await context.route('**/*', r => {
     const u = r.request().url();
-    if (u.includes('mqtt.min.js')) return r.fulfill({ path: path.join(path.dirname(NM('mqtt/package.json')), 'dist/mqtt.min.js'), contentType: 'application/javascript' });
-    if (u.includes('jszip')) return r.fulfill({ path: path.join(path.dirname(NM('jszip/package.json')), 'dist/jszip.min.js'), contentType: 'application/javascript' });
-    if (u.includes('qrcode')) return r.fulfill({ path: NM('qrcode-generator'), contentType: 'application/javascript' });
-    if (u.startsWith('http')) return r.abort();
+    // alleen de app zelf (localhost) mag; al het andere internet blijft dicht
+    if (u.startsWith('http') && !u.startsWith('http://localhost:')) return r.abort();
     return r.continue();
   });
 }
@@ -327,5 +325,23 @@ test('instructiegroepen, beloning, reflectie en dagoverzicht', async ({ browser 
   await t.page.click('#dLog');
   await expect(t.page.locator('#dlList')).toContainText('1 van 1 alles af');
   expect([...t.errors, ...k.errors]).toEqual([]);
+  await t.ctx.close(); await k.ctx.close();
+});
+
+test('foutenlog: fout op een iPad komt bij de leerkracht en gaat mee met een vraag', async ({ browser }) => {
+  const iso = '2026-11-19T09:20:00+01:00';
+  const t = await teacher(browser, iso);
+  const code = await t.page.locator('#tCode').innerText();
+  const k = await kid(browser, iso, code);
+  await k.page.waitForTimeout(1500);
+  await k.page.evaluate(() => setTimeout(() => { throw new Error('testfout op de iPad'); }, 0));
+  await k.page.waitForTimeout(300);
+  expect(await k.page.evaluate(() => localStorage.getItem('fz_errors'))).toContain('testfout');
+  await k.page.evaluate(() => document.querySelector('.kidfoot button:not(.hide)') && 0); // niets
+  // de iPad stuurt de fout mee met zijn volgende signaal
+  await expect.poll(async () => { await k.page.evaluate(() => window.dispatchEvent(new Event('focus'))); await t.page.click('#sPill'); const txt = await t.page.locator('#sList').innerText(); await t.page.mouse.click(3, 700); return txt; }, { timeout: 30000 }).toContain('meldt een fout');
+  await t.page.click('#tTabs [data-tab=rooster]');
+  await t.page.click('#hOpt > summary');
+  await expect(t.page.locator('#hVer')).toContainText('Focuz versie');
   await t.ctx.close(); await k.ctx.close();
 });

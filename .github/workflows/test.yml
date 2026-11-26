@@ -14,5 +14,6 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: node ../build.js --check
+      - run: npx playwright install --with-deps chromium webkit
       - run: npx playwright test
