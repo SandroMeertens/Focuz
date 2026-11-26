@@ -31,6 +31,7 @@
 window.KLASTIMER_FIREBASE = null;
 /* Automatisch uit OneDrive: plak hier de "Application (client) ID" van je app-registratie (zie README). */
 window.FOCUZ_MS_CLIENT_ID = null;
+  window.FOCUZ_FEEDBACK_EMAIL = null; // e-mailadres voor vragen en problemen van collega's
 </script>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -60,6 +61,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <button class="primary" id="btnKid">Ik ben leerling</button>
       <button id="btnTeacher">Ik ben leerkracht</button>
     </div>
+    <a class="hprobeer" href="?probeer=1">Eerst even proberen? Bekijk Focuz met een voorbeeldrooster</a>
     <div id="homeKid" class="hide">
       <label for="codeIn" class="hlabel">Typ de klascode van het bord</label>
       <input id="codeIn" class="codeinput" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="••••••">
@@ -149,6 +151,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
 </section>
 
 <!-- LEERKRACHT -->
+<div class="pzbar" id="pzBar">Probeerstand met een voorbeeldrooster · je klas wordt niet gekoppeld <a href="./">Stoppen</a></div>
 <section id="teacher" class="hide">
   <div class="thead">
     <h1>Focuz</h1>
@@ -165,7 +168,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <button class="primary sjoin" id="tJoinBtn">iPads koppelen</button>
       <ul class="slist" id="sList"></ul>
       <div class="swarn" id="sWarn"></div>
-      <label class="toggle"><input type="checkbox" id="tSound" checked><span></span> Belletjes op de iPads</label>
+      <label class="toggle"><input type="checkbox" id="tSound" checked><span></span> Belletjes op de iPads <button type="button" class="help" data-tip="De iPads geven een zacht belletje als een les begint, als er nog 2 minuten zijn en als de tijd om is." aria-label="Uitleg">?</button></label>
     </div>
     <div class="pop hide" id="mPop">
       <div class="mactive hide" id="mActive"><span id="mInfo"></span><button id="mClear">Weghalen</button></div>
@@ -203,7 +206,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <div class="panel grow">
         <div class="dhead"><h2 id="dHead">Vandaag</h2><button class="link" id="dPast"></button><button class="updbtn" id="dUpd" title="Lees je dagklapper opnieuw in" aria-label="Dagklapper bijwerken">Bijwerken</button></div>
         <ul class="dlist" id="dList"></ul>
-        <button class="addblk" id="qToggle" aria-expanded="false">+ Los blok starten</button>
+        <button class="addblk" id="qToggle" aria-expanded="false">+ Losse timer</button>
         <div class="quick qright">
           <div class="qbox hide" id="qBox">
             <div class="qrow"><select id="tVak2" aria-label="Vak om te starten"></select><input id="tTime" type="time" aria-label="Klaar om"></div>
@@ -233,14 +236,15 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <input type="file" id="wFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hide">
         <div id="wMsBox" class="msbox hide"></div>
         <div class="toggles">
-          <label class="toggle"><input type="checkbox" id="wUse" checked><span></span> Rooster uit de dagklapper gebruiken</label>
-          <label class="toggle"><input type="checkbox" id="rAuto" checked><span></span> Vakken automatisch laten starten</label>
+          <label class="toggle"><input type="checkbox" id="wUse" checked><span></span> Rooster uit de dagklapper gebruiken <button type="button" class="help" data-tip="De lessen, taken en ik-doelen komen uit je Word-dagklapper. Zet dit uit om alleen het rooster in Focuz te gebruiken." aria-label="Uitleg">?</button></label>
+          <label class="toggle"><input type="checkbox" id="rAuto" checked><span></span> Lessen automatisch laten starten <button type="button" class="help" data-tip="De timer start vanzelf op de iPads op de begintijd uit je rooster. Jij hoeft niets te doen." aria-label="Uitleg">?</button></label>
         </div>
         <details class="howlink"><summary>Hoe schrijf ik taken in mijn dagklapper?</summary>
           <div class="howto">
             <p>Zet ze in de kolom Leerstof, gescheiden door een puntkomma:</p>
             <code>Blok 3 les 9; Instructie (10 min); Werkboek 1-4 (20 min); klaar: plusblad</code>
             <p>De tekst zonder minuten wordt de titel. "klaar:" wordt een klaaropdracht. Het lesdoel wordt het ik-doel.</p>
+            <p><a href="sjabloon/Focuz-dagklapper-sjabloon.docx" download>Download een voorbeeld-dagklapper (Word)</a></p>
           </div>
         </details>
         <div class="next hide" id="rNext"></div>
@@ -251,6 +255,8 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <details class="opt" name="opt" id="kOpt">
           <summary><b>Klas en iPads</b><span id="kSum">Klascode</span></summary>
           <div class="optbody kc2">
+      <label class="kgroep">Groep <select id="tGroep" aria-label="Groep"><option value="">Kies…</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+        <button type="button" class="help" data-tip="Bij groep 1 tot en met 4 staan de grote letters op de iPads meteen aan en is de welkomsttekst eenvoudiger." aria-label="Uitleg">?</button></label>
       <div class="krow">
         <div class="kcode"><span>Klascode</span><b id="tCode"></b></div>
         <button id="tCopy">Kopieer link</button>
@@ -258,8 +264,9 @@ window.FOCUZ_MS_CLIENT_ID = null;
       <button class="primary kjoin" id="tJoin">iPads koppelen</button>
       <div class="kopts">
         <b>Wat mogen leerlingen zelf?</b>
-        <label class="toggle"><input type="checkbox" id="oCalm" checked><span></span> Rustig scherm (stoplicht) aanzetten</label>
-        <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken</label>
+        <label class="toggle"><input type="checkbox" id="oCalm" checked><span></span> Rustig scherm (stoplicht) aanzetten <button type="button" class="help" data-tip="Leerlingen kunnen de klok vervangen door een stoplicht: groen, oranje bij de laatste minuten, rood als de tijd om is." aria-label="Uitleg">?</button></label>
+        <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken <button type="button" class="help" data-tip="Leerlingen kunnen het rooster van de hele week bekijken." aria-label="Uitleg">?</button></label>
+        <label class="toggle"><input type="checkbox" id="oBig"><span></span> Grote letters op de iPads <button type="button" class="help" data-tip="Alle tekst op de iPads wordt groter. Handig voor jonge kinderen of leerlingen die slecht zien." aria-label="Uitleg">?</button></label>
       </div>
       <div class="kfoot">
         <button class="link kphone" id="tKidView2">Leerlingscherm</button><button class="link" id="tUseCode">Klascode van ander apparaat gebruiken</button><button class="link" id="tNewCode">Nieuwe klascode maken</button>
@@ -278,9 +285,9 @@ window.FOCUZ_MS_CLIENT_ID = null;
         <details class="opt" name="opt">
           <summary><b>Ochtend</b><span>Welkomstboodschap en ochtendtaken vóór het eerste vak</span></summary>
           <div class="optbody">
-            <label class="toggle"><input type="checkbox" id="oOn" checked><span></span> Ochtendscherm tonen</label>
+            <label class="toggle"><input type="checkbox" id="oOn" checked><span></span> Ochtendscherm tonen <button type="button" class="help" data-tip="Voor de eerste les zien de iPads een welkomstscherm met de ochtendtaken, zoals huiswerk klaarleggen." aria-label="Uitleg">?</button></label>
             <p class="ohint">Of zet in je dagklapper een rij met vak <b>Ochtend</b>: taken in Leerstof, welkomstzin in Lesdoel.</p>
-            <label class="toggle"><input type="checkbox" id="oAuto" checked><span></span> Aanvullen uit de dag (huiswerk, gym, leesboek)</label>
+            <label class="toggle"><input type="checkbox" id="oAuto" checked><span></span> Aanvullen uit de dag (huiswerk, gym, leesboek) <button type="button" class="help" data-tip="Focuz zet er vanzelf taken bij die bij de dag passen, bijvoorbeeld "Gymspullen pakken" op een gymdag." aria-label="Uitleg">?</button></label>
             <label for="oText">Welkomstzin als er in je dagklapper geen staat</label>
             <input id="oText" maxlength="120" placeholder="Fijn dat je er bent!">
             <label for="oTasks">Vaste ochtendtaken, elke dag (één per regel)</label>
@@ -289,7 +296,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
           </div>
         </details>
         <details class="opt" name="opt">
-          <summary><b>Standaard per vak</b><span>Klaaropdrachten en een afvinklijst die bij elk blok van een vak horen</span></summary>
+          <summary><b>Vaste taken per vak</b><span>Taken en klaaropdrachten die bij elke les van een vak horen</span></summary>
           <div class="optbody">
             <div class="vpreset"><span>Nog niets ingesteld?</span><button class="link" id="tVakPreset">Voorstel invullen voor Rekenen, Spelling en Taal</button></div>
             <div class="vakbar">
@@ -306,12 +313,13 @@ window.FOCUZ_MS_CLIENT_ID = null;
             <div class="sum"><button id="tAddRow">+ Taak</button><span id="tSum"></span></div>
           </div>
         </details>
-        <details class="opt" name="opt">
-          <summary><b>Weekrooster zonder Word</b><span>Voor dagen die niet in je dagklapper staan</span></summary>
+        <details class="opt" name="opt" id="rOpt">
+          <summary><b>Rooster in Focuz</b><span>Geen dagklapper? Zet hier je vaste weekrooster</span></summary>
           <div class="optbody">
             <div class="days" id="rDays"></div>
             <div class="rrows" id="rRows"></div>
-            <div class="sum"><button id="rAdd">+ Blok</button></div>
+            <p class="ohint">Kies per dag je lessen. De taken komen uit <b>Vaste taken per vak</b>. Dit rooster herhaalt zich elke week; een dagklapper gaat altijd voor.</p>
+            <div class="sum rbtns"><button id="rAdd">+ Les</button><button class="link" id="rCopy">Deze dag naar alle dagen kopiëren</button></div>
           </div>
         </details>
         <details class="opt" name="opt" id="bOpt">
@@ -320,6 +328,16 @@ window.FOCUZ_MS_CLIENT_ID = null;
             <p class="ohint">Je instellingen staan alleen in deze browser. Maak af en toe een reservekopie en zet die in OneDrive. Op een nieuw apparaat zet je hem terug.</p>
             <div class="bkrow"><button class="primary" id="bkSave">Reservekopie maken</button><button id="bkLoad">Reservekopie terugzetten</button><input type="file" id="bkFile" accept=".json,application/json" class="hide"></div>
             <p class="small muted" id="bkInfo"></p>
+          </div>
+        </details>
+        <details class="opt" name="opt" id="hOpt">
+          <summary><b>Hulp en uitleg</b><span>Startgids, handleiding, sjabloon en een vraag stellen</span></summary>
+          <div class="optbody hlinks">
+            <button id="hWiz">Startgids opnieuw bekijken</button>
+            <a class="btnlike" href="handleiding.html" target="_blank" rel="noopener">Handleiding lezen</a>
+            <a class="btnlike" href="sjabloon/Focuz-dagklapper-sjabloon.docx" download>Sjabloon dagklapper downloaden</a>
+            <a class="btnlike" href="?probeer=1" target="_blank" rel="noopener">Probeerstand openen</a>
+            <button id="hFeedback">Vraag of probleem doorgeven</button>
           </div>
         </details>
       </div>
@@ -394,6 +412,22 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <div class="row"><button id="mCancel">Annuleer</button><button class="primary" id="mOk">OK</button></div>
 </div></div>
 
+<div class="wiz hide" id="wiz" role="dialog" aria-label="Welkom bij Focuz">
+  <div class="wizbox">
+    <h2>Welkom bij Focuz</h2>
+    <p class="muted">In drie stappen klaar. Je kunt alles later terugvinden bij Instellingen.</p>
+    <ol class="wizsteps">
+      <li><div><b>Zet je planning erin</b><span>Heb je een dagklapper in Word? Lees hem in. Anders maak je je rooster in Focuz.</span>
+        <div class="wizbtns"><button class="primary" data-wiz="word">Dagklapper inlezen</button><button data-wiz="rooster">Rooster in Focuz maken</button><a href="sjabloon/Focuz-dagklapper-sjabloon.docx" download>Sjabloon downloaden</a></div></div></li>
+      <li><div><b>Koppel de iPads</b><span>Zet het koppelscherm op het digibord. Kinderen scannen de QR-code.</span>
+        <div class="wizbtns"><button data-wiz="join">Koppelscherm tonen</button></div></div></li>
+      <li><div><b>Kijk mee als leerling</b><span>Zie wat de kinderen zien en probeer het zelf uit.</span>
+        <div class="wizbtns"><button data-wiz="kid">Leerlingscherm bekijken</button></div></div></li>
+    </ol>
+    <div class="wizfoot"><a href="handleiding.html" target="_blank" rel="noopener">Handleiding lezen</a><button class="primary" data-wiz="done">Aan de slag</button></div>
+  </div>
+</div>
+<div class="tipbub hide" id="tipBub" role="tooltip"></div>
 <script src="app.js"></script>
 </body>
 </html>

@@ -8,7 +8,9 @@ const PREFIX = 'focuz/v2/';
 const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const DAGEN = ['','Ma','Di','Wo','Do','Vr'];
 const $ = id => document.getElementById(id);
-const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const PROBEER = new URLSearchParams(location.search).has('probeer'); // probeerstand: eigen opslag, voorbeeldrooster
+const SK = k => PROBEER?'pz_'+k:k;
+const store = {get(k){try{return localStorage.getItem(SK(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(SK(k),v)}catch(e){}},del(k){try{localStorage.removeItem(SK(k))}catch(e){}}};
 const newCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>ALPH[b%ALPH.length]).join('');
 const validCode = c => /^[A-HJ-NP-Z2-9]{6}$/.test(c);
 const myId = store.get('kt_id') || (()=>{const i=newCode()+newCode();store.set('kt_id',i);return i})();
@@ -37,6 +39,13 @@ function ask({title,text='',input=null,ok='OK'}){
   });
 }
 
+// uitleg-vraagtekens
+document.addEventListener('click',e=>{const h=e.target.closest('.help');const b=$('tipBub');
+  if(h){e.preventDefault();e.stopPropagation();if(!b.classList.contains('hide')&&b.dataset.for===h.dataset.tip){b.classList.add('hide');return}
+    b.textContent=h.dataset.tip;b.dataset.for=h.dataset.tip;b.classList.remove('hide');const r=h.getBoundingClientRect();
+    const w=Math.min(300,innerWidth-24);b.style.width=w+'px';b.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';
+    const top=r.bottom+8;b.style.top=(top+b.offsetHeight>innerHeight-8?r.top-b.offsetHeight-8:top)+'px';return}
+  if(!b.classList.contains('hide'))b.classList.add('hide')},true);
 /* =================== verbinding =================== */
 let connected=false, everConnected=false, offSince=Date.now();
 function setConn(ok,txt){
@@ -178,7 +187,7 @@ function connect(){
   const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
            onKids:list=>{kidsInfo=list;renderNow();renderJoin();renderHwTeacher();$('kSum').textContent='Klascode '+code+' · '+(list.length===1?'1 iPad':list.length+' iPads')+' verbonden'},
            onMsg:m=>{if(HOME)return;curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
-           onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set(HOME?'fz_day_thuis':'fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null,hw:arr(d.hw).filter(x=>x&&x.id&&x.vak).map(x=>({id:String(x.id),vak:String(x.vak),wat:String(x.wat||''),date:String(x.date||''),rep:x.rep===''||x.rep==null?'':x.rep}))}:null;renderDay();renderWeek();renderHwAll()}};
+           onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set(HOME?'fz_day_thuis':'fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null,hw:arr(d.hw).filter(x=>x&&x.id&&x.vak).map(x=>({id:String(x.id),vak:String(x.vak),wat:String(x.wat||''),date:String(x.date||''),rep:x.rep===''||x.rep==null?'':x.rep}))}:null;renderDay();renderWeek();renderHwAll();document.body.classList.toggle('kidbig',!!(curDay&&curDay.opts&&curDay.opts.big))}};
   daySig='';
   T=USE_FB?fbTransport(h):mqttTransport(h);
   T.start().catch(e=>{setConn(false,'Verbindingsfout');console.error(e)});
@@ -445,6 +454,29 @@ function startKid(c){role='kid';code=c;if(!VIEW)restoreDay();if(!VIEW){store.set
 function startThuis(c){role='kid';code=c;document.title='Huiswerk en toetsen · Focuz';
   try{const d=JSON.parse(store.get('fz_day_thuis')||'null');if(d&&typeof d==='object')curDay={hw:arr(d.hw)}}catch(e){}
   show('thuis');renderThuis();connect()}
+function demoPlan(){ // voorbeeldweek rond vandaag, zodat er altijd iets te zien is
+  const days={},base=new Date();base.setHours(0,0,0,0);const dow=base.getDay()||7;base.setDate(base.getDate()-(dow-1));
+  const L=[['08:30','Rekenen','Les 4 – breuken vergelijken',[['Instructie',10],['Werkboek opdrachten',25],['Nakijken',5]],'Ik kan breuken vergelijken.','Weektaak Gynzy'],
+    ['09:30','Spelling','Les 3 – woorden met -heid',[['Instructie',10],['Werkboek',20],['Nakijken',5]],'Ik kan woorden met -heid goed schrijven.','Woorden oefenen'],
+    ['10:15','Pauze','',[],'',''],
+    ['10:30','Lezen','Stillezen',[['Lezen in je eigen boek',25]],'Ik kan geconcentreerd lezen.',''],
+    ['11:00','Taal','Les 5 – zinsdelen',[['Instructie',10],['Opdrachten',20]],'Ik kan een zin ontleden.','Woordenschat oefenen'],
+    ['12:00','Pauze','',[],'',''],
+    ['12:45','Wereldoriëntatie','Thema water',[['Tekst lezen',20],['Vragen maken',20]],'Ik kan uitleggen hoe een dijk werkt.',''],
+    ['13:45','Creatief','Tekenen: een landschap',[['Schetsen',15],['Inkleuren',25]],'Ik kan perspectief gebruiken.','']];
+  for(let i=0;i<14;i++){const d=new Date(base);d.setDate(base.getDate()+i);if(d.getDay()===0||d.getDay()===6)continue;
+    days[ymd(d)]=L.map(([at,vak,title,t,doel,klaar],i)=>({at,end:L[i+1]?L[i+1][0]:'14:30',vak,title,doel,klaar,tasks:t.map(([x,m])=>({t:x,m}))}))}
+  const dd=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
+  const hw=[{vak:'Toets topografie',wat:'Kaart C oefenen',date:dd(2),rep:''},{vak:'Toets Engels',wat:'Woorden en zinnen leren',date:dd(4),rep:''},
+    {vak:'Huiswerk werkwoorden',wat:'Maak 3 bladen werkwoordspelling',date:'',rep:5},{vak:'Lezen',wat:'Lees elke dag 15 minuten',date:'',rep:'week'}].map(x=>({...x,id:hwHash(x.vak+'|'+x.wat+'|'+x.date+'|'+x.rep)}));
+  return {vakken:{},word:{file:'Voorbeeldrooster',at:Date.now(),days,morning:{},hw,issues:[]},groep:8};
+}
+function startProbeer(){
+  store.set('kt_role','teacher');role='teacher';code=store.get('kt_teacher_code');
+  if(!validCode(code||'')){code=newCode();store.set('kt_teacher_code',code)}
+  plan=normPlan(readLocalPlan()||demoPlan());if(!plan.word||!Object.keys(plan.word.days).some(k=>k>=today()))plan.word=normPlan(demoPlan()).word;
+  savePlan();document.body.classList.add('probeer');show('teacher');setupTeacher();connect();
+}
 async function startTeacher(){
   store.set('kt_role','teacher');
   if(!USE_FB){
@@ -508,7 +540,8 @@ function normPlan(p){
   const r=p.rooster||{};p.rooster={};for(let d=1;d<=5;d++)p.rooster[d]=arr(r[d]).filter(x=>x&&x.at).map(x=>({at:x.at,vak:x.vak||''}));
   p.auto=p.auto!==false;
   p.useWord=p.useWord!==false;
-  const ko=p.kidOpts&&typeof p.kidOpts==='object'?p.kidOpts:{};p.kidOpts={calm:ko.calm!==false,week:ko.week!==false};
+  const ko=p.kidOpts&&typeof p.kidOpts==='object'?p.kidOpts:{};p.kidOpts={calm:ko.calm!==false,week:ko.week!==false,big:ko.big===true};
+  p.groep=+p.groep>=1&&+p.groep<=8?+p.groep:0;
   const mo=p.morning&&typeof p.morning==='object'?p.morning:{};
   p.morning={on:mo.on!==false,auto:mo.auto!==false,text:typeof mo.text==='string'?mo.text:'Fijn dat je er bent! Begin rustig aan de dag.',
     tasks:typeof mo.tasks==='string'?(mo.v2?mo.tasks:mo.tasks.split('\n').filter(x=>!/jas ophangen/i.test(x)).join('\n')):DEFAULT_MORNING,v2:true,v3:true,v4:true};
@@ -565,10 +598,10 @@ function renderRooster(){
   const rows=plan.rooster[rDay];rows.sort((a,b)=>a.at.localeCompare(b.at));
   const opts=Object.keys(plan.vakken);
   $('rRows').innerHTML='';
-  if(!rows.length){const p=document.createElement('div');p.className='muted small';p.textContent='Nog geen blokken op '+['','maandag','dinsdag','woensdag','donderdag','vrijdag'][rDay]+'.';$('rRows').append(p)}
+  if(!rows.length){const p=document.createElement('div');p.className='muted small';p.textContent='Nog geen lessen op '+['','maandag','dinsdag','woensdag','donderdag','vrijdag'][rDay]+'.';$('rRows').append(p)}
   rows.forEach((x,i)=>{
     const r=document.createElement('div');r.className='rr';r.dataset.i=i;
-    r.innerHTML='<input type="time" class="rt" aria-label="Begintijd"><select class="rv" aria-label="Vak"></select><button class="rdel" aria-label="Verwijder blok">×</button>';
+    r.innerHTML='<input type="time" class="rt" aria-label="Begintijd"><select class="rv" aria-label="Vak"></select><button class="rdel" aria-label="Verwijder les">×</button>';
     r.querySelector('.rt').value=x.at;
     const sel=r.querySelector('.rv');opts.forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v+(sumMin(v)?` (${sumMin(v)} min)`:'');o.value=v;sel.append(o)});
     if(!opts.includes(x.vak)){const o=document.createElement('option');o.value=x.vak;o.textContent=x.vak+' (verwijderd)';sel.append(o)}
@@ -582,9 +615,9 @@ function renderNext(){
   const d=new Date().getDay();const n=Date.now();
   let txt='';
   const w=wordToday();
-  if(w){const nx=w.find(b=>slotTime(b.at)>n);txt=nx?`Vandaag volgende (uit Word): ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':''):'Vandaag geen blokken meer (uit Word).'}
+  if(w){const nx=w.find(b=>slotTime(b.at)>n);txt=nx?`Vandaag volgende (uit Word): ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':''):'Vandaag geen lessen meer.'}
   else if(d>=1&&d<=5){const nx=plan.rooster[d].filter(x=>plan.vakken[x.vak]&&slotTime(x.at)>n).sort((a,b)=>a.at.localeCompare(b.at))[0];
-    if(nx)txt=`Vandaag volgende: ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':'');else txt='Vandaag geen blokken meer.'}
+    if(nx)txt=`Vandaag volgende: ${nx.at} ${nx.vak}`+(plan.auto?' (start vanzelf)':'');else txt='Vandaag geen lessen meer.'}
   else txt='Het is weekend.';
   $('rNext').textContent=txt;
 }
@@ -707,7 +740,7 @@ function renderDay(){
   const nb=$('kNext');
   const spc=BREAK_RE.test(state.vak||'')||GYM_RE.test(state.vak||'')||(state.status==='running'&&state.endAt<=srvNow());
   if(live&&blocks.length&&!spc){nb.classList.remove('hide');nb.innerHTML='';
-    if(next){nb.append('Straks: ');const b=document.createElement('b');b.textContent=next.at+' '+next.vak;nb.append(b)}else nb.textContent='Dit is het laatste blok van vandaag';
+    if(next){nb.append('Straks: ');const b=document.createElement('b');b.textContent=next.at+' '+next.vak;nb.append(b)}else nb.textContent='Dit is de laatste les van vandaag';
   } else nb.classList.add('hide');
   if(!blocks.length)$('kDayOver').classList.add('hide');
 }
@@ -946,8 +979,8 @@ function renderNow(){
   // na dit vak / straks
   if(nb){$('nAfter').innerHTML='';const sp=document.createElement('span');sp.textContent=nb.label+': ';const b=document.createElement('b');b.textContent=nb.b.at+' '+nb.b.vak;
     $('nAfter').append(sp,b);if(nb.b.title){const t=document.createElement('span');t.className='muted';t.textContent=' · '+nb.b.title;$('nAfter').append(t)}
-    $('nNext').textContent=plan.auto?'Het volgende blok start vanzelf op de iPads.':'Automatisch starten staat uit. Start het volgende blok zelf.';}
-  else {$('nAfter').textContent='Geen rooster gevonden voor de komende dagen.';$('nNext').textContent='Koppel je dagklapper bij Word & rooster.'}
+    $('nNext').textContent=plan.auto?'De volgende les start vanzelf op de iPads.':'Automatisch starten staat uit. Start de volgende les zelf.';}
+  else {$('nAfter').textContent='Geen rooster gevonden voor de komende dagen.';$('nNext').textContent='Lees je dagklapper in bij Instellingen, of zet je rooster in Focuz.'}
   // buiten lestijd: wat komt er, en welke toetsen
   if(nb&&!(active||v.src==='done')){$('nUp').classList.remove('hide');$('nUpLbl').textContent=nb.label;$('nUpVak').textContent=nb.b.at+'  '+nb.b.vak;$('nUpSub').textContent=nb.b.title?kidTitle(nb.b.title):''}
   else $('nUp').classList.add('hide');
@@ -967,9 +1000,9 @@ function renderStatus(){
     if(age>2*864e5)warns.push('Je dagklapper is al '+ago(age).replace(' geleden','')+' niet ingelezen. Klopt de planning nog?');
     else if(!auto&&todayBlocks().length&&new Date(plan.word.at).toDateString()!==new Date().toDateString())warns.push('Je dagklapper is vandaag nog niet ingelezen en wordt niet automatisch bijgewerkt. Lees hem in bij Rooster.');
     const soon=plan.word.issues.filter(x=>x.date===today()||x.date===ymd(nextSchoolDay()));if(soon.length)warns.push('Je dagklapper heeft '+(soon.length===1?'een punt':soon.length+' punten')+' om te controleren voor vandaag of morgen (zie Rooster).');
-    if(fileHandle&&filePerm!=='granted')warns.push('Klik bij Word & rooster op "Toegang geven" om automatisch bijwerken weer aan te zetten.');
+    if(fileHandle&&filePerm!=='granted')warns.push('Ga naar Instellingen → Dagklapper en klik op "Toegang geven" om automatisch bijwerken weer aan te zetten.');
     const nd=nextSchoolDay();if(!plan.word.days[ymd(nd)]&&!(plan.rooster[nd.getDay()]||[]).length)warns.push(dayName(nd).split(',')[0]+' ('+DAG[nd.getDay()]+' '+nd.getDate()+' '+MAAND[nd.getMonth()]+') staat niet in je dagklapper.');
-  } else {items.push(['warn','Geen dagklapper gekoppeld']);warns.push('Koppel je dagklapper bij Word & rooster, dan starten de vakken vanzelf.')}
+  } else {items.push(['warn','Geen dagklapper gekoppeld']);warns.push('Lees je dagklapper in bij Instellingen, dan starten de lessen vanzelf.')}
   const wd=weekDates();const has=wd.filter(d=>blocksFor(d).length);
   if(daySig&&has.length)items.push(['ok','Weekplanning op de iPads t/m '+DAG[has[has.length-1].getDay()].slice(0,2)+' '+has[has.length-1].getDate()+' '+MAAND[has[has.length-1].getMonth()]]);
   if(!plan.auto)items.push(['warn','Automatisch starten staat uit']);
@@ -988,7 +1021,7 @@ function renderDayCard(){
   const isToday=ymd(d)===today();const v=currentView();
   const key=ymd(d)+n+JSON.stringify(bl)+v.src+(v.s.wordAt||'')+v.s.vak+showPast;if(key===dayKey)return;dayKey=key;
   const nPast=isToday?bl.filter(b=>n>=b.end).length:0;
-  $('dPast').textContent=nPast?(showPast?'Verberg eerdere blokken':'Eerdere blokken ('+nPast+')'):'';$('dPast').classList.toggle('hide',!nPast);
+  $('dPast').textContent=nPast?(showPast?'Verberg eerdere lessen':'Eerdere lessen ('+nPast+')'):'';$('dPast').classList.toggle('hide',!nPast);
   $('dHead').textContent=dayName(d);
   const ul=$('dList');ul.innerHTML='';
   if(!bl.length){ul.innerHTML='<li class="empty">Geen rooster. Koppel je dagklapper of vul het weekrooster in.</li>';return}
@@ -1028,7 +1061,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.pop'))closePops()})
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePops()});
 let showPast=false;
 $('dPast').addEventListener('click',()=>{showPast=!showPast;dayKey='';renderDayCard()});
-$('qToggle').addEventListener('click',()=>{const h=$('qBox').classList.toggle('hide');$('qToggle').setAttribute('aria-expanded',String(!h));$('qToggle').textContent=h?'+ Los blok starten':'Sluiten'});
+$('qToggle').addEventListener('click',()=>{const h=$('qBox').classList.toggle('hide');$('qToggle').setAttribute('aria-expanded',String(!h));$('qToggle').textContent=h?'+ Losse timer':'Sluiten'});
 
 /* =================== digibord =================== */
 let boardDayKey='';
@@ -1124,9 +1157,20 @@ function wText(el){ // tekst van een cel, zonder geneste tabellen
   return out.replace(/ /g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').replace(/\n+/g,'\n').trim();
 }
 const kids = (el,name) => [...el.childNodes].filter(c=>c.nodeType===1&&c.localName===name);
-function dateFromHeader(txt,ref){
-  const m=txt.toLowerCase().match(new RegExp('(\\d{1,2})\\s+('+MAANDEN.join('|')+')'));if(!m)return null;
-  const day=+m[1], mon=MAANDEN.indexOf(m[2]);
+function textBefore(tbl){ // tekst van de alinea's vlak boven een tabel (bijv. een kop 'Maandag 30 november')
+  let out='',n=tbl.previousSibling,k=0;
+  while(n&&k<4){if(n.nodeType===1){if(n.localName==='tbl')break;if(n.localName==='p'){const t=Array.from(n.getElementsByTagNameNS(W_NS,'t')).map(x=>x.textContent).join('');if(t.trim()){out=t;break}}k++}n=n.previousSibling}
+  return out;
+}
+function dateFromHeader(txt,ref){ // "Maandag 30 november", "ma 30 nov", "30-11", "30/11/2026"
+  const t=String(txt||'').toLowerCase();let day,mon,yr=0;
+  const MK=['jan','feb','maa','apr','mei','jun','jul','aug','sep','okt','nov','dec'];let m=null;
+  for(const x of t.matchAll(/(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sept?|okt|nov|dec)\b\.?/g)){
+    if(+x[1]>=1&&+x[1]<=31){m=x;break}}
+  if(m){day=+m[1];const k=m[2]==='mrt'?'maa':m[2].slice(0,3);mon=MK.indexOf(k)}
+  else{m=t.match(/(?:^|[^\d])(\d{1,2})[-\/.](\d{1,2})(?:[-\/.](\d{2,4}))?(?![\d:])/);if(!m||/\d[.:]\d{2}\s*$/.test(m[0]))return null;day=+m[1];mon=+m[2]-1;if(m[3])yr=+m[3]<100?2000+(+m[3]):+m[3]}
+  if(!(mon>=0&&mon<=11&&day>=1&&day<=31))return null;
+  if(yr)return `${yr}-${pad(mon+1)}-${pad(day)}`;
   const r=ref||new Date(); const start=r.getMonth()>=7?r.getFullYear():r.getFullYear()-1; // schooljaar start in augustus
   const y=mon>=7?start:start+1;
   return `${y}-${pad(mon+1)}-${pad(day)}`;
@@ -1162,13 +1206,18 @@ async function parseDocx(buf){
     const cellsOf=tr=>kids(tr,'tc').map(wText);
     if(rows.length>=2){const h0=cellsOf(rows[0]).map(x=>x.toLowerCase().trim());
       if(h0.some(h=>/^vak/.test(h))&&h0.some(h=>/wanneer|datum|deadline|inleveren/.test(h))){hwRows(rows,h0);continue}}
-    if(rows.length<3)continue;
-    const head=cellsOf(rows[0]).join(' '), hdr=cellsOf(rows[1]).map(s=>s.toLowerCase());
-    if(!/tijd/.test(hdr[0]||'')||!hdr.some(h=>/vak/.test(h)))continue;
-    const date=dateFromHeader(head);if(!date)continue;
-    const iV=hdr.findIndex(h=>/vak/.test(h)), iL=hdr.findIndex(h=>/leerstof/.test(h)), iD=hdr.findIndex(h=>/lesdoel|doel/.test(h));
+    if(rows.length<2)continue;
+    // kopregel zoeken: 'Tijd' + 'Vak' (of Les/Activiteit), in rij 1 of 2
+    const isT=h=>/^(tijd|time|uur|tijdstip|wanneer)\b/.test(h), isV=h=>/^(vak|les\b|activiteit|onderdeel|vakgebied)/.test(h);
+    let hi=-1;for(let r=0;r<Math.min(2,rows.length);r++){const h=cellsOf(rows[r]).map(x=>x.toLowerCase().trim());if(isT(h[0]||'')&&h.some(isV)){hi=r;break}}
+    if(hi<0)continue;
+    const hdr=cellsOf(rows[hi]).map(x=>x.toLowerCase().trim());
+    const head=hi===1?cellsOf(rows[0]).join(' '):textBefore(tbl);
+    const date=dateFromHeader(head);
+    if(!date)continue; // tabel zonder dag en datum: overslaan
+    const iV=hdr.findIndex(isV), iL=hdr.findIndex(h=>/leerstof|lesstof|inhoud|taken|opdracht|^wat/.test(h)), iD=hdr.findIndex(h=>/lesdoel|leerdoel|ik-doel|doel/.test(h));
     const blocks=[];
-    for(const tr of rows.slice(2)){
+    for(const tr of rows.slice(hi+1)){
       const c=cellsOf(tr);const at=toHM(c[0]||'');const vak=cleanName((c[iV]||'').split('\n')[0]);
       if(MORNING_RE.test(vak)){ // geen timerblok: dit zijn de ochtendtaken van die dag
         const tasks=(iL>=0?(c[iL]||''):'').split(/\s*(?:;|\n)\s*/).map(x=>x.replace(/^[-–•*]\s*/,'').trim()).filter(Boolean).slice(0,10).map(x=>x.slice(0,80));
@@ -1185,7 +1234,7 @@ async function parseDocx(buf){
     blocks.forEach((b,i)=>{b.end=blocks[i+1]&&blocks[i+1].at>b.at?blocks[i+1].at:addMin(b.at,45)});
     blocks.forEach(b=>{const sm=b.tasks.reduce((a,x)=>a+x.m,0);const dur=(localTime(b.end)-localTime(b.at))/60000;
       if(sm>dur)parseIssues.push({date,msg:`${b.at} ${b.vak}: taken samen ${sm} min, het blok duurt ${Math.round(dur)} min`})});
-    if(blocks.length)days[date]=blocks;else parseIssues.push({date,msg:'geen blokken gevonden in de tabel'});
+    if(blocks.length)days[date]=blocks;else parseIssues.push({date,msg:'geen lessen gevonden in de tabel'});
   }
   return days;
 }
@@ -1196,7 +1245,7 @@ function keepDays(days){ // bewaar gisteren t/m 3 weken vooruit
 }
 async function importWord(buf,fileName){
   const all=await parseDocx(buf);
-  const n=Object.keys(all).length;if(!n)throw new Error('Geen dagtabellen gevonden (kolommen Tijd, Vak, Leerstof, Lesdoel).');
+  const n=Object.keys(all).length;if(!n)throw new Error('Geen dagen gevonden. Focuz zoekt tabellen met de kolommen Tijd en Vak, met erboven een dag en datum zoals "Maandag 30 november". Download het sjabloon voor een voorbeeld.');
   const kd=keepDays(all),last=Object.keys(kd).sort().pop()||today();
   const km={};for(const k in parseMorning)if(kd[k]||(k>=today()&&k<=last))km[k]=parseMorning[k];
   plan.word={file:fileName||'Word-bestand',at:Date.now(),days:kd,morning:km,hw:parseHW.filter(x=>!x.date||x.date>=today()).slice(0,40),issues:parseIssues.filter(x=>x.date>=today()&&x.date<=last).slice(0,20)};
@@ -1416,6 +1465,7 @@ function startVak(v,endAt,autoKey){
 
 function setupTeacher(){
   renderPresets();
+  if(!store.get('kt_wizard')&&!PROBEER&&!(plan&&plan.word&&Object.keys(plan.word.days).length))$('wiz').classList.remove('hide');
   curVak=store.get('kt_curvak');if(!plan.vakken[curVak])curVak=Object.keys(plan.vakken)[0];
   renderVakBar();renderChips();
   $('tCode').textContent=code;$('kSum').textContent='Klascode '+code;
@@ -1429,9 +1479,14 @@ function setupTeacher(){
   $('tMode').textContent=USE_FB?'Eigen server · alleen jij kunt de timer besturen':'Openbare server · planning staat op dit apparaat';
 }
 
-function bindKidOpts(){$('oCalm').checked=plan.kidOpts.calm;$('oWeek').checked=plan.kidOpts.week}
+function bindKidOpts(){$('oCalm').checked=plan.kidOpts.calm;$('oWeek').checked=plan.kidOpts.week;$('oBig').checked=plan.kidOpts.big;$('tGroep').value=plan.groep?String(plan.groep):''}
 $('oCalm').addEventListener('change',()=>{plan.kidOpts.calm=$('oCalm').checked;savePlan();publishDay()});
 $('oWeek').addEventListener('change',()=>{plan.kidOpts.week=$('oWeek').checked;savePlan();publishDay()});
+$('oBig').addEventListener('change',()=>{plan.kidOpts.big=$('oBig').checked;savePlan();publishDay()});
+$('tGroep').addEventListener('change',()=>{const g=+$('tGroep').value||0;plan.groep=g;
+  if(g){plan.kidOpts.big=g<=4;$('oBig').checked=plan.kidOpts.big;
+    if(g<=4&&plan.morning.text==='Fijn dat je er bent! Begin rustig aan de dag.')plan.morning.text='Goedemorgen! Fijn dat je er bent.'}
+  savePlan();publishDay();renderMorningPrev&&renderMorningPrev()});
 function bindMorning(){bindKidOpts();
   $('oText').value=plan.morning.text;$('oTasks').value=plan.morning.tasks;$('oOn').checked=plan.morning.on;$('oAuto').checked=plan.morning.auto;fitTa($('oTasks'));renderMorningPrev();
 }
@@ -1448,6 +1503,7 @@ function fitTa(el){if(!el||!el.offsetParent)return;el.style.height='auto';el.sty
 function fitAllTa(){document.querySelectorAll('textarea.auto').forEach(fitTa)}
 document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('textarea.auto'))fitTa(e.target)});
 document.addEventListener('toggle',e=>{if(e.target.matches&&e.target.matches('details.opt'))fitAllTa()},true);
+function closeWiz(){$('wiz').classList.add('hide');store.set('kt_wizard','1')}
 function renderBackup(){const at=+store.get('kt_backup_at')||0;const el=$('bkInfo');if(!el)return;
   el.textContent=at?'Laatste reservekopie: '+new Date(at).toLocaleDateString('nl-NL',{day:'numeric',month:'long'})+' om '+clock(at)+'.':'Nog geen reservekopie gemaakt.'}
 function renderJoin(){
@@ -1512,7 +1568,7 @@ function bindTeacher(){
   $('tVakRen').addEventListener('click',async()=>{const n=cleanName(await ask({title:'Vak hernoemen',input:curVak}));if(!n||n===curVak||plan.vakken[n])return;
     const nv={};for(const k in plan.vakken)nv[k===curVak?n:k]=plan.vakken[k];plan.vakken=nv;
     for(let d=1;d<=5;d++)plan.rooster[d].forEach(x=>{if(x.vak===curVak)x.vak=n});curVak=n;savePlan();renderVakBar()});
-  $('tVakDel').addEventListener('click',async()=>{if(Object.keys(plan.vakken).length<2)return;if(!await ask({title:'Vak verwijderen?',text:`"${curVak}", de takenlijst en de blokken in het rooster worden verwijderd.`,ok:'Verwijder'}))return;
+  $('tVakDel').addEventListener('click',async()=>{if(Object.keys(plan.vakken).length<2)return;if(!await ask({title:'Vak verwijderen?',text:`"${curVak}", de vaste taken en de lessen in het rooster worden verwijderd.`,ok:'Verwijder'}))return;
     delete plan.vakken[curVak];for(let d=1;d<=5;d++)plan.rooster[d]=plan.rooster[d].filter(x=>x.vak!==curVak);curVak=Object.keys(plan.vakken)[0];savePlan();renderVakBar();renderChips()});
   $('tRows').addEventListener('input',e=>{const r=e.target.closest('.tr');if(!r)return;const x=V().tasks[+r.dataset.i];
     if(e.target.classList.contains('tt'))x.t=e.target.value;else x.m=Math.max(0,Math.round(+e.target.value||0));
@@ -1542,8 +1598,19 @@ function bindTeacher(){
   };
   $('tPlus').addEventListener('click',()=>{takeOver();shift(5*60000)});
   $('tMin').addEventListener('click',()=>{takeOver();shift(-5*60000)});
-  $('tStop').addEventListener('click',async()=>{if(!await ask({title:'Vak stoppen?',text:'De timer stopt op alle iPads. Het volgende blok start weer gewoon op tijd.',ok:'Stop'}))return;publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||'',stoppedAt:srvNow()})});
+  $('tStop').addEventListener('click',async()=>{if(!await ask({title:'Vak stoppen?',text:'De timer stopt op alle iPads. De volgende les start weer gewoon op tijd.',ok:'Stop'}))return;publishState({v:3,status:'idle',sound:$('tSound').checked,auto:state.auto||'',stoppedAt:srvNow()})});
   $('tCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('tLink').value);$('tCopy').textContent='Gekopieerd'}catch(e){$('tLink').select()}setTimeout(()=>$('tCopy').textContent='Kopieer link',1500)});
+  const openOpt=id=>{document.querySelector('#tTabs [data-tab=rooster]').click();document.querySelectorAll('details.opt').forEach(d=>d.open=d.id===id)};
+  $('wiz').addEventListener('click',e=>{const b=e.target.closest('[data-wiz]');if(!b)return;const a=b.dataset.wiz;
+    if(a==='done'){closeWiz();return}
+    if(a==='word'){closeWiz();openOpt('wOpt');setTimeout(()=>$('wUpd').click(),50)}
+    if(a==='rooster'){closeWiz();openOpt('rOpt')}
+    if(a==='join'){openJoin()}
+    if(a==='kid'){closeWiz();$('tKidView').click()}});
+  $('hWiz').addEventListener('click',()=>$('wiz').classList.remove('hide'));
+  $('hFeedback').addEventListener('click',()=>{const to=window.FOCUZ_FEEDBACK_EMAIL||'';
+    const body='Mijn vraag of probleem:\n\n\n---\nApparaat: '+navigator.userAgent+'\nKlascode: '+code+'\nDatum: '+new Date().toLocaleString('nl-NL');
+    location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent('Focuz: vraag of probleem')+'&body='+encodeURIComponent(body)});
   $('tUseCode').addEventListener('click',async()=>{
     const v=await ask({title:'Klascode van een ander apparaat',text:'Typ de klascode die je op je andere apparaat ziet. De iPads blijven dan gekoppeld.',input:'',ok:'Gebruiken'});
     const c=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(!c)return;
@@ -1574,6 +1641,9 @@ function bindTeacher(){
   });
   // rooster
   $('rDays').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;rDay=+b.dataset.d;renderRooster()});
+  $('rCopy').addEventListener('click',async()=>{const src=plan.rooster[rDay];if(!src.length)return;
+    if(!await ask({title:'Naar alle dagen kopiëren?',text:'De lessen van '+['','maandag','dinsdag','woensdag','donderdag','vrijdag'][rDay]+' komen ook op de andere dagen. Wat daar stond, wordt vervangen.',ok:'Kopiëren'}))return;
+    for(let d=1;d<=5;d++)if(d!==rDay)plan.rooster[d]=src.map(x=>({...x}));savePlan();renderRooster();publishDay&&publishDay()});
   $('rAdd').addEventListener('click',()=>{const rows=plan.rooster[rDay];const last=rows.length?rows[rows.length-1].at:'08:30';
     const [h,m]=last.split(':').map(Number);const nt=`${pad(Math.min(23,h+1))}:${pad(m)}`;rows.push({at:rows.length?nt:'08:45',vak:curVak});savePlan();renderRooster()});
   $('rRows').addEventListener('change',e=>{const r=e.target.closest('.rr');if(!r)return;const x=plan.rooster[rDay][+r.dataset.i];
@@ -1625,7 +1695,8 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventLi
 
 const qs=new URLSearchParams(location.search);
 const urlCode=(qs.get('klas')||'').toUpperCase(),homeCode=(qs.get('thuis')||'').toUpperCase();
-if(HOME&&validCode(homeCode))startThuis(homeCode);
+if(PROBEER)startProbeer();
+else if(HOME&&validCode(homeCode))startThuis(homeCode);
 else if(validCode(urlCode))startKid(urlCode);
 else if(qs.has('leerkracht'))startTeacher();
 else if(store.get('kt_role')==='kid'&&validCode(store.get('kt_kid_code')||''))startKid(store.get('kt_kid_code'));

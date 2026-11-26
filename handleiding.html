@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handleiding · Focuz</title>
+<link rel="icon" href="icons/favicon-64.png">
+<style>
+  :root{--ink:#13263f;--soft:#5b6b80;--go:#2fb67c;--bg:#f3f6fa}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+  header{background:#1f3a5f;color:#fff;padding:36px 20px 28px}
+  header .in,main{max-width:900px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:34px}
+  header p{margin:0;color:#cfe0f5;font-size:18px}
+  nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  nav a{color:#fff;background:rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px}
+  main{padding:24px 20px 60px}
+  section{background:#fff;border-radius:20px;padding:24px 26px;margin:0 0 20px;box-shadow:0 4px 16px rgba(19,38,63,.06)}
+  h2{margin:0 0 8px;font-size:24px;display:flex;align-items:center;gap:12px}
+  h2 span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--go);color:#fff;font-size:17px;flex:none}
+  img{width:100%;border-radius:14px;border:1px solid #dde5ef;margin-top:12px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  code{background:#eef3f9;padding:2px 6px;border-radius:6px;font-size:14px}
+  .tip{background:#e3f6ed;border-radius:12px;padding:10px 14px;margin-top:12px}
+  a.btn{display:inline-block;background:var(--go);color:#fff;font-weight:800;padding:10px 18px;border-radius:12px;text-decoration:none;margin:6px 8px 0 0}
+  a.btn.sec{background:#eef3f9;color:var(--ink)}
+  @media(max-width:640px){.two{grid-template-columns:1fr}header h1{font-size:28px}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Focuz in 5 minuten</h1>
+  <p>Een rustige klassentimer: jij plant, de iPads van je leerlingen volgen vanzelf.</p>
+  <nav><a href="#start">Starten</a><a href="#planning">Planning</a><a href="#koppelen">iPads koppelen</a><a href="#lesgeven">Lesgeven</a><a href="#leerling">Leerling</a><a href="#extra">Extra</a><a href="#vragen">Vragen</a></nav>
+</div></header>
+<main>
+<section id="start">
+  <h2><span>1</span>Starten</h2>
+  <p>Open <b>sandromeertens.github.io/Focuz</b> op je laptop of iPad en kies <b>Ik ben leerkracht</b>. Gebruik je Focuz al op een ander apparaat? Typ dan je klascode, zodat je iPads gekoppeld blijven. De startgids helpt je daarna in drie stappen op weg.</p>
+  <p>Eerst rondkijken zonder klas? Kies op de startpagina <b>Eerst even proberen</b>. Je krijgt dan een voorbeeldrooster en er wordt niets gekoppeld.</p>
+  <a class="btn" href="./">Focuz openen</a><a class="btn sec" href="./?probeer=1">Probeerstand</a>
+  <img src="handleiding/1-startgids.png" alt="De startgids met drie stappen">
+</section>
+<section id="planning">
+  <h2><span>2</span>Je planning erin zetten</h2>
+  <p><b>Met een dagklapper in Word</b>: ga naar <b>Instellingen → Dagklapper</b> en kies je bestand. Op een computer met Chrome of Edge kun je hem <b>koppelen</b>; dan werkt Focuz vanzelf bij als je je dagklapper opslaat. Op een iPad kies je <b>Dagklapper bijwerken</b> na een wijziging.</p>
+  <p>Focuz zoekt per dag een tabel met de kolommen <b>Tijd</b> en <b>Vak</b> (en liefst <b>Leerstof</b> en <b>Lesdoel</b>), met erboven de dag en datum, bijvoorbeeld <i>Maandag 7 december</i>. In Leerstof zet je taken met een puntkomma ertussen:</p>
+  <p><code>Les 4; Instructie (10 min); Werkboek (25 min); Nakijken (5 min); klaar: Gynzy</code></p>
+  <p>De tekst zonder minuten wordt de titel, <code>klaar:</code> wordt de klaaropdracht en het lesdoel wordt het ik-doel. Een rij met vak <b>Ochtend</b> vult het ochtendscherm. Een tabel met <b>Vak · Wat ga je doen · Voor wanneer</b> wordt de lijst met huiswerk en toetsen.</p>
+  <a class="btn" href="sjabloon/Focuz-dagklapper-sjabloon.docx" download>Sjabloon dagklapper downloaden</a>
+  <p class="tip"><b>Geen dagklapper?</b> Kies <b>Instellingen → Rooster in Focuz</b>. Zet per dag je lessen erin; met één knop kopieer je een dag naar alle dagen. De taken komen uit <b>Vaste taken per vak</b>.</p>
+  <img src="handleiding/3-instellingen.png" alt="Instellingen met de dagklapper">
+</section>
+<section id="koppelen">
+  <h2><span>3</span>iPads koppelen</h2>
+  <p>Tik bovenin op <b>0 iPads</b> en kies <b>iPads koppelen</b>. Het koppelscherm komt groot op het digibord. Kinderen scannen de QR-code met de camera, of gaan naar het adres en typen de klascode. De teller laat zien hoeveel iPads er binnen zijn. Laat ze Focuz op het beginscherm zetten (Delen → Zet op beginscherm).</p>
+  <img src="handleiding/5-koppelen.png" alt="Het koppelscherm met QR-code en klascode">
+</section>
+<section id="lesgeven">
+  <h2><span>4</span>Lesgeven</h2>
+  <p>Bij <b>Nu</b> zie je de les van dit moment: de tijd, het ik-doel, de taken en hoeveel iPads klaar zijn. Lessen starten vanzelf op de tijd uit je rooster. Met <b>Pauze</b>, <b>−5 min</b>, <b>+5 min</b> en <b>Stop</b> stuur je bij. <b>Melding</b> zet een bericht op alle iPads, zoals <i>Kom naar de kring</i>; eigen meldingen bewaar je als vaste knop.</p>
+  <p>Via <b>Weergave</b> zet je het <b>Digibord</b> klaar (groot klasscherm) of bekijk je het <b>Leerlingscherm</b> zoals een kind het ziet.</p>
+  <div class="two"><img src="handleiding/4-nu.png" alt="Het Nu-scherm van de leerkracht"><img src="handleiding/7-digibord.png" alt="Het digibordscherm"></div>
+</section>
+<section id="leerling">
+  <h2><span>5</span>Wat de leerling ziet</h2>
+  <p>De leerling ziet het vak, het ik-doel, een rustige klok en een lijst met taken om af te vinken, elk met eigen minuten. Wie klaar is, ziet de klaaropdracht. Onderaan: <b>Huiswerk en toetsen</b>, <b>Weekplanning</b> en <b>Rustig scherm</b> (een stoplicht in plaats van een klok). Voor jonge kinderen zet je bij <b>Klas en iPads</b> de <b>grote letters</b> aan.</p>
+  <div class="two"><img src="handleiding/6-leerling.png" alt="Het leerlingscherm"><img src="handleiding/6-leerling-groot.png" alt="Het leerlingscherm met grote letters"></div>
+</section>
+<section id="extra">
+  <h2><span>6</span>Handig om te weten</h2>
+  <ul>
+    <li><b>Reservekopie:</b> je instellingen staan in je browser. Maak bij <b>Instellingen → Reservekopie</b> af en toe een kopie en zet die in OneDrive.</li>
+    <li><b>Planning thuis:</b> bij <b>Huiswerk en toetsen</b> kopieer je een link voor ouders. Zij zien alleen het huiswerk en de toetsen.</li>
+    <li><b>Ander apparaat:</b> gebruik bij <b>Klas en iPads</b> de knop <i>Klascode van ander apparaat gebruiken</i>, dan blijven je iPads gekoppeld.</li>
+    <li><b>Uitleg:</b> achter veel instellingen staat een <b>?</b> met een korte uitleg.</li>
+    <li><b>Kind zit in de verkeerde klas?</b> Houd op de iPad het groene bolletje rechtsboven 3 seconden ingedrukt om een andere klascode in te voeren.</li>
+  </ul>
+</section>
+<section id="vragen">
+  <h2><span>?</span>Vragen of problemen</h2>
+  <p>Kies in Focuz <b>Instellingen → Hulp en uitleg → Vraag of probleem doorgeven</b>. Er opent een e-mail met de gegevens die nodig zijn om je te helpen.</p>
+</section>
+</main>
+</body>
+</html>

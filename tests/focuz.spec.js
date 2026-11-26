@@ -36,6 +36,7 @@ async function teacher(browser, iso, opts = {}) {
   await page.waitForTimeout(800);
   // nieuw apparaat: vraag naar bestaande klascode -> nieuwe klas
   if (await page.locator('#modal').isVisible()) { await page.click('#mOk'); await page.waitForTimeout(300); }
+  if (await page.locator('#wiz').isVisible()) { await page.click('[data-wiz=done]'); }
   if (opts.docx !== false) {
     await page.click('#tTabs [data-tab=rooster]');
     await page.setInputFiles('#wFile', FIX(opts.docx || 'dagklapper-voorbeeld.docx'));
@@ -282,9 +283,25 @@ test('tweede apparaat: bestaande klascode invoeren houdt de iPads gekoppeld', as
   await expect(page.locator('#modal')).toBeVisible();
   await page.fill('#mInput', 'kq7m2x');
   await page.click('#mOk');
+  await page.click('[data-wiz=done]');
   await expect(page.locator('#tCode')).toHaveText('KQ7M2X');
   await page.click('#tTabs [data-tab=rooster]');
   await expect(page.locator('#kSum')).toContainText('KQ7M2X');
   expect(errors).toEqual([]);
   await ctx.close();
+});
+
+test('sjabloon wordt goed ingelezen, probeerstand werkt los van de echte klas', async ({ browser }) => {
+  const t = await teacher(browser, '2026-12-07T08:00:00+01:00', { docx: 'sjabloon.docx' });
+  await t.page.click('#tTabs [data-tab=rooster]');
+  await expect(t.page.locator('#wSum')).toContainText('5 lesdagen');
+  await expect(t.page.locator('#hwSum')).toContainText('4 items');
+  const real = await t.page.evaluate(() => localStorage.getItem('kt_teacher_code'));
+  const p2 = await t.ctx.newPage();
+  await p2.goto(APP + '?broker=' + BROKER + '&probeer=1');
+  await expect(p2.locator('#pzBar')).toBeVisible();
+  await expect(p2.locator('#dList li').first()).toBeVisible();
+  expect(await p2.evaluate(() => localStorage.getItem('kt_teacher_code'))).toBe(real);
+  expect(t.errors).toEqual([]);
+  await t.ctx.close();
 });

@@ -46,3 +46,9 @@ Taken met minuten zet je in de leerstof, gescheiden door een puntkomma: `Instruc
 
 ## Huiswerk en toetsen
 Zet in je dagklapper een tabel met de kolommen **Vak**, **Wat ga je doen** en **Voor wanneer**. In "Voor wanneer" mag een datum staan (ook een Word-datumveld, `25 nov 2026` of `25-11`), `Elke vrijdag` of `Elke week`. Leerlingen zien de lijst op hun iPad (knop *Huiswerk en toetsen*) en vinken af; jij ziet per item hoeveel iPads klaar zijn. Via Rooster → *Huiswerk en toetsen* → *Planning voor thuis* kopieer je een link (`?thuis=KLASCODE`) voor ouders: die toont alleen deze lijst.
+
+## Voor collega's
+- **Startgids** bij de eerste keer, **Probeerstand** (`?probeer=1`, eigen opslag, voorbeeldrooster), **Handleiding** (`handleiding.html`) en een **sjabloon** (`sjabloon/Focuz-dagklapper-sjabloon.docx`).
+- **Rooster in Focuz** voor wie geen dagklapper heeft; **Vaste taken per vak** vullen de lessen.
+- **Groep** en **grote letters** bij Klas en iPads; **?**-uitleg bij instellingen.
+- **Vraag of probleem doorgeven** opent een e-mail; stel het adres in met `window.FOCUZ_FEEDBACK_EMAIL` in `index.html`.
