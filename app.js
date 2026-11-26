@@ -101,7 +101,7 @@ function mqttTransport(h){
         if(k==='day'){h.onDay(msg);return}
         if(k==='state')h.onState(msg);
         else if(k==='clock'&&role==='kid'&&typeof msg.now==='number')offset=msg.now-Date.now();
-        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number),hw:arr(msg.hw).map(String)};t.count()}
+        else if(k==='ping'&&role==='teacher'&&msg.id){peers[msg.id]={id:String(msg.id),at:Date.now(),sid:String(msg.sid||''),ticks:arr(msg.ticks).map(Number),hw:arr(msg.hw).map(String),grp:String(msg.grp||''),refl:msg.refl&&typeof msg.refl==='object'?msg.refl:{}};t.count()}
       });
     },
     publish(s){pub('state',s,{qos:1,retain:true})},
@@ -111,7 +111,7 @@ function mqttTransport(h){
     tick(){
       if(!client||!client.connected)return;
       if(role==='teacher')pub('clock',{now:Date.now()});
-      if(role==='kid'&&!VIEW&&!HOME)pub('ping',{id:myId,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow()});
+      if(role==='kid'&&!VIEW&&!HOME)pub('ping',{id:myId,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow(),grp:myGroup(),refl:reflRecent()});
     },
     count(){const n=Date.now();for(const k in peers)if(n-peers[k].at>50000)delete peers[k];h.onKids(Object.values(peers))},
     wake(){if(client&&!client.connected)client.reconnect()},
@@ -145,7 +145,7 @@ function fbTransport(h){
         conRef=fb.db.ref('.info/connected');
         conRef.on('value',s=>{if(s.val()){me.onDisconnect().remove();t.tick()}});
       } else {
-        ref('kids').on('value',s=>{const v=s.val()||{};h.onKids(Object.values(v).map(x=>({sid:String(x.sid||''),ticks:arr(x.ticks).map(Number),hw:arr(x.hw).map(String)})))},()=>{});
+        ref('kids').on('value',s=>{const v=s.val()||{};h.onKids(Object.entries(v).map(([id,x])=>({id,sid:String(x.sid||''),ticks:arr(x.ticks).map(Number),hw:arr(x.hw).map(String),grp:String(x.grp||''),refl:x.refl&&typeof x.refl==='object'?x.refl:{}})))},()=>{});
       }
       ref('state').on('value',s=>h.onState(s.val()||{status:'idle'}),e=>setConn(false,'Geen toegang'));
       ref('msg').on('value',s=>h.onMsg(s.val()),()=>{});
@@ -155,7 +155,7 @@ function fbTransport(h){
     sendMsg(m){(m?ref('msg').set(m):ref('msg').remove()).catch(e=>{$('mInfo').textContent='Versturen mislukt: '+(e.code||e.message)})},
     publish(s){ref('state').set(JSON.parse(JSON.stringify(s))).catch(e=>{$('tErr').textContent='Opslaan mislukt: '+(e.code||e.message)})},
     clear(){ref('state').remove().catch(()=>{})},
-    tick(){if(me&&!HOME)me.set({at:firebase.database.ServerValue.TIMESTAMP,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow()}).catch(()=>{})}, count(){}, wake(){},
+    tick(){if(me&&!HOME)me.set({at:firebase.database.ServerValue.TIMESTAMP,sid:state.sid||'',ticks:getTicks(),hw:hwDoneNow(),grp:myGroup(),refl:reflRecent()}).catch(()=>{})}, count(){}, wake(){},
     stop(){try{ref('state').off();ref('kids').off();ref('msg').off();ref('day').off();conRef&&conRef.off();me&&me.remove()}catch(e){}}
   };
   return t;
@@ -185,7 +185,7 @@ function effState(){
 function connect(){
   if(T)T.stop();
   const h={onState:s=>{tState=s&&typeof s==='object'?s:{status:'idle'};state=role==='kid'?effState():tState;if(state.status!=='running'||state.endAt>srvNow())rang=false;render()},
-           onKids:list=>{kidsInfo=list;renderNow();renderJoin();renderHwTeacher();$('kSum').textContent='Klascode '+code+' · '+(list.length===1?'1 iPad':list.length+' iPads')+' verbonden'},
+           onKids:list=>{kidsInfo=list;logKids(list);renderNow();renderJoin();renderHwTeacher();$('kSum').textContent='Klascode '+code+' · '+(list.length===1?'1 iPad':list.length+' iPads')+' verbonden'},
            onMsg:m=>{if(HOME)return;curMsg=m&&typeof m==='object'&&m.text?m:null;renderMsg()},
            onDay:d=>{if(d&&typeof d==='object'&&role==='kid'&&!VIEW)store.set(HOME?'fz_day_thuis':'fz_day',JSON.stringify(d));curDay=d&&typeof d==='object'?{opts:d.opts&&typeof d.opts==='object'?d.opts:{},next:d.next&&d.next.date?d.next:null,date:d.date||'',blocks:arr(d.blocks),week:d.week&&typeof d.week==='object'?d.week:{},auto:d.auto,sound:d.sound,morning:d.morning&&typeof d.morning==='object'?{text:String(d.morning.text||''),tasks:arr(d.morning.tasks).map(String),vandaag:arr(d.morning.vandaag).map(String)}:null,hw:arr(d.hw).filter(x=>x&&x.id&&x.vak).map(x=>({id:String(x.id),vak:String(x.vak),wat:String(x.wat||''),date:String(x.date||''),rep:x.rep===''||x.rep==null?'':x.rep}))}:null;renderDay();renderWeek();renderHwAll();document.body.classList.toggle('kidbig',!!(curDay&&curDay.opts&&curDay.opts.big))}};
   daySig='';
@@ -263,32 +263,66 @@ const getTicks = () => {try{return JSON.parse(store.get(ticksKey())||'[]')}catch
 const setTicks = t => store.set(ticksKey(),JSON.stringify(t));
 const saveMini = () => {if(mini)store.set('kt_mini_'+state.sid,JSON.stringify(mini));else store.del('kt_mini_'+state.sid)};
 function startMini(i){const x=(state.tasks||[])[i];mini=x&&x.m?{i,endAt:Date.now()+x.m*60000,rung:false}:null;saveMini()}
+// ===== instructiegroepen, beloning en reflectie =====
+const taskTags = t => {const g=[];const text=String(t||'').replace(/\s*\[([^\]]{1,30})\]/g,(q,x)=>{x.split(/[,/]/).forEach(y=>{y=y.trim().toLowerCase();if(y)g.push(y)});return ''}).trim();return {text,g}};
+const grpLabel = g => g?g[0].toUpperCase()+g.slice(1):'';
+const myGroup = () => store.get('fz_group_'+code)||'';
+const taskGroups = tasks => [...new Set(tasks.flatMap(x=>taskTags(x.t).g))];
+const forMe = (x,grp) => {const g=taskTags(x.t).g;return !g.length||(grp&&g.includes(grp))};
+const isTable = x => {const tt=taskTags(x.t);return tt.g.length&&/instructie|tafel/i.test(tt.text)};
+function reflStore(){try{return JSON.parse(store.get('fz_refl_'+code)||'{}')||{}}catch(e){return {}}}
+function reflRecent(){const r=reflStore();const ks=Object.keys(r).slice(-4);const o={};ks.forEach(k=>o[k]=r[k]);return o}
+let reflFor=null,lastLesson=null,celebrated={},askedR={};
+function askReflect(les){ // les: {sid,vak,doel}
+  if(!les||!les.doel||VIEW&&!DEMO||reflStore()[les.sid]||askedR[les.sid])return;askedR[les.sid]=1;
+  reflFor=les;$('kRefVak').textContent=les.vak?'Hoe ging '+les.vak+'?':'Hoe ging het?';$('kRefDoel').textContent=les.doel;
+  $('kRefl').classList.remove('hide');clearTimeout(askReflect.t);askReflect.t=setTimeout(()=>$('kRefl').classList.add('hide'),90000);
+}
+function answerReflect(v){if(reflFor&&v){const r=reflStore();r[reflFor.sid]=v;const ks=Object.keys(r);if(ks.length>40)delete r[ks[0]];store.set('fz_refl_'+code,JSON.stringify(r));if(T&&!VIEW&&!DEMO)T.tick()}
+  $('kRefl').classList.add('hide');reflFor=null}
+function celebrate(){
+  const el=$('kCele');el.classList.remove('hide');el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){const box=el.querySelector('.conf');box.innerHTML='';
+    for(let i=0;i<36;i++){const c=document.createElement('i');c.style.left=Math.random()*100+'%';c.style.animationDelay=(Math.random()*.5)+'s';c.style.background=['#2fb67c','#ffd08a','#7fb4ff','#ff9f8a','#fff'][i%5];c.style.transform='rotate('+(Math.random()*360)+'deg)';box.append(c)}}
+  setTimeout(()=>{el.classList.add('hide');askReflect(curLesson())},2600);
+}
+const curLesson = () => state&&state.sid&&state.status!=='idle'&&!BREAK_RE.test(state.vak||'')?{sid:state.sid,vak:state.vak||'',doel:splitDoel(state.doel)[0]}:null;
 function renderKidList(){
   const tasks = Array.isArray(state.tasks)?state.tasks.filter(x=>x&&x.t):[];
+  const groups=taskGroups(tasks), grp=groups.includes(myGroup())?myGroup():'';
   const extras = Array.isArray(state.extra)?state.extra.filter(Boolean):[];
   const sp=BREAK_RE.test(state.vak||'')||GYM_RE.test(state.vak||'');const dn=state.status==='running'&&state.endAt<=srvNow();
   const show = state.status!=='idle' && !sp && !dn && (tasks.length||extras.length);
+  {const cl=curLesson(); // reflectie: na de les, of als de tijd om is
+    if(lastLesson&&(!cl||cl.sid!==lastLesson.sid))askReflect(lastLesson);
+    if(cl&&dn){askReflect(cl);lastLesson=null}else lastLesson=cl}
   $('kid').classList.toggle('haslist',!!show);
   $('kListWrap').classList.toggle('hide',!show);
   if(!show){listSig='';return}
-  if(listSid!==state.sid){listSid=state.sid;selTask=null;try{mini=JSON.parse(store.get('kt_mini_'+state.sid))}catch(e){mini=null}if(mini)selTask=mini.i;else{const t0=getTicks();const f=tasks.findIndex((x,j)=>!t0.includes(j));selTask=f>=0?f:null}}
-  const sig=state.sid+JSON.stringify(tasks)+extras.join('|');
+  if(listSid!==state.sid){listSid=state.sid;selTask=null;try{mini=JSON.parse(store.get('kt_mini_'+state.sid))}catch(e){mini=null}if(mini)selTask=mini.i;else{const t0=getTicks();const f=tasks.findIndex((x,j)=>!t0.includes(j)&&forMe(x,grp));selTask=f>=0?f:null}}
+  $('kGrp').classList.toggle('hide',!groups.length);
+  if(groups.length){$('kGrpTxt').textContent=grp?'Groep: '+grpLabel(grp):'Kies je groep:';
+    $('kGrpBtns').innerHTML='';$('kGrpBtns').classList.toggle('hide',!!grp&&!kGrpOpen);groups.forEach(g=>{const b=document.createElement('button');b.textContent=grpLabel(g);b.dataset.g=g;b.classList.toggle('on',g===grp);$('kGrpBtns').append(b)});
+    $('kGrpChange').classList.toggle('hide',!grp||kGrpOpen)}
+  const sig=state.sid+JSON.stringify(tasks)+extras.join('|')+'#'+grp;
   if(sig!==listSig){
     listSig=sig;
     const ul=$('kTasks');ul.innerHTML='';
     tasks.forEach((x,i)=>{
       const li=document.createElement('li');li.dataset.i=i;
       li.innerHTML='<div class="trow"><button class="box" aria-label="Afvinken"></button><button class="tname"></button><span class="tmin"></span></div><div class="tdetail hide"><div class="say"></div><button class="mbtn"></button></div>';
-      li.querySelector('.tname').textContent=(i+1)+'. '+x.t;
+      const tt=taskTags(x.t);li.classList.toggle('notme',!forMe(x,grp));
+      li.querySelector('.tname').textContent=tt.text;if(isTable(x)){const bd=document.createElement('span');bd.className='tbadge';bd.textContent='Instructietafel';li.querySelector('.tname').append(bd)}
       li.querySelector('.tmin').textContent=x.m?x.m+' min':'';li.querySelector('.tmin').classList.toggle('hide',!x.m);
       ul.append(li);
     });
     $('kExtraList').innerHTML='';
     extras.forEach(e=>{const li=document.createElement('li');li.textContent=e;$('kExtraList').append(li)});
   }
-  const ticks=getTicks();let doneCount=0;
+  const ticks=getTicks();let doneCount=0,mine=0,num=0;
   [...$('kTasks').children].forEach((li,i)=>{
-    const x=tasks[i], ok=ticks.includes(i);if(ok)doneCount++;
+    const x=tasks[i], ok=ticks.includes(i);if(!forMe(x,grp)){li.classList.add('notme');return}mine++;if(ok)doneCount++;
+    li.querySelector('.tname').dataset.n=(++num)+'. ';
     const running=mini&&mini.i===i, r=running?mini.endAt-Date.now():0;
     li.classList.toggle('ok',ok);li.classList.toggle('sel',selTask===i);li.classList.toggle('over',running&&r<=0&&!ok);li.classList.toggle('later',!ok&&selTask!==i);
     li.querySelector('.box').textContent=ok?'✓':'';
@@ -304,11 +338,18 @@ function renderKidList(){
       b.textContent='Start taaktimer';b.classList.toggle('hide',!x.m||ok);
     }
   });
-  $('kProg').textContent=tasks.length?`${doneCount} van ${tasks.length} af`:'';
-  const all=tasks.length>0&&doneCount===tasks.length;
+  $('kProg').textContent=mine?`${doneCount} van ${mine} af`:'';
+  const all=mine>0&&doneCount===mine;
+  if(all&&!celebrated[state.sid]&&!store.get('fz_cele_'+state.sid)){celebrated[state.sid]=1;store.set('fz_cele_'+state.sid,'1');if(listReady)celebrate()}
+  listReady=true;
   $('kAllDone').classList.toggle('hide',!(all&&extras.length));
-  $('kExtras').classList.toggle('hide',!extras.length||(tasks.length>0&&!all));
+  $('kid').classList.toggle('tasksdone',all&&extras.length>0);
+  $('kExtras').classList.toggle('hide',!extras.length||(mine>0&&!all));
 }
+let listReady=false,kGrpOpen=false;
+$('kGrpBtns').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;store.set('fz_group_'+code,b.dataset.g);kGrpOpen=false;listSig='';renderKidList();if(T&&!VIEW&&!DEMO)T.tick()});
+$('kGrpChange').addEventListener('click',()=>{kGrpOpen=true;renderKidList()});
+$('kRefl').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(b)answerReflect(b.dataset.r)});
 $('kTasks').addEventListener('click',e=>{
   const li=e.target.closest('li');if(!li)return;const i=+li.dataset.i;
   const tasks=state.tasks||[];
@@ -316,7 +357,7 @@ $('kTasks').addEventListener('click',e=>{
     let t=getTicks();
     if(t.includes(i))t=t.filter(x=>x!==i);
     else{t.push(i);if(mini&&mini.i===i){mini=null;saveMini()}
-      const next=tasks.findIndex((x,j)=>j>i&&!t.includes(j));
+      const g0=myGroup();const next=tasks.findIndex((x,j)=>j>i&&!t.includes(j)&&forMe(x,taskGroups(tasks).includes(g0)?g0:''));
       selTask=next>=0?next:null;
       if(next>=0&&(!mini||mini.i!==next))startMini(next);   // volgende taak start vanzelf
     }
@@ -873,6 +914,41 @@ function renderThuis(){
   const list=arr(curDay&&curDay.hw);renderHw($('hList'),list);
   $('hUpd').textContent=curDay?'Je vinkjes worden alleen op dit apparaat bewaard.':'Planning laden…';
 }
+// ===== reflectie en dagoverzicht (leerkracht) =====
+function logStore(){try{return JSON.parse(store.get('kt_log')||'{}')||{}}catch(e){return {}}}
+function logSave(l){const ks=Object.keys(l).sort();while(ks.length>21)delete l[ks.shift()];store.set('kt_log',JSON.stringify(l))}
+let logTimer=null;
+function logKids(list){ // bewaart per les: hoeveel iPads alles af hadden en de reflecties
+  const l=logStore();const d=today();const day=l[d]||(l[d]={});let ch=false;
+  const cv=currentView(),cs=cv&&cv.s;
+  const lessonInfo=sid=>{if(cs&&cs.sid===sid&&cs.status&&cs.status!=='idle')return {vak:cs.vak||'',at:cs.wordAt||(cs.startAt?clock(cs.startAt-offset):clock(Date.now())),t:arr(cs.tasks).filter(x=>x&&x.t).map(x=>x.t)};return null};
+  list.forEach(k=>{if(!k.id)return;
+    if(k.sid){let e=day[k.sid];const inf=lessonInfo(k.sid);if(!e&&inf){e=day[k.sid]={vak:inf.vak,at:inf.at,kids:{}};ch=true}
+      if(e&&inf){const mine=inf.t.map((x,i)=>i).filter(i=>{const g=taskTags(inf.t[i]).g;return !g.length||g.includes(k.grp)});
+        const all=mine.length>0&&mine.every(i=>k.ticks.includes(i));const o=e.kids[k.id]||{};if(o.a!==all||o.n!==mine.length){e.kids[k.id]={...o,a:all,n:mine.length,d:mine.filter(i=>k.ticks.includes(i)).length};ch=true}}}
+    for(const sid in (k.refl||{})){const e=day[sid];const v=+k.refl[sid];if(e&&v>=1&&v<=3){const o=e.kids[k.id]||{};if(o.r!==v){e.kids[k.id]={...o,r:v};ch=true}}}});
+  if(ch){clearTimeout(logTimer);logTimer=setTimeout(()=>logSave(l),300);logCache=l}
+}
+let logCache=null;
+function reflCounts(sid,date){const l=logCache||logStore();const e=(l[date||today()]||{})[sid];const c={3:0,2:0,1:0,n:0};
+  kidsInfo.forEach(k=>{const v=+(k.refl||{})[sid];if(v>=1&&v<=3&&!(e&&e.kids[k.id]&&e.kids[k.id].r))c[v]++});
+  if(e)for(const id in e.kids){const v=e.kids[id].r;if(v)c[v]++}c.n=c[3]+c[2]+c[1];return c}
+function reflHtml(c){return `<span class="rl">Doel gehaald?</span><span class="r3">😀 ${c[3]}</span><span class="r2">🙂 ${c[2]}</span><span class="r1">😕 ${c[1]}</span>`}
+function renderDayLog(date){
+  const l=logCache||logStore();const keys=Object.keys(l).filter(k=>Object.keys(l[k]).length).sort().reverse();
+  date=date||keys[0]||today();const sel=$('dlDate');sel.innerHTML='';
+  (keys.length?keys:[today()]).forEach(k=>{const [y,m,d]=k.split('-').map(Number);const dt=new Date(y,m-1,d);const o=document.createElement('option');o.value=k;o.textContent=(k===today()?'Vandaag · ':'')+DAG[dt.getDay()]+' '+d+' '+MAAND[m-1];sel.append(o)});sel.value=date;
+  const box=$('dlList');box.innerHTML='';const day=l[date]||{};
+  const rows=Object.entries(day).sort((a,b)=>String(a[1].at).localeCompare(String(b[1].at)));
+  if(!rows.length){box.innerHTML='<p class="muted">Nog niets bijgehouden voor deze dag. Focuz houdt het overzicht bij zolang dit scherm open staat tijdens de les.</p>';return}
+  rows.forEach(([sid,e])=>{const ks=Object.values(e.kids);const all=ks.filter(k=>k.a).length,tot=ks.filter(k=>k.n).length;const c={3:0,2:0,1:0};ks.forEach(k=>{if(k.r)c[k.r]++});const rn=c[3]+c[2]+c[1];
+    const r=document.createElement('div');r.className='dlrow';
+    r.innerHTML=`<span class="dlt"></span><b class="dlv"></b><span class="dla"></span><span class="dlr"></span>`;
+    r.querySelector('.dlt').textContent=e.at||'';r.querySelector('.dlv').textContent=e.vak||'';
+    r.querySelector('.dla').innerHTML=tot?`<i style="--p:${Math.round(all/tot*100)}%"></i><small>${all} van ${tot} alles af</small>`:'<small class="muted">geen taken bijgehouden</small>';
+    r.querySelector('.dlr').innerHTML=rn?reflHtml(c).replace('<span class="rl">Doel gehaald?</span>',''):'<small class="muted">geen reflectie</small>';
+    box.append(r)});
+}
 function renderHwTeacher(){
   const box=$('hwT');if(!box)return;const list=hwList();
   const here=kidsInfo.length;
@@ -966,12 +1042,16 @@ function renderNow(){
     const tasks=arr(s.tasks).filter(x=>x&&x.t);const here=kidsInfo.filter(k=>k.sid===s.sid);
     const pr=$('nProg');pr.innerHTML='';
     if(tasks.length){
-      const h=document.createElement('div');h.className='nph';const fin=here.filter(k=>tasks.every((x,i)=>k.ticks.includes(i))).length;
+      const mineOf=k=>tasks.map((x,i)=>i).filter(i=>{const g=taskTags(tasks[i].t).g;return !g.length||g.includes(k.grp)});
+      const h=document.createElement('div');h.className='nph';const fin=here.filter(k=>mineOf(k).every(i=>k.ticks.includes(i))).length;
       h.textContent=here.length?`${fin} van ${here.length} klaar`:'Taken';pr.append(h);pr.classList.toggle('noprog',!here.length);
-      tasks.slice(0,6).forEach((x,i)=>{const c=here.filter(k=>k.ticks.includes(i)).length;const pct=here.length?c/here.length*100:0;
+      tasks.slice(0,8).forEach((x,i)=>{const tt=taskTags(x.t);const hh=tt.g.length?here.filter(k=>tt.g.includes(k.grp)):here;const c=hh.filter(k=>k.ticks.includes(i)).length;const pct=hh.length?c/hh.length*100:0;
         const r=document.createElement('div');r.className='npr';r.innerHTML='<span class="t"></span><span class="b"><i></i></span><span class="c"></span>';
-        r.querySelector('.t').innerHTML='<em></em><span></span>';r.querySelector('.t em').textContent=i+1;r.querySelector('.t span').textContent=x.t;r.querySelector('i').style.width=pct+'%';r.querySelector('.c').textContent=here.length?c+'/'+here.length:(x.m?x.m+' min':'');pr.append(r)});
+        r.querySelector('.t').innerHTML='<em></em><span></span>';r.querySelector('.t em').textContent=i+1;r.querySelector('.t span').textContent=tt.text;if(tt.g.length){const gb=document.createElement('b');gb.className='ngrp'+(isTable(x)?' tafel':'');gb.textContent=(isTable(x)?'Tafel · ':'')+tt.g.map(grpLabel).join(', ');r.querySelector('.t').append(gb)}
+        r.querySelector('i').style.width=pct+'%';r.querySelector('.c').textContent=here.length?(hh.length?c+'/'+hh.length:'–'):(x.m?x.m+' min':'');pr.append(r)});
     }
+    // reflectie van deze les
+    {const rs=reflCounts(s.sid);$('nRefl').classList.toggle('hide',!rs.n);if(rs.n)$('nRefl').innerHTML=reflHtml(rs)}
   } else {
     const tb=todayBlocks(),hm=hmNow();
     $('nIdleTxt').textContent=!tb.length?'Geen lessen vandaag':hm<tb[0].at?'Goedemorgen':hm>=tb[tb.length-1].end?'Klaar voor vandaag':'Geen vak actief';
@@ -1181,10 +1261,12 @@ const addMin = (hm,mins) => {const [h,m]=hm.split(':').map(Number);const t=h*60+
 const MIN_RE=/\(?\s*(\d{1,3})\s*(?:min(?:uten|uut)?|m)\.?\s*\)?\s*$/i;
 function splitTasks(txt){
   const parts=txt.split(/\s*(?:;|\n|\s•\s)\s*/).map(x=>x.replace(/^[-–•*]\s*/,'').trim()).filter(Boolean);
-  if(!parts.some(x=>MIN_RE.test(x)&&x.replace(MIN_RE,'').trim()))return {title:txt,tasks:[]};
+  const noTag=x=>x.replace(/\s*\[[^\]]{1,30}\]/g,'').trim();
+  if(!parts.some(x=>MIN_RE.test(noTag(x))&&noTag(x).replace(MIN_RE,'').trim()))return {title:txt,tasks:[]};
   const tasks=[],rest=[];
-  parts.forEach(x=>{const m=x.match(MIN_RE);const t=x.replace(MIN_RE,'').replace(/[\s,:–-]+$/,'').trim();
-    if(m&&t)tasks.push({t:t.slice(0,80),m:Math.min(240,+m[1])});else if(tasks.length)tasks.push({t:x.slice(0,80),m:0});else rest.push(x)});
+  parts.forEach(x0=>{let tg='';const x=x0.replace(/\s*\[[^\]]{1,30}\]/g,q=>{tg+=' '+q.trim();return ''}).trim(); // [basis] [plus]: instructiegroep
+    const m=x.match(MIN_RE);const t=x.replace(MIN_RE,'').replace(/[\s,:–-]+$/,'').trim();
+    if(m&&t)tasks.push({t:(t+tg).slice(0,100),m:Math.min(240,+m[1])});else if(tasks.length)tasks.push({t:(x+tg).slice(0,100),m:0});else rest.push(x0)});
   return {title:rest.join(' · '),tasks:tasks.slice(0,15)};
 }
 function shortTitle(s){
@@ -1611,6 +1693,9 @@ function bindTeacher(){
   $('hFeedback').addEventListener('click',()=>{const to=window.FOCUZ_FEEDBACK_EMAIL||'';
     const body='Mijn vraag of probleem:\n\n\n---\nApparaat: '+navigator.userAgent+'\nKlascode: '+code+'\nDatum: '+new Date().toLocaleString('nl-NL');
     location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent('Focuz: vraag of probleem')+'&body='+encodeURIComponent(body)});
+  $('dLog').addEventListener('click',()=>{renderDayLog();$('dlModal').classList.remove('hide')});
+  $('dlClose').addEventListener('click',()=>$('dlModal').classList.add('hide'));
+  $('dlDate').addEventListener('change',()=>renderDayLog($('dlDate').value));
   $('tUseCode').addEventListener('click',async()=>{
     const v=await ask({title:'Klascode van een ander apparaat',text:'Typ de klascode die je op je andere apparaat ziet. De iPads blijven dan gekoppeld.',input:'',ok:'Gebruiken'});
     const c=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(!c)return;

@@ -1106,3 +1106,57 @@ body.probeer .pzbar a{background:#3d2600;color:#fff;border-radius:999px;padding:
 }
 .hprobeer{color:var(--soft)}
 body.probeer .pzbar{left:auto;right:28px;bottom:28px}@media(max-width:700px){body.probeer .pzbar{right:12px;left:12px;bottom:86px;justify-content:space-between}}
+/* ===== instructiegroepen ===== */
+#kTasks li.notme{display:none}
+#kTasks .tname::before{content:attr(data-n)}
+.tbadge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:#ffd08a;color:#3d2600;font-size:12px;font-weight:800;vertical-align:middle}
+.kgrp{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 8px;font-weight:800;color:#cfe0f5;font-size:15px}
+.kgrp.hide{display:none}
+.kgrpbtns{display:flex;gap:8px;flex-wrap:wrap}.kgrpbtns.hide{display:none}
+.kgrpbtns button{min-height:40px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font-weight:800}
+.kgrpbtns button.on{background:#fff;color:var(--ink)}
+.kgrp .link{color:#cfe0f5;font-size:14px}
+/* ===== beloning ===== */
+.cele{position:fixed;inset:0;z-index:80;display:grid;place-items:center;pointer-events:none;background:rgba(10,22,40,.35)}
+.cele.hide{display:none}
+.celebox{background:#fff;color:var(--ink);border-radius:28px;padding:28px 44px;display:grid;justify-items:center;gap:6px;box-shadow:0 30px 80px rgba(0,0,0,.35);transform:scale(.8);opacity:0}
+.cele.go .celebox{animation:celepop .5s cubic-bezier(.2,1.4,.4,1) forwards}
+.celebox b{font-size:clamp(30px,4.5vw,46px);font-weight:900;color:#17734a}.celebox span{font-size:18px;color:var(--soft);font-weight:700}
+@keyframes celepop{to{transform:scale(1);opacity:1}}
+.conf{position:absolute;inset:0;overflow:hidden}
+.conf i{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:confall 2.2s ease-in forwards}
+@keyframes confall{to{top:105%;transform:rotate(540deg)}}
+@media(prefers-reduced-motion:reduce){.cele.go .celebox{animation:none;transform:none;opacity:1}}
+/* ===== reflectie ===== */
+.reflect{position:fixed;inset:0;z-index:85;background:rgba(10,22,40,.6);display:grid;place-items:center;padding:16px}
+.reflect.hide{display:none}
+.reflbox{background:#fff;color:var(--ink);border-radius:26px;padding:26px 28px;width:min(620px,100%);display:grid;gap:8px;text-align:center}
+.reflbox h3{margin:0;font-size:clamp(24px,3vw,32px)}
+.reflbox p{margin:0;font-size:18px;color:var(--soft);font-weight:700}
+.reflbox .rdoel{color:var(--ink);font-size:clamp(17px,2vw,21px);background:#f3f6fa;border-radius:14px;padding:10px 14px;margin:6px 0}
+.rbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+.rbtns button{display:grid;justify-items:center;gap:6px;min-height:110px;border-radius:20px;background:#eef3f9;color:var(--ink);font-size:18px;font-weight:900}
+.rbtns button i{font-style:normal;font-size:44px;line-height:1}
+.rbtns button:hover{background:#e0f3ea}
+.rlater{justify-self:center;margin-top:4px;color:var(--soft)}
+/* leerkracht: groepen, reflectie, dagoverzicht */
+.ngrp{margin-left:8px;font-size:11px;font-weight:800;background:rgba(255,255,255,.12);color:#cfe0f5;border-radius:999px;padding:2px 8px;white-space:nowrap;flex:none}
+.ngrp.tafel{background:#ffd08a;color:#3d2600}
+#nCard .nrefl{display:flex;gap:14px;align-items:center;margin:-6px 0 12px;font-weight:800;font-size:15px;color:#dfe9f6}
+#nCard .nrefl.hide{display:none}
+.nrefl .rl,.dlr .rl{color:#9fb6d3;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.dlbtn::before{content:none}
+.dlmodal{position:fixed;inset:0;z-index:90;background:rgba(10,22,40,.6);display:grid;place-items:center;padding:16px}
+.dlmodal.hide{display:none}
+.dlbox{background:#fff;color:var(--ink);border-radius:24px;padding:24px 26px;width:min(760px,100%);max-height:92vh;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:10px}
+.dlhead{display:flex;justify-content:space-between;align-items:center;gap:12px}.dlhead h2{margin:0}.dlhead select{width:auto;min-height:40px}
+.dllist{display:grid;gap:6px;align-content:start;overflow:hidden}
+.dlrow{display:grid;grid-template-columns:56px minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,1.2fr);gap:12px;align-items:center;background:#f3f6fa;border-radius:12px;padding:8px 12px;min-height:46px}
+.dlt{font-weight:800;color:var(--soft)}.dlv{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dla{display:grid;gap:3px}.dla i{display:block;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--go) var(--p),#dde5ef var(--p))}.dla small{font-size:12px;color:var(--soft);font-weight:700}
+.dlr{display:flex;gap:10px;font-weight:800;font-size:14px}
+.dlfoot{display:flex;justify-content:flex-end}
+@media(max-width:700px){.dlrow{grid-template-columns:44px minmax(0,1fr);row-gap:4px}.dla,.dlr{grid-column:2}}
+/* alles af: afgevinkte taken inklappen, klaaropdrachten krijgen de ruimte */
+#kid.tasksdone #kTasks{display:none}
+#kid.tasksdone .kgrp{display:none}

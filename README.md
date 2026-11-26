@@ -52,3 +52,4 @@ Zet in je dagklapper een tabel met de kolommen **Vak**, **Wat ga je doen** en **
 - **Rooster in Focuz** voor wie geen dagklapper heeft; **Vaste taken per vak** vullen de lessen.
 - **Groep** en **grote letters** bij Klas en iPads; **?**-uitleg bij instellingen.
 - **Vraag of probleem doorgeven** opent een e-mail; stel het adres in met `window.FOCUZ_FEEDBACK_EMAIL` in `index.html`.
+- **Instructiegroepen**: `Taak (10 min) [basis]`; leerling kiest zijn groep. **Goed gedaan** bij alles af, **reflectie** op het ik-doel, **dagoverzicht** voor de leerkracht (lokaal, zonder namen).

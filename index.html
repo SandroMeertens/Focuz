@@ -127,6 +127,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="list hide" id="kListWrap">
       <h3>Mijn taken</h3>
       <div class="progress" id="kProg"></div>
+      <div class="kgrp hide" id="kGrp"><span id="kGrpTxt"></span><div class="kgrpbtns" id="kGrpBtns"></div><button class="link" id="kGrpChange">wijzig</button></div>
       <ul class="tasks" id="kTasks"></ul>
       <div class="alldone hide" id="kAllDone">Alles af! Kies een klaaropdracht.</div>
       <div class="extras hide" id="kExtras"><h4>Klaaropdrachten</h4><ul id="kExtraList"></ul></div>
@@ -136,6 +137,12 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <div class="kidfoot"><b id="kCode" class="hide"></b><button id="kHwBtn" class="hide">Huiswerk en toetsen</button><button id="kWeekBtn" class="hide">Weekplanning</button><button id="kCalm">Rustig scherm</button><button id="kLeave" title="Houd 3 seconden ingedrukt">Andere code</button></div>
   <div class="offline hide" id="kOff"></div>
   <button class="soundtip hide" id="kSoundTip" aria-label="Geluid aanzetten" title="Tik om het geluid aan te zetten"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <div class="cele hide" id="kCele" aria-live="polite"><div class="conf"></div><div class="celebox"><b>Goed gedaan!</b><span>Al je taken zijn af.</span></div></div>
+  <div class="reflect hide" id="kRefl" role="dialog" aria-label="Reflectie">
+    <div class="reflbox"><h3 id="kRefVak">Hoe ging het?</h3><p>Heb je je doel gehaald?</p><p class="rdoel" id="kRefDoel"></p>
+      <div class="rbtns"><button data-r="3"><i>😀</i>Gelukt</button><button data-r="2"><i>🙂</i>Bijna</button><button data-r="1"><i>😕</i>Nog niet</button></div>
+      <button class="link rlater" data-r="0">Later</button></div>
+  </div>
   <div class="dayover hide" id="kHwOver" role="dialog" aria-label="Huiswerk en toetsen">
     <div class="dayoverbox hwbox"><h3>Huiswerk en toetsen</h3><div class="hwwrap" id="kHwList"></div><button id="kHwClose">Sluiten</button></div>
   </div>
@@ -188,6 +195,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
           <div class="ndoel hide" id="nDoel"><b>Ik-doel</b><span id="nDoelTxt"></span></div>
           <div class="nclock"><div class="ntime"><span id="nBig">--:--</span></div><small class="nend" id="nEnd"></small><div class="nbar"><i id="nBar"></i></div></div>
           <div class="nprog" id="nProg"></div>
+          <div class="nrefl hide" id="nRefl"></div>
           <div class="nctl" id="nCtl">
             <button id="tPause">Pauze</button><button id="tMin">−5 min</button><button id="tPlus">+5 min</button><button class="danger" id="tStop">Stop</button>
           </div>
@@ -204,7 +212,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
     </div>
     <div class="col">
       <div class="panel grow">
-        <div class="dhead"><h2 id="dHead">Vandaag</h2><button class="link" id="dPast"></button><button class="updbtn" id="dUpd" title="Lees je dagklapper opnieuw in" aria-label="Dagklapper bijwerken">Bijwerken</button></div>
+        <div class="dhead"><h2 id="dHead">Vandaag</h2><button class="link" id="dPast"></button><button class="updbtn dlbtn" id="dLog">Dagoverzicht</button><button class="updbtn" id="dUpd" title="Lees je dagklapper opnieuw in" aria-label="Dagklapper bijwerken">Bijwerken</button></div>
         <ul class="dlist" id="dList"></ul>
         <button class="addblk" id="qToggle" aria-expanded="false">+ Losse timer</button>
         <div class="quick qright">
@@ -412,6 +420,12 @@ window.FOCUZ_MS_CLIENT_ID = null;
   <div class="row"><button id="mCancel">Annuleer</button><button class="primary" id="mOk">OK</button></div>
 </div></div>
 
+<div class="dlmodal hide" id="dlModal" role="dialog" aria-label="Dagoverzicht"><div class="dlbox">
+  <div class="dlhead"><h2>Dagoverzicht</h2><select id="dlDate" aria-label="Dag"></select></div>
+  <p class="muted small">Per les: hoeveel iPads al hun taken af hadden, en hoe de leerlingen hun ik-doel inschatten.</p>
+  <div class="dllist" id="dlList"></div>
+  <div class="dlfoot"><button class="primary" id="dlClose">Sluiten</button></div>
+</div></div>
 <div class="wiz hide" id="wiz" role="dialog" aria-label="Welkom bij Focuz">
   <div class="wizbox">
     <h2>Welkom bij Focuz</h2>

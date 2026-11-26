@@ -305,3 +305,27 @@ test('sjabloon wordt goed ingelezen, probeerstand werkt los van de echte klas', 
   expect(t.errors).toEqual([]);
   await t.ctx.close();
 });
+
+test('instructiegroepen, beloning, reflectie en dagoverzicht', async ({ browser }) => {
+  const iso = '2026-12-07T08:40:00+01:00';
+  const t = await teacher(browser, iso, { docx: 'groepen.docx' });
+  const code = await t.page.locator('#tCode').innerText();
+  await expect(t.page.locator('#nProg')).toContainText('Tafel · Verlengd');
+  const k = await kid(browser, iso, code);
+  await expect(k.page.locator('#kGrp')).toBeVisible({ timeout: 10000 });
+  await k.page.locator('#kGrpBtns button', { hasText: 'Plus' }).click();
+  // plus ziet: Werkboek, Plusblad, Nakijken (niet de verlengde instructie)
+  await expect(k.page.locator('#kTasks li:not(.notme)')).toHaveCount(3);
+  await expect(k.page.locator('#kTasks')).not.toContainText('Instructietafel', { useInnerText: true });
+  for (let i = 0; i < 3; i++) await k.page.locator('#kTasks li:not(.notme):not(.ok) .box').first().click();
+  await expect(k.page.locator('#kCele')).toBeVisible();
+  await expect(k.page.locator('#kRefl')).toBeVisible({ timeout: 6000 });
+  await expect(k.page.locator('#kRefDoel')).toContainText('breuken');
+  await k.page.click('#kRefl [data-r="3"]');
+  await expect(t.page.locator('#nRefl')).toContainText('😀 1', { timeout: 20000 });
+  await expect(t.page.locator('#nProg')).toContainText('1 van 1 klaar');
+  await t.page.click('#dLog');
+  await expect(t.page.locator('#dlList')).toContainText('1 van 1 alles af');
+  expect([...t.errors, ...k.errors]).toEqual([]);
+  await t.ctx.close(); await k.ctx.close();
+});
