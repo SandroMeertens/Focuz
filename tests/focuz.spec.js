@@ -345,3 +345,22 @@ test('foutenlog: fout op een iPad komt bij de leerkracht en gaat mee met een vra
   await expect(t.page.locator('#hVer')).toContainText('Focuz versie');
   await t.ctx.close(); await k.ctx.close();
 });
+
+test('oudere apparaten: code is ES2018 zonder nieuwe regex-trucs, geen :has(), en de noodroute voor flex-gap werkt', async ({ browser }) => {
+  const fs = require('fs'); const acorn = require('acorn');
+  for (const f of ['app.js', 'sw.js', 'vendor/mqtt.min.js', 'vendor/jszip.min.js', 'vendor/qrcode.js']) {
+    const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+    expect(() => acorn.parse(src, { ecmaVersion: 2018 }), f + ' moet ES2018 zijn (Safari 12)').not.toThrow();
+    expect(/\(\?<[=!]/.test(src), f + ' gebruikt lookbehind (niet in oudere Safari)').toBe(false);
+  }
+  const css = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
+  expect(css.includes(':has('), 'style.css gebruikt :has() (pas vanaf iOS 15.4)').toBe(false);
+  // leerkracht + leerling met de noodroute voor oudere Safari (marges in plaats van flex-gap)
+  const t = await teacher(browser, '2026-11-19T09:20:00+01:00');
+  const code = await t.page.locator('#tCode').textContent();
+  const k = await kid(browser, '2026-11-19T09:20:00+01:00', code, '&oud=1');
+  await expect(k.page.locator('#kTasks li').first()).toBeVisible({ timeout: 10000 });
+  expect(await k.page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+  expect([...t.errors, ...k.errors]).toEqual([]);
+  await t.ctx.close(); await k.ctx.close();
+});

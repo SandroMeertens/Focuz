@@ -55,6 +55,10 @@ document.addEventListener('click',e=>{const h=e.target.closest('.help');const b=
     const w=Math.min(300,innerWidth-24);b.style.width=w+'px';b.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';
     const top=r.bottom+8;b.style.top=(top+b.offsetHeight>innerHeight-8?r.top-b.offsetHeight-8:top)+'px';return}
   if(!b.classList.contains('hide'))b.classList.add('hide')},true);
+
+// bestanden lezen, ook in oudere Safari (zonder File.arrayBuffer/text)
+const readBuf = f => f.arrayBuffer ? f.arrayBuffer() : new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsArrayBuffer(f)});
+const readText = f => f.text ? f.text() : new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsText(f)});
 /* =================== verbinding =================== */
 let connected=false, everConnected=false, offSince=Date.now();
 function setConn(ok,txt){
@@ -1253,8 +1257,8 @@ function textBefore(tbl){ // tekst van de alinea's vlak boven een tabel (bijv. e
 function dateFromHeader(txt,ref){ // "Maandag 30 november", "ma 30 nov", "30-11", "30/11/2026"
   const t=String(txt||'').toLowerCase();let day,mon,yr=0;
   const MK=['jan','feb','maa','apr','mei','jun','jul','aug','sep','okt','nov','dec'];let m=null;
-  for(const x of t.matchAll(/(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sept?|okt|nov|dec)\b\.?/g)){
-    if(+x[1]>=1&&+x[1]<=31){m=x;break}}
+  {const re=/(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sept?|okt|nov|dec)\b\.?/g;let x;
+    while((x=re.exec(t))){if(+x[1]>=1&&+x[1]<=31){m=x;break}}}
   if(m){day=+m[1];const k=m[2]==='mrt'?'maa':m[2].slice(0,3);mon=MK.indexOf(k)}
   else{m=t.match(/(?:^|[^\d])(\d{1,2})[-\/.](\d{1,2})(?:[-\/.](\d{2,4}))?(?![\d:])/);if(!m||/\d[.:]\d{2}\s*$/.test(m[0]))return null;day=+m[1];mon=+m[2]-1;if(m[3])yr=+m[3]<100?2000+(+m[3]):+m[3]}
   if(!(mon>=0&&mon<=11&&day>=1&&day<=31))return null;
@@ -1390,7 +1394,7 @@ $('wUse').addEventListener('change',()=>{plan.useWord=$('wUse').checked;savePlan
 $('wPick').addEventListener('click',()=>$('wFile').click());
 $('wFile').addEventListener('change',async()=>{
   const f=$('wFile').files[0];if(!f)return;$('wStatus').textContent='Inlezen…';
-  try{const n=await importWord(await f.arrayBuffer(),f.name);void n}
+  try{const n=await importWord(await readBuf(f),f.name);void n}
   catch(e){$('wStatus').textContent='Inlezen mislukt: '+e.message}
   $('wFile').value='';
 });
@@ -1485,7 +1489,7 @@ async function readHandle(force){
     if(filePerm!=='granted'){renderAuto();return}
     const f=await fileHandle.getFile();
     if(!force&&f.lastModified===fileLastMod&&plan.word)return;
-    await importWord(await f.arrayBuffer(),f.name);fileLastMod=f.lastModified;renderAuto();
+    await importWord(await readBuf(f),f.name);fileLastMod=f.lastModified;renderAuto();
   }catch(e){$('wStatus').textContent='Bijwerken mislukt: '+e.message+'. Staat het bestand nog op dezelfde plek?'}
 }
 let wShowAll=false;
@@ -1720,7 +1724,7 @@ function bindTeacher(){
     store.set('kt_backup_at',String(Date.now()));renderBackup()});
   $('bkLoad').addEventListener('click',()=>$('bkFile').click());
   $('bkFile').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-    try{const d=JSON.parse(await f.text());if(!d||d.app!=='Focuz'||!d.plan)throw 0;
+    try{const d=JSON.parse(await readText(f));if(!d||d.app!=='Focuz'||!d.plan)throw 0;
       if(!await ask({title:'Reservekopie terugzetten?',text:'Je huidige instellingen worden vervangen door die van '+String(d.at||'').slice(0,10)+(d.code?'. Klascode wordt '+d.code+'.':'.'),ok:'Terugzetten'}))return;
       plan=normPlan(d.plan);savePlan();
       if(validCode(String(d.code||''))&&d.code!==code){T&&T.stop();T=null;state={status:'idle'};code=d.code;store.set('kt_teacher_code',code);kidsInfo=[];setupTeacher();connect()}
@@ -1747,6 +1751,26 @@ function bindTeacher(){
   $('rRows').addEventListener('click',e=>{if(!e.target.classList.contains('rdel'))return;plan.rooster[rDay].splice(+e.target.closest('.rr').dataset.i,1);savePlan();renderRooster()});
   $('rAuto').addEventListener('change',()=>{plan.auto=$('rAuto').checked;savePlan();renderNext()});
 }
+// ===== klassen in plaats van CSS :has() (werkt ook op oudere iPads) =====
+function syncHas(){
+  const b=document.body,vis=id=>{const e=$(id);return !!e&&!e.classList.contains('hide')};
+  b.classList.toggle('scr-teacher',vis('teacher'));b.classList.toggle('scr-board',vis('board'));b.classList.toggle('scr-home',vis('home'));
+  $('kid').classList.toggle('has-free',vis('kFree'));$('board').classList.toggle('has-morning',vis('bMorning'));
+  document.querySelectorAll('.panel,.tab').forEach(el=>el.classList.toggle('has-open',!!el.querySelector('details.opt[open]')));
+}
+// oudere Safari (voor iOS 14.5) kent geen 'gap' bij flexbox: dan zetten we marges op de kinderen
+const FLEXGAP=!/[?&]oud\b/.test(location.search)&&(()=>{const d=document.createElement('div');d.style.cssText='display:flex;flex-direction:column;row-gap:1px;position:absolute';d.append(document.createElement('div'),document.createElement('div'));document.body.append(d);const ok=d.scrollHeight===1;d.remove();return ok})();
+function flexGapFix(){if(FLEXGAP)return;
+  document.querySelectorAll('body *').forEach(el=>{const c=getComputedStyle(el);if(!/flex/.test(c.display))return;
+    const cg=parseFloat(c.columnGap)||0,rg=parseFloat(c.rowGap)||0;if(!cg&&!rg)return;
+    const col=/column/.test(c.flexDirection),wrap=c.flexWrap!=='nowrap';const kids=[...el.children].filter(k=>getComputedStyle(k).display!=='none'&&getComputedStyle(k).position!=='absolute');
+    const free=(k,side)=>k.dataset.fg||parseFloat(getComputedStyle(k)[side])===0; // eigen marges (zoals 'auto') niet overschrijven
+    kids.forEach((k,i)=>{if(col){if(free(k,'marginTop')){k.style.marginTop=i?rg+'px':'';k.dataset.fg=1}}
+      else if(wrap){if(free(k,'marginRight')){k.style.marginRight=cg+'px';k.style.marginBottom=rg+'px';k.dataset.fg=1}}
+      else if(free(k,'marginLeft')){k.style.marginLeft=i?cg+'px':'';k.dataset.fg=1}})})}
+{let q=false;const run=()=>{q=false;syncHas();flexGapFix()};
+  new MutationObserver(()=>{if(!q){q=true;(window.requestAnimationFrame||setTimeout)(run)}}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','open']});
+  document.addEventListener('toggle',()=>{syncHas();flexGapFix()},true);syncHas();flexGapFix()}
 /* =================== tikken =================== */
 setInterval(()=>{
   if(role==='kid'){manageWake();renderSoundTip()}

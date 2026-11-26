@@ -44,8 +44,8 @@ function textBefore(tbl){ // tekst van de alinea's vlak boven een tabel (bijv. e
 function dateFromHeader(txt,ref){ // "Maandag 30 november", "ma 30 nov", "30-11", "30/11/2026"
   const t=String(txt||'').toLowerCase();let day,mon,yr=0;
   const MK=['jan','feb','maa','apr','mei','jun','jul','aug','sep','okt','nov','dec'];let m=null;
-  for(const x of t.matchAll(/(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sept?|okt|nov|dec)\b\.?/g)){
-    if(+x[1]>=1&&+x[1]<=31){m=x;break}}
+  {const re=/(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sept?|okt|nov|dec)\b\.?/g;let x;
+    while((x=re.exec(t))){if(+x[1]>=1&&+x[1]<=31){m=x;break}}}
   if(m){day=+m[1];const k=m[2]==='mrt'?'maa':m[2].slice(0,3);mon=MK.indexOf(k)}
   else{m=t.match(/(?:^|[^\d])(\d{1,2})[-\/.](\d{1,2})(?:[-\/.](\d{2,4}))?(?![\d:])/);if(!m||/\d[.:]\d{2}\s*$/.test(m[0]))return null;day=+m[1];mon=+m[2]-1;if(m[3])yr=+m[3]<100?2000+(+m[3]):+m[3]}
   if(!(mon>=0&&mon<=11&&day>=1&&day<=31))return null;
@@ -181,7 +181,7 @@ $('wUse').addEventListener('change',()=>{plan.useWord=$('wUse').checked;savePlan
 $('wPick').addEventListener('click',()=>$('wFile').click());
 $('wFile').addEventListener('change',async()=>{
   const f=$('wFile').files[0];if(!f)return;$('wStatus').textContent='Inlezen…';
-  try{const n=await importWord(await f.arrayBuffer(),f.name);void n}
+  try{const n=await importWord(await readBuf(f),f.name);void n}
   catch(e){$('wStatus').textContent='Inlezen mislukt: '+e.message}
   $('wFile').value='';
 });
@@ -276,7 +276,7 @@ async function readHandle(force){
     if(filePerm!=='granted'){renderAuto();return}
     const f=await fileHandle.getFile();
     if(!force&&f.lastModified===fileLastMod&&plan.word)return;
-    await importWord(await f.arrayBuffer(),f.name);fileLastMod=f.lastModified;renderAuto();
+    await importWord(await readBuf(f),f.name);fileLastMod=f.lastModified;renderAuto();
   }catch(e){$('wStatus').textContent='Bijwerken mislukt: '+e.message+'. Staat het bestand nog op dezelfde plek?'}
 }
 let wShowAll=false;
@@ -511,7 +511,7 @@ function bindTeacher(){
     store.set('kt_backup_at',String(Date.now()));renderBackup()});
   $('bkLoad').addEventListener('click',()=>$('bkFile').click());
   $('bkFile').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-    try{const d=JSON.parse(await f.text());if(!d||d.app!=='Focuz'||!d.plan)throw 0;
+    try{const d=JSON.parse(await readText(f));if(!d||d.app!=='Focuz'||!d.plan)throw 0;
       if(!await ask({title:'Reservekopie terugzetten?',text:'Je huidige instellingen worden vervangen door die van '+String(d.at||'').slice(0,10)+(d.code?'. Klascode wordt '+d.code+'.':'.'),ok:'Terugzetten'}))return;
       plan=normPlan(d.plan);savePlan();
       if(validCode(String(d.code||''))&&d.code!==code){T&&T.stop();T=null;state={status:'idle'};code=d.code;store.set('kt_teacher_code',code);kidsInfo=[];setupTeacher();connect()}

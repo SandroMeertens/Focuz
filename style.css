@@ -299,6 +299,7 @@ h2 {
   font-size: 16px;
 }
 .task {
+  font-size: max(24px, min(4vw, 42px));
   font-size: clamp(24px, 4vw, 42px);
   line-height: 1.1;
   margin: 8px 0 0;
@@ -314,6 +315,7 @@ h2 {
   padding: 8px 16px;
   margin-top: 10px;
   font-weight: 800;
+  font-size: max(17px, min(2.2vw, 21px));
   font-size: clamp(17px, 2.2vw, 21px);
   max-width: 900px;
   text-align: left;
@@ -374,6 +376,10 @@ h2 {
 }
 .ringtext {
   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   display: grid;
   place-items: center;
@@ -385,17 +391,21 @@ h2 {
   font-weight: 900;
 }
 .big {
+  font-size: max(56px, min(13vmin, 140px));
   font-size: clamp(56px, 13vmin, 140px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 #kid.haslist .big {
+  font-size: max(48px, min(9vmin, 104px));
   font-size: clamp(48px, 9vmin, 104px);
 }
 #kid.idle .big {
+  font-size: max(34px, min(7vmin, 64px));
   font-size: clamp(34px, 7vmin, 64px);
 }
 .sub {
+  font-size: max(16px, min(2.6vmin, 24px));
   font-size: clamp(16px, 2.6vmin, 24px);
   color: #cfe0f5;
   margin-top: 6px;
@@ -410,6 +420,7 @@ h2 {
   margin-top: 10px;
 }
 .doneicon {
+  font-size: max(70px, min(14vmin, 140px));
   font-size: clamp(70px, 14vmin, 140px);
   line-height: 1;
 }
@@ -459,6 +470,7 @@ h2 {
   color: var(--go);
 }
 .ltext {
+  font-size: max(24px, min(3.4vw, 34px));
   font-size: clamp(24px, 3.4vw, 34px);
   font-weight: 900;
 }
@@ -629,6 +641,10 @@ h2 {
 }
 .alert {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 20;
   background: #e5484d;
@@ -642,6 +658,7 @@ h2 {
   max-width: 900px;
 }
 .alerttxt {
+  font-size: max(44px, min(8vw, 96px));
   font-size: clamp(44px, 8vw, 96px);
   font-weight: 900;
   line-height: 1.05;
@@ -701,6 +718,7 @@ h2 {
   }
 }
 #teacher {
+  height: 100vh;
   height: 100vh;
   height: 100dvh;
   padding: 14px max(2vw, 14px);
@@ -973,6 +991,7 @@ label {
   color: #cfe0f5;
 }
 .nvak {
+  font-size: max(26px, min(2.6vw, 38px));
   font-size: clamp(26px, 2.6vw, 38px);
   font-weight: 900;
   line-height: 1.05;
@@ -1007,6 +1026,7 @@ label {
   margin-top: 4px;
 }
 .ntime span {
+  font-size: max(56px, min(6.4vw, 96px));
   font-size: clamp(56px, 6.4vw, 96px);
   font-weight: 900;
   line-height: 1;
@@ -1088,6 +1108,7 @@ label {
   opacity: 0.35;
 }
 .nidle {
+  font-size: max(28px, min(3vw, 40px));
   font-size: clamp(28px, 3vw, 40px);
   font-weight: 900;
   margin-top: 6px;
@@ -1381,7 +1402,7 @@ body.minimode .status {
 .dlist li.now {
   padding: 8px 10px;
 }
-body:has(#teacher:not(.hide)) .status {
+body.scr-teacher .status {
   display: none;
 }
 .qbox {
@@ -1399,6 +1420,7 @@ body:has(#teacher:not(.hide)) .status {
 }
 @media (max-height: 800px) {
   .ntime span {
+    font-size: max(48px, min(5.4vw, 80px));
     font-size: clamp(48px, 5.4vw, 80px);
   }
   .nvak {
@@ -1515,6 +1537,7 @@ body:has(#teacher:not(.hide)) .status {
   font-size: 15px;
 }
 .ntime span {
+  font-size: max(56px, min(min(8.5vw, 13vh), 130px));
   font-size: clamp(56px, min(8.5vw, 13vh), 130px);
 }
 .tab[data-tab="klas"].on {
@@ -1536,6 +1559,7 @@ details.opt {
   font-weight: 700;
 }
 .kcode b {
+  font-size: max(36px, min(4vw, 52px));
   font-size: clamp(36px, 4vw, 52px);
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -1759,6 +1783,10 @@ details.opt summary:focus-visible {
 }
 .intro {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 100;
   display: grid;
@@ -1841,6 +1869,10 @@ details.opt summary:focus-visible {
 }
 .iburst {
   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
 }
 .iburst i {
@@ -1860,6 +1892,7 @@ details.opt summary:focus-visible {
 }
 .iword {
   display: flex;
+  font-size: max(56px, min(11vmin, 120px));
   font-size: clamp(56px, 11vmin, 120px);
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -1876,6 +1909,7 @@ details.opt summary:focus-visible {
   color: #2fb67c;
 }
 .itag {
+  font-size: max(17px, min(2.4vmin, 24px));
   font-size: clamp(17px, 2.4vmin, 24px);
   color: #cfe0f5;
   font-weight: 700;
@@ -1892,6 +1926,7 @@ details.opt summary:focus-visible {
 .vakline {
   text-align: center;
   color: #cfe0f5;
+  font-size: max(15px, min(1.8vmin, 19px));
   font-size: clamp(15px, 1.8vmin, 19px);
   margin-top: 10px;
   max-width: 440px;
@@ -1901,6 +1936,7 @@ details.opt summary:focus-visible {
 .ring.taskmode .sub {
   color: #fff;
   font-weight: 800;
+  font-size: max(16px, min(2.4vmin, 22px));
   font-size: clamp(16px, 2.4vmin, 22px);
 }
 .ring.over .fg {
@@ -1929,9 +1965,11 @@ details.opt summary:focus-visible {
   stroke: #7fb2ff;
 }
 #kid.brk .task {
+  font-size: max(44px, min(7vw, 80px));
   font-size: clamp(44px, 7vw, 80px);
 }
 #kid.done .ringtext .big {
+  font-size: max(40px, min(7vmin, 72px));
   font-size: clamp(40px, 7vmin, 72px);
 }
 #kLeave.holding {
@@ -1983,14 +2021,17 @@ details.opt summary:focus-visible {
   text-align: left;
 }
 .bjtxt b {
+  font-size: max(26px, min(2.6vw, 40px));
   font-size: clamp(26px, 2.6vw, 40px);
 }
 .bjtxt span {
+  font-size: max(16px, min(1.4vw, 22px));
   font-size: clamp(16px, 1.4vw, 22px);
   color: #cfe0f5;
   max-width: 22ch;
 }
 .bjtxt strong {
+  font-size: max(40px, min(4vw, 64px));
   font-size: clamp(40px, 4vw, 64px);
   letter-spacing: 0.14em;
   font-weight: 900;
@@ -2002,10 +2043,11 @@ details.opt summary:focus-visible {
   width: min(720px, 100%);
   margin: 0 auto;
 }
-#kid:has(#kFree:not(.hide)) .kidmain {
+#kid.has-free .kidmain {
   grid-template-columns: minmax(0, 1fr);
 }
 .fbig {
+  font-size: max(46px, min(7vw, 96px));
   font-size: clamp(46px, 7vw, 96px);
   font-weight: 900;
   line-height: 1.1;
@@ -2017,6 +2059,7 @@ details.opt summary:focus-visible {
   animation: rise 0.8s ease-out both;
 }
 .ftext {
+  font-size: max(20px, min(2.6vw, 28px));
   font-size: clamp(20px, 2.6vw, 28px);
   font-weight: 800;
   color: #dfe9f6;
@@ -2027,6 +2070,7 @@ details.opt summary:focus-visible {
 @media (max-width: 700px) {
   #teacher {
     height: auto;
+    min-height: 100vh;
     min-height: 100dvh;
     overflow: visible;
     padding: 10px 12px calc(76px + env(safe-area-inset-bottom));
@@ -2112,6 +2156,7 @@ details.opt summary:focus-visible {
   }
 }
 #board {
+  height: 100vh;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -2259,6 +2304,10 @@ details.opt summary:focus-visible {
 }
 .dayover {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 15;
   background: rgba(10, 20, 35, 0.7);
@@ -2357,6 +2406,7 @@ details.opt summary:focus-visible {
   min-height: 100vh;
   background: #13263f;
   grid-template-rows: 1fr auto;
+  padding: max(20px, min(3vw, 48px));
   padding: clamp(20px, 3vw, 48px);
 }
 #board.warn {
@@ -2368,6 +2418,7 @@ details.opt summary:focus-visible {
 .bmain {
   display: grid;
   grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: max(20px, min(3vw, 56px));
   gap: clamp(20px, 3vw, 56px);
   align-items: center;
 }
@@ -2379,21 +2430,25 @@ details.opt summary:focus-visible {
   font-weight: 900;
 }
 .btitle {
+  font-size: max(28px, min(3.4vw, 54px));
   font-size: clamp(28px, 3.4vw, 54px);
   line-height: 1.1;
   margin-top: 10px;
   text-wrap: balance;
 }
 #board .doel {
+  font-size: max(18px, min(1.8vw, 28px));
   font-size: clamp(18px, 1.8vw, 28px);
 }
 .bbig {
+  font-size: max(90px, min(15vw, 260px));
   font-size: clamp(90px, 15vw, 260px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   margin-top: 18px;
 }
 #board.idle .bbig {
+  font-size: max(48px, min(6vw, 96px));
   font-size: clamp(48px, 6vw, 96px);
 }
 .bbar,
@@ -2414,11 +2469,13 @@ details.opt summary:focus-visible {
   transition: width 0.9s linear;
 }
 .bsub {
+  font-size: max(20px, min(2vw, 32px));
   font-size: clamp(20px, 2vw, 32px);
   color: #cfe0f5;
   margin-top: 12px;
 }
 .bright .daylist .dv {
+  font-size: max(18px, min(1.5vw, 24px));
   font-size: clamp(18px, 1.5vw, 24px);
 }
 .bfoot {
@@ -2463,8 +2520,8 @@ details.opt summary:focus-visible {
   border: 0;
   transform-origin: 0 0;
 }
-body:has(#board:not(.hide)) .status,
-body:has(#teacher:not(.hide)) .status {
+body.scr-board .status,
+body.scr-teacher .status {
   top: auto;
   bottom: 6px;
 }
@@ -2606,6 +2663,10 @@ body.hasdemo .kidtop {
 }
 .modal {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   background: rgba(10, 20, 35, 0.6);
   display: grid;
@@ -2707,6 +2768,7 @@ body.hasdemo .kidtop {
   color: #fff;
 }
 .mfirst .mfh b {
+  font-size: max(24px, min(3vw, 32px));
   font-size: clamp(24px, 3vw, 32px);
   font-size: 18px;
   color: #fff;
@@ -2740,6 +2802,7 @@ body.hasdemo .kidtop {
   animation: none;
 }
 .mtext {
+  font-size: max(18px, min(2.2vw, 22px));
   font-size: clamp(18px, 2.2vw, 22px);
 }
 .mfirst .mfh {
@@ -2782,6 +2845,7 @@ body.hasdemo .kidtop {
   animation: rise 0.8s ease-out both;
 }
 .mhello {
+  font-size: max(40px, min(5.6vw, 68px));
   font-size: clamp(40px, 5.6vw, 68px);
 }
 .mtext {
@@ -2882,10 +2946,10 @@ body.hasdemo .kidtop {
 .msh .msn {
   display: none;
 }
-#board:has(#bMorning:not(.hide)) #bSub,
-#board:has(#bMorning:not(.hide)) #bTask,
-body:has(#board:not(.hide)) .status,
-body:has(#home:not(.hide)) .status {
+#board.has-morning #bSub,
+#board.has-morning #bTask,
+body.scr-board .status,
+body.scr-home .status {
   display: none;
 }
 .homecard {
@@ -2953,6 +3017,10 @@ body:has(#home:not(.hide)) .status {
 }
 .kvfull,
 .kvfull .kvframe {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   background: #1f3a5f;
 }
@@ -2966,6 +3034,10 @@ body:has(#home:not(.hide)) .status {
 }
 .kvfull .kvframe iframe {
   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -3052,6 +3124,7 @@ body.kvopen {
   display: grid;
 }
 .bmh {
+  font-size: max(56px, min(7vw, 110px));
   font-size: clamp(56px, 7vw, 110px);
   font-weight: 900;
   line-height: 1.05;
@@ -3066,6 +3139,7 @@ body.kvopen {
   font-weight: 800;
 }
 .bmt {
+  font-size: max(20px, min(2vw, 30px));
   font-size: clamp(20px, 2vw, 30px);
   color: #dfe9f6;
 }
@@ -3079,6 +3153,7 @@ body.kvopen {
 .bml li {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 18px;
+  font-size: max(22px, min(2.2vw, 32px));
   font-size: clamp(22px, 2.2vw, 32px);
   display: flex;
   align-items: center;
@@ -3106,7 +3181,7 @@ body.kvopen {
   font-size: 24px;
   font-weight: 900;
 }
-#board:has(#bMorning:not(.hide)) {
+#board.has-morning {
   background: radial-gradient(
     90% 80%at 30% 35%,
     #20416a 0,
@@ -3130,15 +3205,18 @@ body.kvopen {
   font-variant-numeric: tabular-nums;
 }
 .bmclock {
+  font-size: max(28px, min(2.6vw, 40px));
   font-size: clamp(28px, 2.6vw, 40px);
   font-weight: 900;
 }
 .bmdate {
+  font-size: max(18px, min(1.5vw, 24px));
   font-size: clamp(18px, 1.5vw, 24px);
   font-weight: 700;
   color: #9fe7c4;
 }
 .bmorning .bmh {
+  font-size: max(60px, min(7.2vw, 120px));
   font-size: clamp(60px, 7.2vw, 120px);
   margin: 0;
 }
@@ -3157,11 +3235,13 @@ body.kvopen {
   justify-content: space-between;
   align-items: baseline;
   gap: 16px;
+  font-size: max(20px, min(1.8vw, 28px));
   font-size: clamp(20px, 1.8vw, 28px);
   font-weight: 800;
   color: #dfe9f6;
 }
 .bmcl b {
+  font-size: max(26px, min(2.4vw, 38px));
   font-size: clamp(26px, 2.4vw, 38px);
   white-space: nowrap;
 }
@@ -3229,7 +3309,7 @@ body.kvopen {
 .bback:hover {
   opacity: 1;
 }
-#board:has(#bMorning:not(.hide)) .bright .daylist li:first-child {
+#board.has-morning .bright .daylist li:first-child {
   background: rgba(47, 182, 124, 0.22);
 }
 @media (max-height: 860px) {
@@ -3237,6 +3317,7 @@ body.kvopen {
     gap: 6px;
   }
   .bmorning .bmh {
+    font-size: max(52px, min(6vw, 84px));
     font-size: clamp(52px, 6vw, 84px);
   }
   .bmorning .bmt {
@@ -3309,6 +3390,7 @@ body.kvopen {
     gap: 10px;
   }
   .bmorning .bmh {
+    font-size: max(48px, min(5.4vw, 76px));
     font-size: clamp(48px, 5.4vw, 76px);
   }
   .bmorning .bmt {
@@ -3326,55 +3408,58 @@ body.kvopen {
     margin-top: 18px;
   }
 }
-#board:has(#bMorning:not(.hide)) .bmain {
+#board.has-morning .bmain {
   align-items: stretch;
   padding-top: 12px;
 }
-#board:has(#bMorning:not(.hide)) .bleft {
+#board.has-morning .bleft {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
-#board:has(#bMorning:not(.hide)) .bmorning {
+#board.has-morning .bmorning {
   height: 100%;
   grid-template-rows: auto auto auto 1fr auto;
   align-content: stretch;
 }
-#board:has(#bMorning:not(.hide)) .bml {
+#board.has-morning .bml {
   align-self: start;
 }
-#board:has(#bMorning:not(.hide)) .bmcount {
+#board.has-morning .bmcount {
   align-self: end;
   margin-top: 0;
 }
-#board:has(#bMorning:not(.hide)) .bright {
+#board.has-morning .bright {
   justify-content: flex-start;
   display: flex;
   flex-direction: column;
 }
-#board:has(#bMorning:not(.hide)) .bright h3 {
+#board.has-morning .bright h3 {
+  font-size: max(26px, min(2.4vw, 38px));
   font-size: clamp(26px, 2.4vw, 38px);
+  height: max(28px, min(2.6vw, 40px));
   height: clamp(28px, 2.6vw, 40px);
 }
-#board:has(#bMorning:not(.hide)) .bmtop {
+#board.has-morning .bmtop {
+  height: max(28px, min(2.6vw, 40px));
   height: clamp(28px, 2.6vw, 40px);
 }
-#board:has(#bMorning:not(.hide)) .bright .daylist {
+#board.has-morning .bright .daylist {
   flex: 1;
   align-content: space-between;
 }
 .bfoot {
   padding-top: 16px;
 }
-#board:has(#bMorning:not(.hide)) .bmtop,
-#board:has(#bMorning:not(.hide)) .bright h3 {
+#board.has-morning .bmtop,
+#board.has-morning .bright h3 {
   height: 40px;
   line-height: 1;
   margin: 0 0 18px;
   display: flex;
   align-items: center;
 }
-#board:has(#bMorning:not(.hide)) .bmclock {
+#board.has-morning .bmclock {
   line-height: 1;
 }
 textarea.auto {
@@ -3387,12 +3472,12 @@ textarea.auto {
   font-size: 14px;
   color: var(--soft);
 }
-.panel:has(details.opt[open]) > details.opt:not([open]),
-.panel:has(details.opt[open]) > h2,
-.panel:has(details.opt[open]) > p {
+.panel.has-open > details.opt:not([open]),
+.panel.has-open > h2,
+.panel.has-open > p {
   display: none;
 }
-.panel:has(details.opt[open]) > details.opt[open] {
+.panel.has-open > details.opt[open] {
   margin-top: 0;
   border: 0;
 }
@@ -3428,12 +3513,13 @@ details.opt[open] > .optbody {
   font-size: 13px;
 }
 @media (max-width: 860px) {
-  .tab:has(details.opt[open]) > .col:first-child {
+  .tab.has-open > .col:first-child {
     display: none;
   }
 }
 @media (max-width: 700px) {
   #teacher {
+    height: 100vh;
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
@@ -3541,6 +3627,10 @@ details.opt[open] > .optbody {
 }
 .joinfull {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 90;
   background: radial-gradient(circle at 20% 10%, #2a4d7a, #13263f 70%);
@@ -3574,6 +3664,7 @@ details.opt[open] > .optbody {
 }
 .jq p {
   margin: 0;
+  font-size: max(16px, min(2.4vh, 26px));
   font-size: clamp(16px, 2.4vh, 26px);
   color: #cfe0f5;
   font-weight: 700;
@@ -3590,16 +3681,19 @@ details.opt[open] > .optbody {
   gap: 12px;
 }
 .jbrand img {
+  width: max(36px, min(5.5vh, 56px));
   width: clamp(36px, 5.5vh, 56px);
   height: auto;
   border-radius: 12px;
 }
 .jbrand b,
 .jr h1 {
+  font-size: max(22px, min(3.4vh, 34px));
   font-size: clamp(22px, 3.4vh, 34px);
   font-weight: 900;
 }
 .jr h1 {
+  font-size: max(34px, min(6.5vh, 72px));
   font-size: clamp(34px, 6.5vh, 72px);
   line-height: 1.05;
 }
@@ -3610,6 +3704,7 @@ details.opt[open] > .optbody {
   counter-reset: j;
   display: grid;
   gap: 1.4vh;
+  font-size: max(18px, min(3vh, 32px));
   font-size: clamp(18px, 3vh, 32px);
   color: #dbe7f6;
 }
@@ -3659,6 +3754,7 @@ details.opt[open] > .optbody {
   display: inline-flex;
   align-items: center;
   gap: 14px;
+  font-size: max(18px, min(3vh, 30px));
   font-size: clamp(18px, 3vh, 30px);
   font-weight: 800;
   color: #cfe0f5;
@@ -3732,11 +3828,11 @@ details.opt[open] > .optbody {
 details.opt[open] > summary b {
   font-size: 19px;
 }
-.tab[data-tab="rooster"]:has(.rmain.ready) {
+.tab[data-tab="rooster"].has-ready {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
 }
-.tab[data-tab="rooster"]:has(.rmain.ready) .rmain {
+.tab[data-tab="rooster"].has-ready .rmain {
   flex: none;
 }
 @media (orientation: portrait) {
@@ -3751,6 +3847,7 @@ details.opt[open] > summary b {
     gap: 2.2vh;
   }
   .jr h1 {
+    font-size: max(30px, min(4.6vh, 56px));
     font-size: clamp(30px, 4.6vh, 56px);
   }
   .jclose {
@@ -3779,6 +3876,7 @@ details.opt[open] > summary b {
   justify-items: start;
 }
 .kc2 .kcode b {
+  font-size: max(30px, min(3.2vw, 40px));
   font-size: clamp(30px, 3.2vw, 40px);
   letter-spacing: 0.14em;
   padding-left: 0;
@@ -3838,11 +3936,13 @@ details.opt[open] > summary b {
 #kVak {
   background: 0 0;
   padding: 0;
+  font-size: max(30px, min(4.6vw, 50px));
   font-size: clamp(30px, 4.6vw, 50px);
   line-height: 1.05;
   display: block;
 }
 #kVak:not(.hide) + .task {
+  font-size: max(17px, min(2.2vw, 23px));
   font-size: clamp(17px, 2.2vw, 23px);
   font-weight: 700;
   color: #cfe0f5;
@@ -3850,6 +3950,7 @@ details.opt[open] > summary b {
 }
 .autod {
   margin-top: 6px;
+  font-size: max(14px, min(1.7vw, 17px));
   font-size: clamp(14px, 1.7vw, 17px);
   color: #cfe0f5;
   font-weight: 700;
@@ -3954,12 +4055,14 @@ details.opt[open] > summary b {
 #bVak {
   background: 0 0;
   padding: 0;
+  font-size: max(40px, min(5vw, 80px));
   font-size: clamp(40px, 5vw, 80px);
   font-weight: 900;
   line-height: 1.05;
   display: block;
 }
 #bVak:not(.hide) + .btitle {
+  font-size: max(20px, min(2.2vw, 34px));
   font-size: clamp(20px, 2.2vw, 34px);
   font-weight: 700;
   color: #cfe0f5;
@@ -4137,13 +4240,16 @@ details.opt[open] > summary b {
   margin: 10px auto 0;
   font-weight: 800;
   color: #ffd08a;
+  font-size: max(15px, min(1.8vw, 20px));
   font-size: clamp(15px, 1.8vw, 20px);
   text-align: center;
 }
 #board .mhw {
+  font-size: max(18px, min(1.8vw, 28px));
   font-size: clamp(18px, 1.8vw, 28px);
 }
 #thuis {
+  min-height: 100vh;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg, #13263f);
@@ -4260,6 +4366,7 @@ details.opt[open] > summary b {
   width: 96vw;
   max-width: 1500px;
   height: 94vh;
+  height: 94vh;
   height: 94dvh;
   max-height: none;
   display: grid;
@@ -4268,11 +4375,14 @@ details.opt[open] > summary b {
   gap: 1.4vh;
 }
 #kWeekOver .weekbox h3 {
+  font-size: max(22px, min(3.2vh, 34px));
   font-size: clamp(22px, 3.2vh, 34px);
   margin: 0;
 }
 #kWeekTabs button {
+  min-height: max(52px, min(7vh, 76px));
   min-height: clamp(52px, 7vh, 76px);
+  font-size: max(17px, min(2.4vh, 24px));
   font-size: clamp(17px, 2.4vh, 24px);
 }
 #kWeekList {
@@ -4286,13 +4396,16 @@ details.opt[open] > summary b {
   }
 }
 #kWeekList .dt {
+  font-size: max(18px, min(2.6vh, 28px));
   font-size: clamp(18px, 2.6vh, 28px);
 }
 #kWeekList .dv {
+  font-size: max(19px, min(2.9vh, 30px));
   font-size: clamp(19px, 2.9vh, 30px);
 }
 #kWeekList .dv small,
 #kWeekList .dv small.d {
+  font-size: max(14px, min(2vh, 20px));
   font-size: clamp(14px, 2vh, 20px);
 }
 #kWeekList li.past {
@@ -4303,14 +4416,18 @@ details.opt[open] > summary b {
 }
 #kWeekOver .weekbox > button {
   margin-top: 0;
+  min-height: max(48px, min(6vh, 64px));
   min-height: clamp(48px, 6vh, 64px);
+  font-size: max(17px, min(2.2vh, 22px));
   font-size: clamp(17px, 2.2vh, 22px);
 }
 .ring {
+  width: min(70vmin, 540px, calc(100vh - 400px));
   width: min(70vmin, 540px, calc(100dvh - 400px));
   min-width: 220px;
 }
 #kid.haslist .ring {
+  width: min(42vw, 60vh, 440px, calc(100vh - 400px));
   width: min(42vw, 60vh, 440px, calc(100dvh - 400px));
 }
 .updbtn {
@@ -4384,11 +4501,11 @@ details.opt[open] > summary b {
 .jr h1 {
   text-wrap: balance;
 }
-#board:not(:has(#bMorning:not(.hide))) .bmain {
+#board:not(.has-morning) .bmain {
   align-items: start;
   align-content: center;
 }
-#board:not(:has(#bMorning:not(.hide))) .bright {
+#board:not(.has-morning) .bright {
   justify-content: flex-start;
   align-self: start;
 }
@@ -4432,6 +4549,7 @@ details.opt[open] > summary b {
   min-height: 0;
 }
 #nCard .nvak {
+  font-size: max(28px, min(2.6vw, 36px));
   font-size: clamp(28px, 2.6vw, 36px);
   margin: 0;
   line-height: 1.1;
@@ -4482,10 +4600,12 @@ details.opt[open] > summary b {
   display: block;
 }
 #nCard .ntime span {
+  font-size: max(72px, min(17vh, 170px));
   font-size: clamp(72px, 17vh, 170px);
   line-height: 0.9;
   letter-spacing: -0.02em;
   display: block;
+  font-size: max(64px, min(min(17vh, 21vw), 170px));
   font-size: clamp(64px, min(17vh, 21vw), 170px);
 }
 #nCard .nend {
@@ -4564,7 +4684,7 @@ details.opt[open] > summary b {
 .rmain > h2 {
   display: none;
 }
-.col > .panel.grow:has(#dList) {
+.col > .panel.grow.has-dlist {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -4619,7 +4739,7 @@ details.opt[open] > summary b {
   gap: 10px;
 }
 @media (max-width: 860px) {
-  .tab[data-tab="rooster"]:has(details.opt[open]) > .col:first-child {
+  .tab[data-tab="rooster"].has-open > .col:first-child {
     display: flex;
   }
 }
@@ -4705,6 +4825,7 @@ details.opt[open] > summary b {
 }
 #nCard .nidle,
 .nup b {
+  font-size: max(30px, min(3vw, 42px));
   font-size: clamp(30px, 3vw, 42px);
   font-weight: 900;
 }
@@ -4728,6 +4849,7 @@ details.opt[open] > summary b {
   color: #9fb6d3;
 }
 .nup b {
+  font-size: max(24px, min(2.4vw, 32px));
   font-size: clamp(24px, 2.4vw, 32px);
   white-space: pre;
 }
@@ -4772,7 +4894,7 @@ details.opt[open] > summary b {
     padding-top: 9px;
     padding-bottom: 9px;
   }
-  .panel:has(> details.opt) > h2 {
+  .panel.has-opts > h2 {
     margin-bottom: 8px;
   }
 }
@@ -4830,17 +4952,21 @@ body.kidbig #kid {
   font-size: 120%;
 }
 body.kidbig #kVak {
+  font-size: max(38px, min(5.6vw, 62px));
   font-size: clamp(38px, 5.6vw, 62px);
 }
 body.kidbig #kid .doel,
 body.kidbig #kid .doel b {
+  font-size: max(18px, min(2.2vw, 24px));
   font-size: clamp(18px, 2.2vw, 24px);
 }
 body.kidbig #kListWrap li {
+  font-size: max(19px, min(2.3vw, 25px));
   font-size: clamp(19px, 2.3vw, 25px);
 }
 body.kidbig #kMTasks li,
 body.kidbig .mtasks li {
+  font-size: max(22px, min(2.6vw, 30px));
   font-size: clamp(22px, 2.6vw, 30px);
 }
 body.kidbig .kidfoot button {
@@ -4860,6 +4986,10 @@ button:focus:not(:focus-visible) {
 }
 .wiz {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 95;
   background: rgba(10, 22, 40, 0.6);
@@ -5007,17 +5137,17 @@ body.probeer .pzbar a {
   color: var(--soft);
 }
 @media (min-width: 900px) {
-  .tab[data-tab="rooster"] .panel:not(:has(details.opt[open])) {
+  .tab[data-tab="rooster"] .panel:not(.has-open) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     align-content: start;
   }
-  .tab[data-tab="rooster"] .panel:not(:has(details.opt[open])) > h2 {
+  .tab[data-tab="rooster"] .panel:not(.has-open) > h2 {
     grid-column: 1/-1;
     margin-bottom: 0;
   }
-  .tab[data-tab="rooster"] .panel:not(:has(details.opt[open])) > details.opt {
+  .tab[data-tab="rooster"] .panel:not(.has-open) > details.opt {
     margin: 0;
   }
 }
@@ -5085,6 +5215,10 @@ body.probeer .pzbar {
 }
 .cele {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 80;
   display: grid;
@@ -5113,6 +5247,7 @@ body.probeer .pzbar {
   animation: celepop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
 }
 .celebox b {
+  font-size: max(30px, min(4.5vw, 46px));
   font-size: clamp(30px, 4.5vw, 46px);
   font-weight: 900;
   color: #17734a;
@@ -5128,6 +5263,10 @@ body.probeer .pzbar {
   position: absolute;
 }
 .conf {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   overflow: hidden;
 }
@@ -5147,6 +5286,10 @@ body.probeer .pzbar {
 }
 .reflect {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 85;
   background: rgba(10, 22, 40, 0.6);
@@ -5169,6 +5312,7 @@ body.probeer .pzbar {
 }
 .reflbox h3 {
   margin: 0;
+  font-size: max(24px, min(3vw, 32px));
   font-size: clamp(24px, 3vw, 32px);
 }
 .reflbox p {
@@ -5176,6 +5320,7 @@ body.probeer .pzbar {
 }
 .reflbox .rdoel {
   color: var(--ink);
+  font-size: max(17px, min(2vw, 21px));
   font-size: clamp(17px, 2vw, 21px);
   background: #f3f6fa;
   border-radius: 14px;
@@ -5242,6 +5387,10 @@ body.probeer .pzbar {
 }
 .dlmodal {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   z-index: 90;
   background: rgba(10, 22, 40, 0.6);
@@ -5399,4 +5548,12 @@ body.probeer .pzbar {
   #kid .doel{display:none!important}
   #kVak:not(.hide)+.task{display:none!important}
   #kTasks .tname{font-size:14px!important}
+}
+
+/* ===== Oudere browsers zonder aspect-ratio (iPadOS/iOS 14 en ouder) ===== */
+@supports not (aspect-ratio: 1) {
+  .ring::before, .lamps i::before, .istage::before { content: ""; display: block; padding-top: 100%; }
+  .ring svg { position: absolute; top: 0; left: 0; }
+  .jqr svg { height: auto; }
+  .jcode span { height: min(13.4vh, 9.1vw); }
 }

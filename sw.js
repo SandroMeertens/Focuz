@@ -1,5 +1,5 @@
 /* Focuz service worker: app opent ook zonder internet */
-const CACHE='focuz-v34';
+const CACHE='focuz-v35';
 const CORE=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./icons/favicon-64.png','./vendor/mqtt.min.js','./vendor/jszip.min.js','./vendor/qrcode.js','./handleiding.html'];
 self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(CORE);self.skipWaiting()})())});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE)await caches.delete(k);await self.clients.claim()})())});
@@ -10,7 +10,7 @@ self.addEventListener('fetch',e=>{
   if(r.mode==='navigate'||u.origin===location.origin){
     // eigen bestanden: eerst internet (nieuwste versie), anders de bewaarde versie
     e.respondWith((async()=>{const c=await caches.open(CACHE);
-      try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),4000);const res=await fetch(r,{signal:ctl.signal});clearTimeout(t);
+      try{const ctl=self.AbortController?new AbortController():null;const t=ctl&&setTimeout(()=>ctl.abort(),4000);const res=await fetch(r,ctl?{signal:ctl.signal}:{});clearTimeout(t);
         if(res.ok)c.put(r.mode==='navigate'?'./index.html':r,res.clone());return res}
       catch(err){return (await c.match(r.mode==='navigate'?'./index.html':r,{ignoreSearch:true}))||(await c.match('./'))||Response.error()}})());
     return;

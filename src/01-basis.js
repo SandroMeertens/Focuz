@@ -53,3 +53,7 @@ document.addEventListener('click',e=>{const h=e.target.closest('.help');const b=
     const w=Math.min(300,innerWidth-24);b.style.width=w+'px';b.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';
     const top=r.bottom+8;b.style.top=(top+b.offsetHeight>innerHeight-8?r.top-b.offsetHeight-8:top)+'px';return}
   if(!b.classList.contains('hide'))b.classList.add('hide')},true);
+
+// bestanden lezen, ook in oudere Safari (zonder File.arrayBuffer/text)
+const readBuf = f => f.arrayBuffer ? f.arrayBuffer() : new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsArrayBuffer(f)});
+const readText = f => f.text ? f.text() : new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsText(f)});

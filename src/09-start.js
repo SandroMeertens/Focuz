@@ -1,3 +1,23 @@
+// ===== klassen in plaats van CSS :has() (werkt ook op oudere iPads) =====
+function syncHas(){
+  const b=document.body,vis=id=>{const e=$(id);return !!e&&!e.classList.contains('hide')};
+  b.classList.toggle('scr-teacher',vis('teacher'));b.classList.toggle('scr-board',vis('board'));b.classList.toggle('scr-home',vis('home'));
+  $('kid').classList.toggle('has-free',vis('kFree'));$('board').classList.toggle('has-morning',vis('bMorning'));
+  document.querySelectorAll('.panel,.tab').forEach(el=>el.classList.toggle('has-open',!!el.querySelector('details.opt[open]')));
+}
+// oudere Safari (voor iOS 14.5) kent geen 'gap' bij flexbox: dan zetten we marges op de kinderen
+const FLEXGAP=!/[?&]oud\b/.test(location.search)&&(()=>{const d=document.createElement('div');d.style.cssText='display:flex;flex-direction:column;row-gap:1px;position:absolute';d.append(document.createElement('div'),document.createElement('div'));document.body.append(d);const ok=d.scrollHeight===1;d.remove();return ok})();
+function flexGapFix(){if(FLEXGAP)return;
+  document.querySelectorAll('body *').forEach(el=>{const c=getComputedStyle(el);if(!/flex/.test(c.display))return;
+    const cg=parseFloat(c.columnGap)||0,rg=parseFloat(c.rowGap)||0;if(!cg&&!rg)return;
+    const col=/column/.test(c.flexDirection),wrap=c.flexWrap!=='nowrap';const kids=[...el.children].filter(k=>getComputedStyle(k).display!=='none'&&getComputedStyle(k).position!=='absolute');
+    const free=(k,side)=>k.dataset.fg||parseFloat(getComputedStyle(k)[side])===0; // eigen marges (zoals 'auto') niet overschrijven
+    kids.forEach((k,i)=>{if(col){if(free(k,'marginTop')){k.style.marginTop=i?rg+'px':'';k.dataset.fg=1}}
+      else if(wrap){if(free(k,'marginRight')){k.style.marginRight=cg+'px';k.style.marginBottom=rg+'px';k.dataset.fg=1}}
+      else if(free(k,'marginLeft')){k.style.marginLeft=i?cg+'px':'';k.dataset.fg=1}})})}
+{let q=false;const run=()=>{q=false;syncHas();flexGapFix()};
+  new MutationObserver(()=>{if(!q){q=true;(window.requestAnimationFrame||setTimeout)(run)}}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','open']});
+  document.addEventListener('toggle',()=>{syncHas();flexGapFix()},true);syncHas();flexGapFix()}
 /* =================== tikken =================== */
 setInterval(()=>{
   if(role==='kid'){manageWake();renderSoundTip()}
