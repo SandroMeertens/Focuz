@@ -60,3 +60,4 @@ Zet in je dagklapper een tabel met de kolommen **Vak**, **Wat ga je doen** en **
 - Tests: `cd tests && npx playwright test` (Chrome). In GitHub Actions draaien ze ook in Safari (WebKit). Lokaal Safari: `SAFARI=1 npx playwright test`.
 - Visuele controle: `python3`-script maakt schermafbeeldingen; `node tests/vdiff.js mapA mapB` vergelijkt ze pixel voor pixel.
 - Fouten worden bewaard in `localStorage.fz_errors` (laatste 30) en gaan mee met "Vraag of probleem doorgeven".
+- **Platformtest** (`tests/platform.spec.js`): de kernroute (startpagina, leerkracht, dagklapper, koppelscherm, leerling, weekplanning) op Windows/Mac (Chrome, Edge, Safari, Firefox), iPad liggend/staand/Pro, iPhone, Android-telefoon en -tablet. Controleert ook dat niets buiten beeld valt en er geen fouten zijn. Minimaal nodig: iPadOS/iOS 15.4, Chrome/Edge 105, Firefox 121.

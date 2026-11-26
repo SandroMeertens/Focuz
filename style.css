@@ -5351,3 +5351,52 @@ body.probeer .pzbar {
   .wizbtns{margin-top:4px;gap:6px}.wizbtns button{min-height:38px;padding:6px 12px;font-size:14px}
   .wizbtns a{display:none}
 }
+#sPop .sjoin{display:block!important}
+/* ===== Leerling op een telefoon: alles op één scherm ===== */
+@media (max-width:600px){
+  #kid{padding:8px 12px 6px!important;gap:4px!important}
+  #kVak{font-size:26px!important}
+  #kVak:not(.hide)+.task{font-size:14px!important;margin-top:0!important}
+  #kid .doel{font-size:13px!important;padding:5px 10px!important;margin-top:4px!important;-webkit-line-clamp:2}
+  #kid .doel b{font-size:11px!important;padding:2px 6px!important}
+  .autod{display:none!important}
+  #kid .ring{width:min(58vw,30dvh,260px)!important;min-width:130px!important}
+  #kid.haslist .ring{width:min(30vw,17dvh,150px)!important;min-width:96px!important}
+  #kid.haslist .ringtext .big{font-size:clamp(20px,6.5vw,28px)!important}
+  #kid.haslist .ringtext .sub{display:none!important}
+  #kid .vakline{font-size:12px!important;margin-top:0!important}
+  #kListWrap h3{font-size:16px!important;margin:0!important}
+  #kListWrap .progress{font-size:12px!important;margin:0 0 4px!important}
+  #kTasks{gap:5px!important}
+  #kTasks li{padding:6px 10px!important;border-radius:12px!important}
+  #kTasks .trow{gap:8px!important;min-height:0!important}
+  #kTasks .box{width:26px!important;height:26px!important;min-height:0!important;max-height:26px;padding:0!important;border-radius:7px!important;flex:none;align-self:center}
+  #kTasks .tname{font-size:15px!important;line-height:1.25!important}
+  #kTasks .tmin{font-size:12px!important;padding:2px 8px!important}
+  #kTasks .tdetail{margin-top:4px!important;padding-left:34px!important}
+  #kTasks .mbtn{min-height:32px!important;font-size:13px!important;padding:4px 12px!important}
+  .nextwrap .nextbar{font-size:13px!important;padding:5px 12px!important;min-height:0!important}
+  .kidfoot{gap:6px!important;flex-wrap:nowrap!important;justify-content:center}
+  .kidfoot button{font-size:12px!important;padding:5px 8px!important;min-height:32px!important;white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .soundtip{right:22px!important;width:36px!important;height:36px!important}
+  #kTasks .trow{padding:4px 2px!important}
+  #kTasks .tdetail{padding:0 4px 4px 34px!important;display:flex!important;align-items:center;gap:8px}
+  #kTasks .tdetail.hide{display:none!important}
+  .nextwrap{padding:0 12px 2px!important}
+  .kidfoot{padding:0 10px 6px!important}
+  #kHwBtn,#kWeekBtn{font-size:0!important}
+  #kHwBtn::after{content:"Huiswerk";font-size:12px}
+  #kWeekBtn::after{content:"Week";font-size:12px}
+}
+@media (max-width:600px) and (max-height:720px){
+  #kListWrap h3{display:none!important}
+  #kid.haslist .vakline{display:none!important}
+  #kid.haslist .ring{width:min(26vw,15dvh,120px)!important;min-width:84px!important}
+  #kid .doel span{display:-webkit-box!important;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  #kVak{font-size:22px!important}
+}
+@media (max-width:600px) and (max-height:600px){
+  #kid .doel{display:none!important}
+  #kVak:not(.hide)+.task{display:none!important}
+  #kTasks .tname{font-size:14px!important}
+}

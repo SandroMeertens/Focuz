@@ -158,7 +158,9 @@ function morningFor(dt){
   const bl=blocksFor(dt);
   const les0=bl.find(b=>!BREAK_RE.test(b.vak)&&!GYM_RE.test(b.vak)&&!NOWORKBOOK_RE.test(b.vak));
   const fixed=mo.tasks.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>/^werkboeken klaarleggen$/i.test(x)&&les0?x+' voor '+les0.vak.toLowerCase():x);
-  const list=[...(wm?arr(wm.tasks):[]),...fixed];
+  const suffix=x=>/^werkboeken klaarleggen$/i.test(x)&&les0?x+' voor '+les0.vak.toLowerCase():x;
+  // taken uit de Ochtend-rij komen eerst; dubbele taken (ook 'Werkboeken klaarleggen') maar één keer
+  const list=[...(wm?arr(wm.tasks).map(suffix):[]),...fixed];
   const has=re=>list.some(x=>re.test(x));
   if(mo.auto&&bl.length){
     const all=bl.map(b=>(b.vak||'')+' '+(b.title||'')+' '+(b.doel||'')).join(' ');
