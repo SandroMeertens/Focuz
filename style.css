@@ -1024,3 +1024,4 @@ details.opt[open]>summary b{font-size:19px}
 #wOpt .optbody.rmain{display:block;padding:0;background:none;box-shadow:none;border-radius:0}
 .wrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .wrow #wStatus{flex:1 1 260px;margin:0}
+#dUpd{display:none!important}

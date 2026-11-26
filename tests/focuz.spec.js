@@ -263,10 +263,10 @@ test('oefenbalk alleen voor de leerkracht, niet op een leerling-iPad', async ({ 
 
 test('knop Dagklapper bijwerken leest het bestand opnieuw in', async ({ browser }) => {
   const t = await teacher(browser, '2026-11-19T09:20:00+01:00');
-  await expect(t.page.locator('#dUpd')).toBeVisible();
-  const [fc] = await Promise.all([t.page.waitForEvent('filechooser'), t.page.click('#dUpd')]);
-  await fc.setFiles(FIX('dagklapper-voorbeeld.docx'));
   await t.page.click('#tTabs [data-tab=rooster]');
+  await t.page.click('#wOpt summary');
+  const [fc] = await Promise.all([t.page.waitForEvent('filechooser'), t.page.click('#wUpd')]);
+  await fc.setFiles(FIX('dagklapper-voorbeeld.docx'));
   await expect(t.page.locator('#wStatus')).toContainText('Ingelezen');
   expect(t.errors).toEqual([]);
   await t.ctx.close();
