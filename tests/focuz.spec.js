@@ -34,6 +34,8 @@ async function teacher(browser, iso, opts = {}) {
   const errors = []; watchErrors(page, errors);
   await page.goto(APP + '?broker=' + BROKER + '&leerkracht');
   await page.waitForTimeout(800);
+  // nieuw apparaat: vraag naar bestaande klascode -> nieuwe klas
+  if (await page.locator('#modal').isVisible()) { await page.click('#mOk'); await page.waitForTimeout(300); }
   if (opts.docx !== false) {
     await page.click('#tTabs [data-tab=rooster]');
     await page.setInputFiles('#wFile', FIX(opts.docx || 'dagklapper-voorbeeld.docx'));
@@ -53,7 +55,7 @@ async function kid(browser, iso, code, params = '') {
 
 test('leerkrachtscherm: alle tabbladen passen zonder scrollen', async ({ browser }) => {
   const t = await teacher(browser, '2026-11-19T09:20:00+01:00');
-  for (const tab of ['nu', 'rooster', 'klas']) {
+  for (const tab of ['nu', 'rooster']) {
     await t.page.click(`#tTabs [data-tab=${tab}]`);
     await t.page.waitForTimeout(300);
     expect(await t.page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
@@ -270,4 +272,19 @@ test('knop Dagklapper bijwerken leest het bestand opnieuw in', async ({ browser 
   await expect(t.page.locator('#wStatus')).toContainText('Ingelezen');
   expect(t.errors).toEqual([]);
   await t.ctx.close();
+});
+
+test('tweede apparaat: bestaande klascode invoeren houdt de iPads gekoppeld', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1180, height: 820 } });
+  await setup(ctx, '2026-11-19T09:20:00+01:00');
+  const page = await ctx.newPage(); const errors = []; watchErrors(page, errors);
+  await page.goto(APP + '?broker=' + BROKER + '&leerkracht');
+  await expect(page.locator('#modal')).toBeVisible();
+  await page.fill('#mInput', 'kq7m2x');
+  await page.click('#mOk');
+  await expect(page.locator('#tCode')).toHaveText('KQ7M2X');
+  await page.click('#tTabs [data-tab=rooster]');
+  await expect(page.locator('#kSum')).toContainText('KQ7M2X');
+  expect(errors).toEqual([]);
+  await ctx.close();
 });

@@ -155,14 +155,14 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="tclock"><b id="tClock">--:--</b><span id="tDate"></span></div>
     <nav class="ttabs" id="tTabs">
       <button data-tab="nu" class="on">Nu</button>
-      <button data-tab="rooster">Rooster</button>
-      <button data-tab="klas">Klas</button>
+      <button data-tab="rooster">Instellingen</button>
     </nav>
     <div class="who"><span id="tWho"></span><button class="ghost hide" id="tLogout">Uitloggen</button>
       <button class="spill" id="sPill" aria-expanded="false"><i></i><span id="sPillTxt">Status</span></button>
-      <button class="ghost" id="tJoinBtn">iPads koppelen</button><button class="ghost" id="mBtn">Melding</button><button class="primary" id="vBtn" aria-haspopup="true">Weergave</button></div>
+      <button class="ghost" id="mBtn">Melding</button><button class="primary" id="vBtn" aria-haspopup="true">Weergave</button></div>
     <div class="pop vpop hide" id="vPop"><button id="tBoard"><b>Digibord</b><span>Groot klasscherm met tijd en dagplanning</span></button><button id="tKidBtn"><b>Leerlingscherm</b><span>Bekijk en bedien Focuz zoals een leerling</span></button></div>
     <div class="pop hide" id="sPop">
+      <button class="primary sjoin" id="tJoinBtn">iPads koppelen</button>
       <ul class="slist" id="sList"></ul>
       <div class="swarn" id="sWarn"></div>
       <label class="toggle"><input type="checkbox" id="tSound" checked><span></span> Belletjes op de iPads</label>
@@ -170,7 +170,7 @@ window.FOCUZ_MS_CLIENT_ID = null;
     <div class="pop hide" id="mPop">
       <div class="mactive hide" id="mActive"><span id="mInfo"></span><button id="mClear">Weghalen</button></div>
       <div class="chips" id="mPresets"></div>
-      <div class="linkbox" id="mOwn"><input id="mText2" maxlength="80" placeholder="Of typ een eigen melding" aria-label="Eigen melding"><button class="primary" id="mSend">Stuur</button></div>
+      <div class="linkbox" id="mOwn"><input id="mText2" maxlength="80" placeholder="Of typ een eigen melding" aria-label="Eigen melding"><button id="mSave" title="Bewaar als vaste knop">Bewaar</button><button class="primary" id="mSend">Stuur</button></div>
     </div>
   </div>
 
@@ -191,6 +191,8 @@ window.FOCUZ_MS_CLIENT_ID = null;
         </div>
         <div id="nIdle" class="hide">
           <div class="nidle" id="nIdleTxt">Geen vak actief</div>
+          <div class="nup hide" id="nUp"><span id="nUpLbl"></span><b id="nUpVak"></b><small id="nUpSub"></small></div>
+          <div class="nuphw hide" id="nUpHw"></div>
           <div class="nnext" id="nNext"></div>
         </div>
         <div class="nafter" id="nAfter"></div>
@@ -246,6 +248,25 @@ window.FOCUZ_MS_CLIENT_ID = null;
       
           </div>
         </details>
+        <details class="opt" name="opt" id="kOpt">
+          <summary><b>Klas en iPads</b><span id="kSum">Klascode</span></summary>
+          <div class="optbody kc2">
+      <div class="krow">
+        <div class="kcode"><span>Klascode</span><b id="tCode"></b></div>
+        <button id="tCopy">Kopieer link</button>
+      </div>
+      <button class="primary kjoin" id="tJoin">iPads koppelen</button>
+      <div class="kopts">
+        <b>Wat mogen leerlingen zelf?</b>
+        <label class="toggle"><input type="checkbox" id="oCalm" checked><span></span> Rustig scherm (stoplicht) aanzetten</label>
+        <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken</label>
+      </div>
+      <div class="kfoot">
+        <button class="link kphone" id="tKidView2">Leerlingscherm</button><button class="link" id="tUseCode">Klascode van ander apparaat gebruiken</button><button class="link" id="tNewCode">Nieuwe klascode maken</button>
+      </div>
+      <div class="hide"><div class="qr" id="tQr"></div><p id="tQrNote"></p><input id="tLink" readonly><span id="tMode"></span><button id="tKidView"></button></div>
+              </div>
+        </details>
         <details class="opt" name="opt">
           <summary><b>Huiswerk en toetsen</b><span id="hwSum">Nog geen tabel gevonden</span></summary>
           <div class="optbody">
@@ -293,28 +314,15 @@ window.FOCUZ_MS_CLIENT_ID = null;
             <div class="sum"><button id="rAdd">+ Blok</button></div>
           </div>
         </details>
+        <details class="opt" name="opt" id="bOpt">
+          <summary><b>Reservekopie</b><span>Bewaar je instellingen en klascode in OneDrive</span></summary>
+          <div class="optbody">
+            <p class="ohint">Je instellingen staan alleen in deze browser. Maak af en toe een reservekopie en zet die in OneDrive. Op een nieuw apparaat zet je hem terug.</p>
+            <div class="bkrow"><button class="primary" id="bkSave">Reservekopie maken</button><button id="bkLoad">Reservekopie terugzetten</button><input type="file" id="bkFile" accept=".json,application/json" class="hide"></div>
+            <p class="small muted" id="bkInfo"></p>
+          </div>
+        </details>
       </div>
-    </div>
-  </div>
-
-  <!-- TAB: KLAS -->
-  <div class="tab" data-tab="klas">
-    <div class="klascard kc2">
-      <h2>Klas</h2>
-      <div class="krow">
-        <div class="kcode"><span>Klascode</span><b id="tCode"></b></div>
-        <button id="tCopy">Kopieer link</button>
-      </div>
-      <button class="primary kjoin" id="tJoin">iPads koppelen</button>
-      <div class="kopts">
-        <b>Wat mogen leerlingen zelf?</b>
-        <label class="toggle"><input type="checkbox" id="oCalm" checked><span></span> Rustig scherm (stoplicht) aanzetten</label>
-        <label class="toggle"><input type="checkbox" id="oWeek" checked><span></span> Weekplanning bekijken</label>
-      </div>
-      <div class="kfoot">
-        <button class="link kphone" id="tKidView2">Leerlingscherm</button><button class="link" id="tNewCode">Nieuwe klascode maken</button>
-      </div>
-      <div class="hide"><div class="qr" id="tQr"></div><p id="tQrNote"></p><input id="tLink" readonly><span id="tMode"></span><button id="tKidView"></button></div>
     </div>
   </div>
 </section>

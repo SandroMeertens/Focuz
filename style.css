@@ -1025,3 +1025,36 @@ details.opt[open]>summary b{font-size:19px}
 .wrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .wrow #wStatus{flex:1 1 260px;margin:0}
 #dUpd{display:none!important}
+/* status-popover met koppelknop */
+.sjoin{width:100%;min-height:48px;margin-bottom:10px}
+/* klas als optie */
+#kOpt .optbody.kc2{display:grid;gap:14px;width:auto;margin:0;padding:0;background:none;box-shadow:none}
+#kOpt .kjoin{display:block;min-height:50px}
+.kalt2{margin-top:-4px}
+.bkrow{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
+/* eigen meldingsknoppen */
+#mPresets .mine{position:relative;padding-right:30px}
+#mPresets .mx{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-weight:900;color:var(--soft);padding:0 4px}
+#mOwn{gap:8px}
+/* Nu buiten lestijd */
+#nCard #nIdle{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px}
+#nCard #nIdle.hide{display:none}
+#nCard .nidle{font-size:clamp(30px,3vw,42px);font-weight:900}
+.nup{display:grid;gap:4px;background:rgba(255,255,255,.07);border-radius:16px;padding:16px 18px;width:100%}
+.nup.hide{display:none}
+.nup span{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9fb6d3}
+.nup b{font-size:clamp(24px,2.4vw,32px);font-weight:900;white-space:pre}
+.nup small{font-size:16px;color:#cfe0f5}
+.nuphw{font-weight:800;color:#ffd08a;font-size:16px}
+.nuphw.hide{display:none}
+#nCard .nnext{color:#9fb6d3;font-size:15px}
+#kOpt .kfoot{display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-start}
+#mOwn{display:flex;align-items:center}
+#mOwn input{flex:1 1 auto;min-width:0;width:auto}
+#mOwn button{flex:none}
+#mPop{width:min(440px,calc(100vw - 24px))}
+@media(max-height:760px){
+  .panel>details.opt+details.opt{margin-top:7px}
+  details.opt:not([open])>summary{padding-top:9px;padding-bottom:9px}
+  .panel:has(>details.opt)>h2{margin-bottom:8px}
+}
