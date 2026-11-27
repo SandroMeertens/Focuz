@@ -1,5 +1,5 @@
 /* Focuz service worker: app opent ook zonder internet */
-const CACHE='focuz-v35';
+const CACHE='focuz-v36';
 const CORE=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./icons/favicon-64.png','./vendor/mqtt.min.js','./vendor/jszip.min.js','./vendor/qrcode.js','./handleiding.html'];
 self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(CORE);self.skipWaiting()})())});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE)await caches.delete(k);await self.clients.claim()})())});

@@ -303,7 +303,7 @@ function updReady(){ // samenvatting van de dagklapper in de optielijst; bij een
     t=(auto?'Gekoppeld, werkt automatisch bij':'Ingelezen '+atTxt)+' · '+up.length+' lesdagen';
     if(last){const [y,mo,d]=last.split('-').map(Number);const dt=new Date(y,mo-1,d);t+=' t/m '+DAG[dt.getDay()].slice(0,2)+' '+d+' '+MAAND[mo-1]}
     if(iss.length){t=iss.length+(iss.length===1?' punt':' punten')+' om na te kijken · '+t;warn=true}
-    if(fileHandle&&filePerm!=='granted'){t='Klik om de koppeling weer toegang te geven · '+t;warn=true}}
+    if(fileHandle&&filePerm!=='granted'){t='Wacht op toegang: klik op "Toegang geven" (kies "Bij elk bezoek toestaan") · '+t;warn=true}}
   sum.textContent=t;sum.classList.toggle('warn',warn);
   if(warn&&!wAutoOpened&&$('wOpt')&&!document.querySelector('details.opt[open]')){wAutoOpened=true;wAutoNow=true;$('wOpt').open=true}
   else if(!warn&&wAutoNow&&$('wOpt').open){wAutoNow=false;$('wOpt').open=false} // ingelezen: weer inklappen
@@ -335,6 +335,20 @@ async function initAuto(){
   fileHandle=await loadHandle();if(!fileHandle){renderAuto();return}
   try{filePerm=await fileHandle.queryPermission({mode:'read'})}catch(e){filePerm=''}
   renderAuto();if(filePerm==='granted')readHandle(false);
+  else armPermAsk();
+}
+// Chrome vraagt na een herstart opnieuw toestemming. Dat mag alleen na een klik:
+// bij je eerste klik in Focuz vragen we het meteen, zodat je er niet voor naar Instellingen hoeft.
+let permAsked=false;
+function armPermAsk(){
+  if(permAsked||!fileHandle||filePerm==='granted')return;
+  const once=async e=>{
+    if(permAsked||role!=='teacher'||!fileHandle||filePerm==='granted'){document.removeEventListener('click',once,true);return}
+    permAsked=true;document.removeEventListener('click',once,true);
+    try{filePerm=await fileHandle.requestPermission({mode:'read'})}catch(err){}
+    renderAuto();if(filePerm==='granted')readHandle(true);
+  };
+  document.addEventListener('click',once,true);
 }
 setInterval(()=>{if(role==='teacher'&&fileHandle&&filePerm==='granted')readHandle(false)},60000);
 function startVak(v,endAt,autoKey){
